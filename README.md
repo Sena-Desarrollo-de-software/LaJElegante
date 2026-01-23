@@ -1,7 +1,8 @@
 # **Hotel La J Elegante - Sistema de Gestión Hotelera**
 ![Java](https://img.shields.io/badge/Java-EE7-red?logo=java)
+![JSF](https://img.shields.io/badge/JSF-2.3-orange?logo=jsf)
 ![PHP](https://img.shields.io/badge/PHP-8.2-blue?logo=php)
-![Laravel](https://img.shields.io/badge/Laravel-10.x-orange?logo=laravel)
+![Laravel](https://img.shields.io/badge/Laravel-12-orange?logo=laravel)
 ![License](https://img.shields.io/badge/License-Academic-green)
 ![GitHub last commit](https://img.shields.io/github/last-commit/Xanderm0/LaJElegante)
 
@@ -47,13 +48,339 @@
 | C# | Por definir | Por definir | ⏳ **Planificado** | - |
 
 ## 📈 Estado del Proyecto
-**Progreso General: < 20%** - Fase inicial de CRUDs básicos
+**Progreso General: 37.5%** - Fase de CRUDs básicos en desarrollo
 
-### **✅ Historias de Usuario Completadas**
+### **📝 Sistema de Tracking para el Equipo**
 
-### **🔄 En Desarrollo (Sprint Actual)**
+**¿Cómo actualizar nuestro progreso?**
+1. Busca tu HU en las tablas abajo
+2. Encuentra la columna de tu lenguaje
+3. Actualiza el emoji según:
+   - 🟢 **Completado** = "Funciona en mi máquina y pruebas OK"
+   - 🟡 **En Progreso** = "Estoy trabajando activamente"
+   - 🔴 **No Iniciado** = "Aún no empiezo"
+   - 🔍 **En Revisión** = "Decidiendo si implementar"
+   - 📅 **Futuro** = "Para otro trimestre"
 
-### **⏳ Pendientes (Backlog)**
+**Ejemplo de actualización:**
+```diff
+- | HU-003 | 🟡 60% | 🔴 0% |
++ | HU-003 | 🟢 100% | 🟡 40% |
+```
+---
+
+### **📋 Historias de Usuario - Vista Consolidada por Módulo**
+
+| Módulo | ID | Historia de Usuario | Estado Global | Categoría |
+|--------|----|---------------------|---------------|-----------|
+| **Usuarios** | HU-001 | Crear y modificar usuarios | 🟡 **Parcial** | ✅ Confirmada |
+| **Usuarios** | HU-002 | Consultar roles y usuarios | 🟡 **Parcial** | ✅ Confirmada |
+| **Habitaciones** | HU-003 | Gestionar habitaciones | 🟡 **Parcial** | ✅ Confirmada |
+| **Habitaciones** | HU-004 | Definir tarifas | 🟡 **Parcial** | ✅ Confirmada |
+| **Reservas** | HU-005 | Reservar manualmente (fallback) | 🟡 **Parcial** | ✅ Confirmada |
+| **Restaurante** | HU-006 | Gestionar mesas | 🟡 **Parcial** | ✅ Confirmada |
+| **Restaurante** | HU-007 | Gestionar reservas restaurante | 🟡 **Parcial** | ✅ Confirmada |
+| **Facturación** | HU-008 | Generar facturas | 🔴 **No Iniciado** | ✅ Confirmada |
+| **Facturación** | HU-009 | Gestionar facturas existentes | 🔴 **No Iniciado** | ✅ Confirmada |
+| **Analíticas** | HU-010 | Relación reservas/mesas | 🔴 **No Iniciado** | ✅ Confirmada |
+| **Analíticas** | HU-011 | Relación reservas/habitaciones | 🔴 **No Iniciado** | ✅ Confirmada |
+| **Analíticas** | HU-012 | Relación facturas/servicios | 🔴 **No Iniciado** | ✅ Confirmada |
+| **Sistema** | HU-013 | Backups de base de datos | 🔴 **No Iniciado** | ❌ Descartada |
+| **Sistema** | HU-014 | Políticas de descuento | 🔴 **No Iniciado** | ✅ Simplificada |
+| **Sistema** | HU-015 | Manual de usuario | 🔴 **No Iniciado** | 📅 Baja prioridad |
+
+---
+
+### **🔍 Detalle de Implementación Multi-Lenguaje**
+
+#### **Módulo Habitaciones**  
+| Historia | Rol | Descripción | PHP/Laravel | Java/JSF | Python* | C#* |
+|----------|-----|-------------|-------------|----------|---------|-----|
+| **HU-003** | Administrador | CRUD completo habitaciones | 🟢 100% | 🟡 60% | ⏳ | ⏳ |
+| **HU-003B** | Gerente General | Consulta y aprobación | 🔴 0% | 🔴 0% | ⏳ | ⏳ |
+| **HU-003C** | Recepcionista | Solo consulta estado | 🔴 0% | 🔴 0% | ⏳ | ⏳ |
+| **HU-004** | Administrador | Definir tarifas | 🟢 100% | 🟡 60% | ⏳ | ⏳ |
+
+#### **Módulo Restaurante**
+| Historia | Rol | Descripción | PHP/Laravel | Java/JSF | Python* | C#* |
+|----------|-----|-------------|-------------|----------|---------|-----|
+| **HU-006** | Administrador | CRUD mesas | 🟢 100% | 🟡 60% | ⏳ | ⏳ |
+| **HU-007** | Administrador | CRUD reservas restaurante | 🟢 100% | 🟡 60% | ⏳ | ⏳ |
+| **HU-007B** | Cliente | Autoservicio web | 🔴 0% | 🔴 0% | ⏳ | ⏳ |
+
+#### **Módulo Usuarios**
+| Historia | Rol | Descripción | PHP/Laravel | Java/JSF | Python* | C#* |
+|----------|-----|-------------|-------------|----------|---------|-----|
+| **HU-001** | Administrador | CRUD usuarios | 🟢 100% | 🟢 100% | ⏳ | ⏳ |
+| **HU-002** | Administrador | Consultar usuarios | 🟢 100% | 🟡 60% | ⏳ | ⏳ |
+| **HU-001B** | Usuario | Autoconsulta perfil | 🔴 0% | 🔴 0% | ⏳ | ⏳ |
+
+#### **Módulo Facturación (Futuro)**
+| Historia | Rol | Descripción | PHP/Laravel | Java/JSF | Python* | C#* |
+|----------|-----|-------------|-------------|----------|---------|-----|
+| **HU-008** | Administrador | Generar facturas | 🔴 0% | 🔴 0% | ⏳ | ⏳ |
+| **HU-009** | Administrador | Gestionar facturas | 🔴 0% | 🔴 0% | ⏳ | ⏳ |
+| **HU-008B** | Cliente | Ver mis facturas | 🔴 0% | 🔴 0% | ⏳ | ⏳ |
+
+---
+
+### **📊 Progreso por Lenguaje**
+
+#### **PHP/Laravel**  
+```mermaid
+pie title PHP/Laravel - HUs Completadas
+    "Completado (7)" : 7
+    "En Progreso (0)" : 0
+    "No Iniciado (8)" : 8
+```
+
+**Resumen:** 7/15 HUs implementadas
+**Detalle:** ✅ Todos los CRUDs básicos terminados
+
+#### **Java/JSF**  
+```mermaid
+pie title Java/JSF - Estado Actual
+    "Completado (1)" : 1
+    "En Progreso (6)" : 6
+    "No Iniciado (8)" : 8
+```
+
+**Resumen:** 1/15 HUs completadas, 6 en progreso
+**Detalle:** 🟡 Módulos principales por implementar
+
+#### **Python y C#**  
+```mermaid
+pie title Futuras Implementaciones
+    "Planificado (15)" : 15
+    "No definido (0)" : 0
+```
+
+---
+
+### **🗂️ Estructura Jerárquica Completa por Rol**
+
+**📁 ADMINISTRADOR**
+```
+├── 📂 MÓDULO USUARIOS
+│   ├── HU-001: Crear y modificar usuarios dentro del sistema
+│   │   ├── HU-001A: Crear usuario nuevo (formulario + validaciones)
+│   │   ├── HU-001B: Modificar usuario existente (con confirmación)
+│   │   └── HU-001C: Archivar/desarchivar usuario (doble confirmación)
+│   └── HU-002: Realizar consultas de roles y usuarios
+│       ├── HU-002A: Listar usuarios (orden alfabético)
+│       └── HU-002B: Mostrar "sin resultados" cuando no hay datos
+│
+├── 📂 MÓDULO HABITACIONES
+│   ├── HU-003: Crear y modificar habitaciones del sistema
+│   │   ├── HU-003A: Crear nueva habitación
+│   │   ├── HU-003B: Modificar habitación existente
+│   │   └── HU-003C: Archivar/desarchivar habitación
+│   └── HU-004: Definir tarifas de las habitaciones
+│       ├── HU-004A: Crear nueva tarifa
+│       ├── HU-004B: Modificar tarifa existente
+│       └── HU-004C: Retirar/activar tarifa
+│
+├── 📂 MÓDULO RESERVAS
+│   └── HU-005: Reservar manualmente (soporte para fallos)
+│       ├── HU-005A: Crear reserva manual
+│       ├── HU-005B: Modificar reserva existente
+│       └── HU-005C: Cancelar reserva
+│
+├── 📂 MÓDULO RESTAURANTE
+│   ├── HU-006: Crear y modificar mesas del restaurante
+│   │   ├── HU-006A: Crear nueva mesa
+│   │   ├── HU-006B: Modificar mesa existente
+│   │   └── HU-006C: Retirar/activar mesa
+│   └── HU-007: Gestionar reservas del restaurante
+│       ├── HU-007A: Crear reserva de mesa
+│       ├── HU-007B: Modificar reserva de mesa
+│       └── HU-007C: Cancelar reserva de mesa
+│
+├── 📂 MÓDULO FACTURACIÓN *(Futuro)*
+│   ├── HU-008: Generar facturas de servicios del hotel
+│   │   ├── HU-008A: Generar factura exitosa
+│   │   └── HU-008B: Manejar conflicto en generación
+│   └── HU-009: Gestionar facturas existentes
+│       ├── HU-009A: Listar facturas
+│       └── HU-009B: Mostrar "sin facturas" cuando no hay
+│
+├── 📂 MÓDULO ANALÍTICAS *(Futuro)*
+│   ├── HU-010: Ver relación reservas y mesas disponibles
+│   │   ├── HU-010A: Listar mesas con estados de reserva
+│   │   └── HU-010B: Mostrar "sin reservas en mesas"
+│   ├── HU-011: Ver relación reservas y habitaciones con tarifas
+│   │   ├── HU-011A: Listar habitaciones con estados y tarifas
+│   │   └── HU-011B: Mostrar "sin reservas en habitaciones"
+│   └── HU-012: Ver relación facturas y servicios consumidos
+│       ├── HU-012A: Listar facturas por servicio
+│       └── HU-012B: Mostrar "sin facturas"
+│
+└── 📂 MÓDULO SISTEMA
+    ├── HU-013: ❌ DESCARTADA - Backups de base de datos
+    ├── HU-014: Políticas de descuento y promociones
+    │   ├── HU-014A: Crear política
+    │   ├── HU-014B: Activar política
+    │   └── HU-014C: Desactivar política
+    └── HU-015: 📅 MANUAL DE USUARIO (PDF final)
+        ├── HU-015A: Descargar manual exitosamente
+        └── HU-015B: Manejar error en descarga
+```
+
+**📁 GERENTE GENERAL**
+```
+├── 📂 HABITACIONES
+│   ├── HU-003B: Modificar habitaciones existentes
+│   └── HU-004B: Modificar tarifas existentes
+│
+├── 📂 ANALÍTICAS
+│   └── HU-011B: Reportes PDF de reservas vs habitaciones
+│
+└── 📂 SISTEMA
+    └── HU-014: Gestionar políticas de descuento
+        ├── HU-014B: Activar políticas
+        └── HU-014C: Desactivar políticas
+```
+
+**📁 GERENTE DE HABITACIONES**
+```
+└── 📂 HABITACIONES
+    └── HU-003D: Actualizar estado de mantenimiento de habitaciones
+        ├── HU-003D1: Marcar habitación en mantenimiento
+        └── HU-003D2: Liberar habitación de mantenimiento
+```
+
+**📁 RECEPCIONISTA**
+```
+├── 📂 HABITACIONES
+│   └── HU-003C: Consultar estado de habitaciones
+│
+├── 📂 RESERVAS
+│   ├── HU-005A: Crear reservas manuales
+│   ├── HU-005B: Modificar reservas existentes
+│   └── HU-005C: Cancelar reservas
+│
+├── 📂 RESTAURANTE
+│   ├── HU-006C: Consultar estado de mesas
+│   ├── HU-007A: Crear reservas de mesa
+│   ├── HU-007B: Modificar reservas de mesa
+│   └── HU-007C: Cancelar reservas de mesa
+│
+└── 📂 FACTURACIÓN
+    └── HU-008A: Generar facturas para servicios
+```
+
+**📁 CLIENTE / HUÉSPED**
+```
+├── 📂 RESERVAS
+│   ├── HU-005C: Reservar habitación online
+│   └── HU-005B: Modificar mi reserva
+│
+├── 📂 RESTAURANTE
+│   ├── HU-007A: Reservar mesa online
+│   └── HU-007B: Modificar mi reserva de mesa
+│
+└── 📂 FACTURACIÓN
+    └── HU-009A: Consultar mis facturas
+```
+
+---
+
+### **🗓️ Objetivos por Trimestre (Histórico y Planificado)**
+
+#### **📅 TRIMESTRE 3B (Abril-Julio 2025)**
+*Equipo no existente*
+
+| Objetivo | Detalles |
+|----------|----------|
+| **Formulación del proyecto** | Definición del producto a trabajar |
+| **Investigación de mercado** | Defenir estandares, reglas de negocio y area de ganancia |
+| **Selección de tecnologías** | Decisión de enfoque multi-lenguaje con especialización |
+| **Creacion de base de datos** | Script, Triggers y Procedimientos almacenados |
+
+---
+
+#### **📅 TRIMESTRE 4B (Julio-Octubre 2025)**
+*Fase de planificación y despliegue en PHP/Laravel*
+
+**✅ OBJETIVOS CUMPLIDOS (Criterios de Evaluación):**
+
+| # | Objetivo Específico | Cumplido | Evidencia | Notas |
+|---|---------------------|----------|-----------|-------|
+| 1 | Autenticación y manejo dinámico de roles | ✅ SI | Sistema de login con middleware | Roles: Admin, Recepcionista, Cliente |
+| 2 | CRUD con validaciones de formularios | ✅ SI | 7 módulos CRUD implementados | *Faltan validaciones específicas* |
+| 3 | Reportes con filtros multicriterio | ✅ SI | Listados con búsqueda, ordenamiento y filtros multicriterio | Eloquent en PHP |
+| 4 | Criterios de usabilidad y navegabilidad | ✅ SI | Bootstrap 5, navegación intuitiva | *Revisar objetivos generales* |
+| 5 | Uso de repositorio y versionamiento | ✅ SI | GitHub | - |
+| 6 | Implementación con Frameworks | ✅ SI | Laravel 12 | MVC, Eloquent ORM, Blade |
+
+**📊 PORCENTAJE DE PROYECTO EN ESTE TRIMESTRE: 47%**
+- ✅ PHP/Laravel: 7/15 HUs completadas
+
+---
+
+#### **📅 TRIMESTRE 5B (Octubre-Diciembre 2025)**
+*Implementación en Java/JSF*
+
+**🎯 OBJETIVOS CUMPLIDOS:**
+
+| # | Objetivo Específico | Cumplido | Evidencia | Notas |
+|---|---------------------|----------|-----------|-------|
+| 1 | Autenticación y manejo dinámico de roles | ✅ SI | Sistema de login | - |
+| 2 | CRUD con validaciones de formularios | ✅ SI | 1 módulo CRUD implementado | - |
+| 3 | Reportes con filtros multicriterio | ✅ SI | Listados con búsqueda, ordenamiento y filtros multicriterio | - |
+| 4 | Criterios de usabilidad y navegabilidad | ✅ SI | Bootstrap 5, navegación intuitiva, Primefaces | - |
+| 5 | Uso de repositorio y versionamiento | ✅ SI | GitHub con ramas organizadas | - |
+| 6 | Implementación con Frameworks | ✅ SI | JSF 2.3 | MVC, JDBC, XHTML |
+
+**📊 PORCENTAJE DE PROYECTO EN ESTE TRIMESTRE: 28%**
+- ✅ Java/JSF: 1/15 HUs completadas
+
+---
+
+#### **📅 TRIMESTRE 6B (Enero-Abril 2026) - PLANIFICADO**
+*Tercer lenguaje (Python o C#) - Por definir*
+
+**🎯 OBJETIVOS CUMPLIDOS:**
+
+**📊 PORCENTAJE DE PROYECTO EN ESTE TRIMESTRE: ?%**
+
+---
+
+#### **📅 TRIMESTRE 7B (Abril-Julio 2026) - PLANIFICADO**
+*Cuarto lenguaje (Python o C#) - Por definir*
+
+**🎯 OBJETIVOS CUMPLIDOS:**
+
+**📊 PORCENTAJE DE PROYECTO EN ESTE TRIMESTRE: ?%**
+
+---
+
+### **📈 RESUMEN DE EVOLUCIÓN**
+
+| Trimestre | Lenguaje | % Proyecto | HUs Completadas | Estado |
+|-----------|----------|------------|-----------------|--------|
+| 3B 2025 | - | 0% | 0/15 | ⚪️ Sin Participacion |
+| 4B 2025 | PHP/Laravel | 47% | 7/15 | 🟢 Completado |
+| 5B 2025 | Java/JSF | 28%* | 1/15* | 🟢 Completado |
+| 6B 2026 | ¿Python/C#? | ?%* | ?/15* | 🔵 Planificado |
+| 7B 2026 | ¿Python/C#? | ?%* | ?/15* | 🔵 Planificado |
+
+---
+
+### **📈 Métricas del Proyecto**
+
+**Progreso Total:** 37.5%  
+**HUs por Estado:**
+- ✅ Confirmadas: 12 HUs
+- ❌ Descartadas: 1 HU (HU-13)
+- 📅 Baja prioridad: 1 HU (HU-15)
+- 🔍 Simplificadas: 1 HU (HU-14)
+
+**Distribución por Complejidad:**
+- 🔵 **Baja:** CRUDs básicos (HU-1 a HU-7) - 28.57% completo
+- 🟡 **Media:** Facturación (HU-8, HU-9) - 0% 
+- 🔴 **Alta:** Analíticas (HU-10 a HU-12) - 0%
+---
 
 ## 📁 Estructura del Repositorio
 **Estrategia de Ramas:**
