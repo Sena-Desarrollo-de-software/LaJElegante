@@ -60,8 +60,9 @@ function validarPasswordTiempoReal(input) {
 }
 
 function validarConfirmacionPassword() {
-    var password = document.getElementById('registerForm:password').value;
-    var confirmacion = document.getElementById('registerForm:confirmPassword').value;
+    // NOTA: Como prependId="false", usamos solo 'password' y 'confirmPassword' no 'registerForm:password'
+    var password = document.getElementById('password').value;
+    var confirmacion = document.getElementById('confirmPassword').value;
     var feedback = document.getElementById('confirmFeedback');
     
     if (!confirmacion) {
@@ -81,8 +82,12 @@ function validarConfirmacionPassword() {
 }
 
 function validarFormularioCompleto() {
-    var emailValid = validarEmailTiempoReal(document.getElementById('registerForm:email'));
-    var passwordValid = validarPasswordTiempoReal(document.getElementById('registerForm:password'));
+    // NOTA: Como prependId="false", usamos solo los IDs simples
+    var emailInput = document.getElementById('email');
+    var passwordInput = document.getElementById('password');
+    
+    var emailValid = validarEmailTiempoReal(emailInput);
+    var passwordValid = validarPasswordTiempoReal(passwordInput);
     var confirmValid = validarConfirmacionPassword();
     
     var allValid = emailValid.valid && passwordValid.valid && confirmValid.valid;
@@ -110,9 +115,10 @@ function validarFormularioCompleto() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    var emailInput = document.getElementById('registerForm:email');
-    var passwordInput = document.getElementById('registerForm:password');
-    var confirmInput = document.getElementById('registerForm:confirmPassword');
+    // NOTA: Como prependId="false", usamos solo los IDs simples
+    var emailInput = document.getElementById('email');
+    var passwordInput = document.getElementById('password');
+    var confirmInput = document.getElementById('confirmPassword');
     
     if (emailInput) {
         emailInput.addEventListener('input', function() { validarEmailTiempoReal(this); });
