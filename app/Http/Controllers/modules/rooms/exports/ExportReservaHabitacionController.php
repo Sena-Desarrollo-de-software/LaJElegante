@@ -9,7 +9,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ReservaHabitacionExport;
 
-class ReporteReservaHabitacionController extends Controller
+class ExportReservaHabitacionController extends Controller
 {
     public function index(Request $request)
     {

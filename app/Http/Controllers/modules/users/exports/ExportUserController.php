@@ -8,7 +8,7 @@ use App\Exports\UsersExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 
-class ReporteUserController extends Controller
+class ExportUserController extends Controller
 {
     public function index(Request $request)
     {
