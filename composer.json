@@ -28,6 +28,10 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
+            "Database\\Factories\\Finance\\": "database/factories/finance/",
+            "Database\\Factories\\Restaurant\\": "database/factories/restaurant/",
+            "Database\\Factories\\Rooms\\": "database/factories/rooms/",
+            "Database\\Factories\\Users\\": "database/factories/users/",
             "Database\\Seeders\\": "database/seeders/",
             "Database\\Seeders\\Finance\\": "database/seeders/finance/",
             "Database\\Seeders\\Restaurant\\": "database/seeders/restaurant/",
