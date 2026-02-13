@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\ReservaHabitacion;
-use App\Models\ReservaRestaurante;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -14,16 +12,20 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            TipoClienteSeeder::class,
-            TipoHabitacionSeeder::class,
-            HabitacionSeeder::class,
-            TemporadaSeeder::class,
+            // Finance
             TarifaSeeder::class,
+            TemporadaSeeder::class,
+            // Restaurant
             MesaSeeder::class,
+            ReservaRestauranteSeeder::class,
+            // Rooms
+            HabitacionSeeder::class,
+            TipoHabitacionSeeder::class,
+            ReservaHabitacionSeeder::class,
+            // Users
             UserSeeder::class,
             ClienteSeeder::class,
-            ReservaHabitacion::class,
-            ReservaRestaurante::class
+            TipoClienteSeeder::class,
         ]);
     }
 }
