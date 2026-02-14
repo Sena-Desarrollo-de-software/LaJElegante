@@ -1,5 +1,5 @@
 {{-- resources/views/reservas/show.blade.php --}}
-@extends('administrador.layouts.reservasr')
+@extends('backoffice.layouts.reservasr')
 
 @section('title', 'Detalle de Reserva')
 

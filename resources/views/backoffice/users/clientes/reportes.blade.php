@@ -1,4 +1,4 @@
-@extends('administrador.layouts.clientes')
+@extends('backoffice.layouts.clientes')
 
 @section('content')
 <div class="container mt-4">

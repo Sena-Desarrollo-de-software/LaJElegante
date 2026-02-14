@@ -1,4 +1,4 @@
-@extends('administrador.layouts.reservasr')
+@extends('backoffice.layouts.reservasr')
 
 @section('content')
 <div class="container d-flex align-items-center" style="min-height: 70vh;">
