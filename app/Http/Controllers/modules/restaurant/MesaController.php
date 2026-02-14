@@ -1,11 +1,11 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Modules\Restaurant;
 
 use App\Models\Mesa;
 use App\Models\ReservaRestaurante;
 use Illuminate\Http\Request;
 
-class MesaController extends Controller
+class MesaController
 {
     public function index(Request $request)
     {

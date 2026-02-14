@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exports;
+namespace App\Exports\Finance;
 
 use App\Models\Temporada;
 use Maatwebsite\Excel\Concerns\FromCollection;

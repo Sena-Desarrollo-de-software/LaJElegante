@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backoffice\Includes\RoomManager;
 
 use Illuminate\Http\Request;
 

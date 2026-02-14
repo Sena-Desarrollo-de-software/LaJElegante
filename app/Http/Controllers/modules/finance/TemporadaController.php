@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Modules\Finance;
 
 use App\Models\Temporada;
 use Illuminate\Http\Request;
 
-class TemporadaController extends Controller
+class TemporadaController
 {
     public function index()
     {

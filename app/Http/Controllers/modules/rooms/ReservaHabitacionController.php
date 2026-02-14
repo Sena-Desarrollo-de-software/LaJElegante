@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Modules\Rooms;
 
 use App\Models\ReservaHabitacion;
 use App\Models\DetalleReservaHabitacion;
@@ -9,7 +9,7 @@ use App\Models\Habitacion;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
-class ReservaHabitacionController extends Controller
+class ReservaHabitacionController
 {
     public function index()
     {

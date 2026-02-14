@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exports;
+namespace App\Exports\Users;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;

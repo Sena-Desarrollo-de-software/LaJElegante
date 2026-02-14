@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Modules\Rooms\Exports;
 
 use App\Models\ReservaHabitacion;
 use App\Models\TipoCliente;

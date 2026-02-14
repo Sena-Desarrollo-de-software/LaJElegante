@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Modules\Users\Exports;
 
 use Illuminate\Http\Request;
 
-class ExportTipoClienteController extends Controller
+class ExportTipoClienteController
 {
     //
 }

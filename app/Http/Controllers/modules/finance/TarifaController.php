@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Modules\Finance;
 
 use App\Models\Tarifa;
 use App\Models\Temporada;
 use Illuminate\Http\Request;
 
-class TarifaController extends Controller
+class TarifaController 
 {
     public function index()
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backoffice\Includes\AdminAssistant;
 
 use Illuminate\Http\Request;
 

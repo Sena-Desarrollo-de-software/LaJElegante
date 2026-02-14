@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Modules\Restaurant;
 
 use App\Models\ReservaRestaurante;
 use App\Models\Cliente;
 use App\Models\Mesa;
 use Illuminate\Http\Request;
 
-class ReservaRestauranteController extends Controller
+class ReservaRestauranteController
 {
     // Listar reservas
     public function index(Request $request)

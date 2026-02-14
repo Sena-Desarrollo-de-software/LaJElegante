@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exports;
+namespace App\Exports\Rooms;
 
 use App\Models\Habitacion;
 use Maatwebsite\Excel\Concerns\FromQuery;

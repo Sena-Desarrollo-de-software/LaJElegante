@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Modules\Rooms\Exports;
 
 use Illuminate\Http\Request;
 use App\Models\Habitacion;
@@ -9,7 +9,7 @@ use App\Exports\HabitacionesExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 
-class ExportHabitacionController extends Controller
+class ExportHabitacionController
 {
     public function index(Request $request)
     {

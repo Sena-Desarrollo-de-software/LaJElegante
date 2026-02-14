@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exports;
+namespace App\Exports\Restaurant;
 
 use App\Models\Mesa;
 use Maatwebsite\Excel\Concerns\FromCollection;

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backoffice\Includes;
 
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
-class DashboardController extends Controller
+class DashboardController
 {
     public function index()
 {

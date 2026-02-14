@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Modules\Rooms;
 
 use App\Models\TipoHabitacion;
 use Illuminate\Http\Request;
 
-class TipoHabitacionController extends Controller
+class TipoHabitacionController
 {
     public function index()
     {

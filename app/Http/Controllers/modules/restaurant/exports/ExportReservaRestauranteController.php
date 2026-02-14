@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Modules\Restaurant\Exports;
 
 use Illuminate\Http\Request;
 
