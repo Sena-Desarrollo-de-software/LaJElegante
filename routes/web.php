@@ -1,5 +1,5 @@
 <?php
-
+/*
 // Controladores de administración
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ReservaHabitacionController;
@@ -41,6 +41,7 @@ use App\Models\ReservaRestaurante;
 | CLIENTES
 |--------------------------------------------------------------------------
 */
+/*
 Route::prefix('clientes')->name('clientes.')->group(function () {
     // CRUD
     Route::get('papelera', [ClienteController::class, 'papelera'])->name('papelera');
@@ -58,6 +59,7 @@ Route::prefix('clientes')->name('clientes.')->group(function () {
 | HABITACIONES
 |--------------------------------------------------------------------------
 */
+/*
 // Habitaciones
 Route::prefix('habitaciones')->name('habitaciones.')->group(function () {
     Route::get('papelera', [HabitacionController::class, 'papelera'])->name('papelera');
@@ -77,6 +79,7 @@ Route::prefix('habitaciones')->name('habitaciones.')->group(function () {
 | RESERVAS DE HABITACIÓN
 |--------------------------------------------------------------------------
 */
+/*
 Route::prefix('reservash')->name('reservash.')->group(function () {
     Route::get('papelera', [ReservaHabitacionController::class, 'papelera'])->name('papelera');
     Route::patch('restaurar/{id}', [ReservaHabitacionController::class, 'restaurar'])->name('restaurar');
@@ -91,6 +94,7 @@ Route::prefix('reservash')->name('reservash.')->group(function () {
 | TARIFAS
 |--------------------------------------------------------------------------
 */
+/*
 Route::prefix('tarifas')->name('tarifas.')->group(function () {
     Route::get('papelera', [TarifaController::class, 'papelera'])->name('papelera');
     Route::patch('restaurar/{id}', [TarifaController::class, 'restaurar'])->name('restaurar');
@@ -103,6 +107,7 @@ Route::prefix('tarifas')->name('tarifas.')->group(function () {
 | TEMPORADAS
 |--------------------------------------------------------------------------
 */
+/*
 Route::prefix('temporadas')->name('temporadas.')->group(function () {
     Route::get('papelera', [TemporadaController::class, 'papelera'])->name('papelera');
     Route::patch('restaurar/{id}', [TemporadaController::class, 'restaurar'])->name('restaurar');
@@ -114,6 +119,7 @@ Route::prefix('temporadas')->name('temporadas.')->group(function () {
 | TIPO CLIENTE
 |--------------------------------------------------------------------------
 */
+/*
 Route::prefix('tipo_cliente')->name('tipo_cliente.')->group(function () {
     Route::resource('gestion', TipoClienteController::class)->parameters(['gestion' => 'tipo_cliente']);
     Route::get('papelera', [TipoClienteController::class, 'papelera'])->name('papelera');
@@ -125,6 +131,7 @@ Route::prefix('tipo_cliente')->name('tipo_cliente.')->group(function () {
 | TIPO HABITACIÓN
 |--------------------------------------------------------------------------
 */
+/*
 Route::prefix('tipo_habitacion')->name('tipo_habitacion.')->group(function () {
     Route::get('papelera', [TipoHabitacionController::class, 'papelera'])->name('papelera');
     Route::patch('restaurar/{id}', [TipoHabitacionController::class, 'restaurar'])->name('restaurar');
@@ -137,6 +144,7 @@ Route::prefix('tipo_habitacion')->name('tipo_habitacion.')->group(function () {
 | MESAS
 |--------------------------------------------------------------------------
 */
+/*
 Route::prefix('mesas')->name('mesas.')->group(function () {
     // Ocultar y mostrar mesas
     Route::patch('{id}/ocultar', [MesaController::class, 'ocultar'])->name('ocultar');
@@ -168,6 +176,7 @@ Route::prefix('mesas')->name('mesas.')->group(function () {
 | RESERVAS RESTAURANTE
 |--------------------------------------------------------------------------
 */
+/*
 Route::prefix('reservasr')->name('reservasr.')->group(function () {
     // CRUD de reservas
     Route::patch('{id}/ocultar', [ReservaRestauranteController::class, 'ocultar'])->name('ocultar');
@@ -195,7 +204,7 @@ Route::prefix('reservasr')->name('reservasr.')->group(function () {
 | USERS
 |--------------------------------------------------------------------------
 */
-
+/*
 Route::prefix('users')->name('users.')->group(function () {
     Route::resource('gestion', UserController::class)->parameters(['gestion' => 'user']);
     Route::get('papelera', [UserController::class, 'papelera'])->name('papelera');
@@ -212,6 +221,7 @@ Route::prefix('users')->name('users.')->group(function () {
 | INDEX VISTAS
 |--------------------------------------------------------------------------
 */
+/*
 Route::prefix('hotel')->name('hotel.')->group(function () {
     Route::get('/', function () {
         return view('hotel.lobby');
@@ -247,6 +257,7 @@ Route::prefix('hotel')->name('hotel.')->group(function () {
 | DASHBOARD
 |--------------------------------------------------------------------------
 */
+/*
 Route::prefix('administrador')->name('administrador.')->group(function () {
     Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
         ->name('dashboard');
@@ -257,6 +268,7 @@ Route::prefix('administrador')->name('administrador.')->group(function () {
 | DASHBOARDS POR ROL DE EMPLEADOS
 |--------------------------------------------------------------------------
 */
+/*
 Route::prefix('recepcionista')->name('recepcionista.')->group(function () {
     Route::get('dashboard', fn() => view('empleados.recepcionista.dashboard'))->name('dashboard');
 });
@@ -280,3 +292,4 @@ Route::prefix('gerente_habitaciones')->name('gerente_habitaciones.')->group(func
 Route::prefix('gerente_general')->name('gerente_general.')->group(function () {
     Route::get('dashboard', fn() => view('empleados.gerente_general.dashboard'))->name('dashboard');
 });
+*/
