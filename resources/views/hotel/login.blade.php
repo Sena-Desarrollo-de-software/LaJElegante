@@ -4,10 +4,11 @@
 
 @section('content')
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    {{-- CardLogin Component--}}
     <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%;">
         <h3 class="text-center mb-4 fw-bold">🔑 Iniciar Sesión</h3>
 
-        {{-- Mensajes de error --}}
+        {{-- ErrorMessage Component --}}
         @if ($errors->any())
             <div class="alert alert-danger">
                 <ul class="mb-0">
@@ -17,7 +18,7 @@
                 </ul>
             </div>
         @endif
-
+        {{-- LoginForm Component --}}
         <form method="POST" action="{{ route('hotel.login.process') }}">
             @csrf
             <div class="mb-3">
@@ -36,7 +37,7 @@
         </form>
 
         <hr class="my-4">
-
+        {{-- AdiotionalMessageForm Component --}}
         <p class="text-center mb-0">
             ¿No tienes cuenta? 
             <a href="{{ route('hotel.signup.index') }}" class="text-decoration-none fw-bold text-primary">

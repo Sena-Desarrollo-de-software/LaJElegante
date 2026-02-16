@@ -6,10 +6,10 @@
 <div class="container-fluid my-4">
     <div class="row" style="min-height: 80vh;">
         
-        {{-- Columna izquierda: Restaurante --}}
+        {{-- LeftColumn Component --}}
         <div class="col-md-6 d-flex flex-column justify-content-between text-center bg-light bg-restaurant p-4">
             
-            {{-- Texto intuitivo arriba --}}
+            {{-- LeftColumnContent Component--}}
             <div class="mb-auto">
                 <div class="d-flex flex-column align-items-center">
                     <h4 class="fw-bold text-white">Mesas disponibles para hoy</h4>
@@ -18,17 +18,17 @@
                 </div>
             </div>
 
-            {{-- Botón abajo --}}
+            {{-- LeftColumnButton Component --}}
             <div class="mt-auto pb-3">
                 <a href="#" class="btn btn-reserva btn-lg px-5">¡Reservar ahora!</a>
             </div>
         </div>
 
-        {{-- Columna derecha: Platos --}}
+        {{-- RightColumn Component--}}
         <div class="col-md-6 d-flex flex-column align-items-center justify-content-center">
             <div class="row g-3 h-100">
                 
-                {{-- Plato 1 --}}
+                {{-- RightColumnContent Component --}}
                 <div class="col-md-6">
                     <div class="d-flex flex-column h-100 overflow-hidden bg-prom">
                         <div class="flex-fill plato-img" style="background-image: url('{{ asset('build/img/plato1.png') }}');"></div>
@@ -39,7 +39,7 @@
                     </div>
                 </div>
 
-                {{-- Plato 2 --}}
+                {{-- RightColumnContent Component --}}
                 <div class="col-md-6">
                     <div class="d-flex flex-column h-100 overflow-hidden bg-prom">
                         <div class="flex-fill plato-img" style="background-image: url('{{ asset('build/img/plato2.png') }}');"></div>
@@ -50,6 +50,7 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>

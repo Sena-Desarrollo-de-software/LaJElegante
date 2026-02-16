@@ -5,7 +5,7 @@
 @section('content')
 <div class="container-fluid my-4">
     <div class="row" style="min-height: 80vh;">
-        {{-- Columna izquierda: banner habitación especial --}}
+        {{-- LeftColum Component: Big Room Frame --}}
         <div class="col-md-6 position-relative d-flex flex-column align-items-center justify-content-between text-center p-4 text-white overflow-hidden habitacion-card"
             style="background: url('{{ asset('build/img/habitacionespecialHotel.png') }}') no-repeat center center/cover; min-height: 80vh;">
             <div class="mb-auto">
@@ -23,11 +23,11 @@
             </div>
         </div>
 
-        {{-- Columna derecha: grid habitaciones --}}
+        {{-- RightColumn: grid Rooms --}}
         <div class="col-md-6 ps-3">
             <div class="row g-3 h-100">
 
-                {{-- Fila superior: 2 habitaciones --}}
+                {{-- RoomCard Component --}}
                 <div class="col-md-6">
                     <div class="room-card position-relative overflow-hidden h-100">
                         <img src="{{ asset('build/img/habitacionbasicaHotel.png') }}" class="img-fluid w-100 h-100 object-fit-cover" alt="Habitación 1">
@@ -37,7 +37,7 @@
                         </div>
                     </div>
                 </div>
-
+                {{-- RoomCard Component --}}
                 <div class="col-md-6">
                     <div class="room-card position-relative overflow-hidden h-100">
                         <img src="{{ asset('build/img/habitacionfamiliarHotel.png') }}" class="img-fluid w-100 h-100 object-fit-cover" alt="Habitación 2">
@@ -47,7 +47,7 @@
                         </div>
                     </div>
                 </div>
-
+                {{-- RoomCard Component --}}
                 <div class="col-md-6">
                     <div class="room-card position-relative overflow-hidden h-100">
                         <img src="{{ asset('build/img/habitacionparejaHotel.png') }}" class="img-fluid w-100 h-100 object-fit-cover" alt="Habitación 3">
@@ -57,7 +57,7 @@
                         </div>
                     </div>
                 </div>
-
+                {{-- CircleCard Component: Deals --}}
                 <div class="col-md-6 d-flex justify-content-center align-items-center">
                     <div class="circle-card-lg">
                         <span class="fw-bold">20% por primera reserva</span>
