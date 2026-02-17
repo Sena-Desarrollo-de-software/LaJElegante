@@ -8,7 +8,7 @@
     @endif
 
     <a href="{{ route('tarifas.gestion.create') }}" class="btn btn-primary mb-3">Nueva tarifa</a>
-
+    {{-- IndexTable Component --}}
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
             <tr>
@@ -22,17 +22,18 @@
         </thead>
         <tbody>
             @forelse($tarifas as $tarifa)
-                <tr>
+            {{-- IndexTableContent Component --}}    
+            <tr>
                     <td>{{ $tarifa->id_tarifa }}</td>
                     <td>{{ $tarifa->tarifa_fija }}</td>
                     <td>{{ $tarifa->precio_final }}</td>
                     <td>{{ ucfirst($tarifa->estado) }}</td>
                     <td>{{ $tarifa->temporada->nombre ?? 'N/A' }}</td>
                     <td>
-                        <!-- Botón editar (abre modal) -->
+                        {{-- EditButton Component --}}
                         <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ $tarifa->id_tarifa }}">Editar</button>
 
-                        <!-- Botón eliminar -->
+                        <!-- DeleteButton Component -->
                         <form action="{{ route('tarifas.gestion.destroy', $tarifa) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')
@@ -41,10 +42,11 @@
                     </td>
                 </tr>
 
-                <!-- Modal de edición -->
+                <!-- EditModal Component -->
                 <div class="modal fade" id="editModal{{ $tarifa->id_tarifa }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
+                            <!-- EditModalForm Component -->                            
                             <form action="{{ route('tarifas.gestion.update', $tarifa) }}" method="POST">
                                 @csrf
                                 @method('PUT')
@@ -53,6 +55,7 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body">
+                                    <!-- EditModalFormInput Component -->
                                     <div class="mb-3">
                                         <label>Tarifa fija</label>
                                         <input type="number" step="0.01" name="tarifa_fija" class="form-control" value="{{ $tarifa->tarifa_fija }}" required>
@@ -61,6 +64,7 @@
                                         <label>Precio final</label>
                                         <input type="number" step="0.01" name="precio_final" class="form-control" value="{{ $tarifa->precio_final }}" required>
                                     </div>
+                                    <!-- EditModalFormSelect Component -->
                                     <div class="mb-3">
                                         <label>Estado</label>
                                         <select name="estado" class="form-select">
@@ -86,7 +90,8 @@
                             </form>
                         </div>
                     </div>
-                </div>
+                </div
+            {{-- EmptyIndexTable Component --}}
             @empty
                 <tr>
                     <td colspan="6" class="text-center">No hay tarifas registradas.</td>

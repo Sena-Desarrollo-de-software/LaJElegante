@@ -1,11 +1,14 @@
 @extends('backoffice.layouts.tarifas')
 
 @section('content')
+    {{-- TopTextForm Component --}}
     <h1 class="mb-4">Nueva Tarifa</h1>
-
+    {{-- CreateForm Component --}}
     <form action="{{ route('tarifas.gestion.store') }}" method="POST">
         @csrf
+        {{-- CRUDFormItem Component --}}
         <div class="mb-3">
+            {{-- CRUDFormItemInput Component --}}
             <label>Tarifa fija</label>
             <input type="number" step="0.01" name="tarifa_fija" class="form-control" required>
         </div>
@@ -14,6 +17,7 @@
             <input type="number" step="0.01" name="precio_final" class="form-control" required>
         </div>
         <div class="mb-3">
+            {{-- CRUDFormItemSelect Component --}}
             <label>Estado</label>
             <select name="estado" class="form-select">
                 <option value="vigente">Vigente</option>

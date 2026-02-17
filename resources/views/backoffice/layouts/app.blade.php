@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Sistema de Reservas')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    {{-- Make a individual CSS file --}}
     <style>
         body {
             min-height: 100vh;
@@ -38,10 +39,11 @@
     </style>
 </head>
 <body>
-
+    {{-- DashBoardSideBar Component--}}
     <div class="sidebar d-none d-lg-flex flex-column p-3">
         <h4 class="text-white">Sistema Hotel</h4>
         <ul class="nav nav-pills flex-column mb-auto">
+            {{-- DashBoardSideBarLink Component--}}            
             <li class="nav-item"><a href="{{ route('clientes.gestion.index') }}" class="nav-link">Clientes</a></li>
             <li><a href="{{ route('users.gestion.index') }}" class="nav-link">Usuarios</a></li>
             <li><a href="{{ route('habitaciones.gestion.index') }}" class="nav-link">Habitaciones</a></li>
@@ -55,13 +57,15 @@
         </ul>
 
         <hr>
-            <form action="{{ route('hotel.empleados.logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn btn-danger w-100">Salir</button>
-            </form>
+        {{-- LogOutButton Component --}}
+        <form action="{{ route('hotel.empleados.logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="btn btn-danger w-100">Salir</button>
+        </form>
     </div>
 
     <div class="content">
+        {{-- DashBoardSideBarMobile Component--}}
         <nav class="navbar navbar-dark bg-dark mb-4 d-lg-none">
             <div class="container-fluid">
                 <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
@@ -81,6 +85,7 @@
         </div>
         <div class="offcanvas-body">
             <ul class="nav nav-pills flex-column mb-auto">
+                {{-- DashBoardSideBarItemMobile Component--}}
                 <li class="nav-item"><a href="{{ route('clientes.gestion.index') }}" class="nav-link text-white">Clientes</a></li>
                 <li><a href="{{ route('users.gestion.index') }}" class="nav-link text-white">Usuarios</a></li>
                 <li><a href="{{ route('habitaciones.gestion.index') }}" class="nav-link text-white">Habitaciones</a></li>
@@ -94,10 +99,11 @@
             </ul>
 
             <hr>
-                <form action="{{ route('hotel.empleados.logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-danger w-100">Salir</button>
-                </form>
+        {{-- LogOutButtonMobile Component --}}
+            <form action="{{ route('hotel.empleados.logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-danger w-100">Salir</button>
+            </form>
         </div>
 
 
