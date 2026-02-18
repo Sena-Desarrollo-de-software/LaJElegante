@@ -1,15 +1,10 @@
-<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Restaurante</title>
-</head>
-<body>
-  {% include "hotel/componentes/header.html" %}
-  <main>
-    <h1>Restaurante del Hotel</h1>
-    <p>Menú y servicios del restaurante. Pendiente de integración.</p>
-  </main>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Restaurante - Hotel LJE{% endblock %}
+
+{% block content %}
+<main class="container text-center">
+  <h1>Restaurante del Hotel</h1>
+  <p>Menú y servicios del restaurante. Pendiente de integración.</p>
+</main>
+{% endblock %}
