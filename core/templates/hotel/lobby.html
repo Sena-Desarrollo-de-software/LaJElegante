@@ -1,15 +1,10 @@
-<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lobby</title>
-</head>
-<body>
-  {% include "hotel/componentes/header.html" %}
-  <main>
-    <h1>Lobby del Hotel</h1>
-    <p>Bienvenido al lobby principal. Próximamente contenido dinámico.</p>
-  </main>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Lobby - Hotel LJE{% endblock %}
+
+{% block content %}
+<div class="container text-center">
+    {% include 'hotel/components/carousel.html' with carousel_id="carouselLobby" %}
+    {% include 'hotel/components/bottom_nav.html' %}
+</div>
+{% endblock %}

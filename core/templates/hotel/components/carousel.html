@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>carousel</title>
+</head>
+<body>
+    <div id="{{ carousel_id|default:'carouselDefault' }}">
+  {% if items %}
+    {% for item in items %}
+      {% include "hotel/components/carousel_item.html" with title=item.title text=item.text only %}
+    {% endfor %}
+  {% else %}
+    {% include "hotel/components/carousel_item.html" with title="Bienvenido" text="Contenido del carrusel pendiente." only %}
+  {% endif %}
+</div>
+</body>
+</html>
