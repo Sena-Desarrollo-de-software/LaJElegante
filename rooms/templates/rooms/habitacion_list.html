@@ -1,0 +1,9 @@
+{% extends "layouts/base_form.html" %}
+
+{% block title %}Habitaciones{% endblock %}
+{% block header %}Habitaciones{% endblock %}
+
+{% block content %}
+<p>Lista pendiente. Esto existe para que "Cancelar" tenga a dónde volver.</p>
+<a href="{% url 'rooms:habitacion_create' %}">Crear habitación</a>
+{% endblock %}
