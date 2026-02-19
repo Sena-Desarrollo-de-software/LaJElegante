@@ -1,0 +1,21 @@
+{% extends "layouts/base_form.html" %}
+
+{% block title %}Editar Habitación{% endblock %}
+{% block header %}Editar Habitación{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Guardar cambios</button>
+    <a href="{% url 'rooms:habitacion_list' %}">Cancelar</a>
+</form>
+
+{% if form.errors %}
+  <div style="color: red;">
+      <h3>Errores:</h3>
+      {{ form.errors }}
+  </div>
+{% endif %}
+{% endblock %}
