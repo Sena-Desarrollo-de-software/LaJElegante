@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import TipoHabitacion, Habitacion
 
-# Register your models here.
+admin.site.register(TipoHabitacion)
+admin.site.register(Habitacion)
