@@ -1,15 +1,5 @@
 from django.db import models
-
-
-class BaseAuditModel(models.Model):
-    is_active = models.BooleanField(default=True)  # Soft delete
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        abstract = True
-
+from core.models import BaseAuditModel
 
 # === TipoHabitacion ===
 class TipoHabitacion(BaseAuditModel):
@@ -21,7 +11,7 @@ class TipoHabitacion(BaseAuditModel):
     ]
 
     nombre_tipo = models.CharField(max_length=20, choices=NOMBRE_TIPO_CHOICES)
-    descripcion = models.TextField(blank=True, null=True)
+    descripcion = models.TextField(blank=True)
     capacidad_maxima = models.PositiveIntegerField()
 
     def __str__(self):
@@ -70,7 +60,7 @@ class DetallesReservaHabitacion(BaseAuditModel):
     recargo_aplicado = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     precio_reserva = models.DecimalField(max_digits=12, decimal_places=2)
 
-    observacion = models.TextField(blank=True, null=True)
+    observacion = models.TextField(blank=True)
 
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
