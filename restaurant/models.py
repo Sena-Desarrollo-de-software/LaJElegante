@@ -1,5 +1,7 @@
 from django.db import models
 from core.models import BaseAuditModel
+from users.models import Usuario
+
 # === Mesa ===
 class Mesa(BaseAuditModel):
     numero_mesa = models.SmallIntegerField()
@@ -9,8 +11,13 @@ class Mesa(BaseAuditModel):
 
 # === Reserva Restaurante ===
 class ReservaRestaurante(BaseAuditModel):
-    #Referencia temporal a cliente
-    cliente_id = models.PositiveIntegerField()
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name="reservas_restaurante",
+        verbose_name="Cliente"
+    )
+
     mesa = models.ForeignKey(
         Mesa,
         on_delete = models.CASCADE,

@@ -1,5 +1,6 @@
 from django.db import models
 from core.models import BaseAuditModel
+from users.models import Usuario
 
 # === TipoHabitacion ===
 class TipoHabitacion(BaseAuditModel):
@@ -71,9 +72,12 @@ class DetallesReservaHabitacion(BaseAuditModel):
 
 # === ReservaHabitacion ===
 class ReservaHabitacion(BaseAuditModel):
-    # En Java: Cliente cliente;
-    # En Django aún no existe el modelo Cliente, por lo que se usara una referencia temporal
-    cliente_id = models.PositiveIntegerField()
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name="reservas_habitacion",
+        verbose_name="Cliente"
+    )
 
     detalle_reserva_habitacion = models.OneToOneField(
         DetallesReservaHabitacion,
