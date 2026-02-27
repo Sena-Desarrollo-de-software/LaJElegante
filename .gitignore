@@ -15,6 +15,3 @@ media/
 # System
 .DS_Store
 Thumbs.db
-
-# Binding
-.vscode
