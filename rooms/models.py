@@ -11,7 +11,7 @@ class TipoHabitacion(BaseAuditModel):
     ]
 
     nombre_tipo = models.CharField(max_length=20, choices=NOMBRE_TIPO_CHOICES)
-    descripcion = models.TextField(blank=True)
+    descripcion = models.TextField(blank=True, null=True)
     capacidad_maxima = models.PositiveIntegerField()
 
     def __str__(self):
@@ -60,7 +60,7 @@ class DetallesReservaHabitacion(BaseAuditModel):
     recargo_aplicado = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     precio_reserva = models.DecimalField(max_digits=12, decimal_places=2)
 
-    observacion = models.TextField(blank=True)
+    observacion = models.TextField(blank=True, null=True)
 
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
