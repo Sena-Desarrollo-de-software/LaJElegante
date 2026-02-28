@@ -1,12 +1,22 @@
-<header>
-  <nav>
-    <a href="/">Inicio</a> |
-    <a href="/hotel/lobby/">Lobby</a> |
-    <a href="/hotel/habitaciones/">Habitaciones</a> |
-    <a href="/hotel/restaurante/">Restaurante</a> |
-    <a href="/hotel/login/">Login</a> |
-    <a href="/hotel/signup/">Registro</a> |
-    <a href="/hotel/tyc/">Términos</a>
-  </nav>
-  <hr>
-</header>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-opacity-50 py-1 mb-4" style="backdrop-filter: blur(10px);" >
+  <div class="container-fluid">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarHotel">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarHotel">
+      <ul class="navbar-nav w-100 d-flex justify-content-between text-center">      
+        {% include "hotel/components/nav_item.html" with url_name="lobby" icono="lobby" texto="Lobby" %}
+
+        {% include "hotel/components/nav_item.html" with url_name="restaurante" icono="restaurante" texto="Restaurante" %}
+                
+        {% include "hotel/components/nav_item.html" with url_name="habitaciones" icono="habitaciones" texto="Habitaciones" %}
+                
+        {% include "hotel/components/nav_item.html" with url_name="tyc" icono="terminos" texto="T&C" %}
+
+        {% include "hotel/components/nav_item.html" with url_name="login" icono="login" texto="Login" %}
+      </ul>
+    </div>
+
+  </div>
+</nav>

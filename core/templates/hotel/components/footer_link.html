@@ -1,0 +1,10 @@
+{% comment %}
+    FooterLink Component con nombre de ruta
+    Uso: {% include "hotel/components/footer_link.html" with url_name="lobby" texto="Lobby" %}
+{% endcomment %}
+
+<li>
+    <a href="{% url url_name %}" class="text-decoration-none text-muted">
+        {{ texto }}
+    </a>
+</li>

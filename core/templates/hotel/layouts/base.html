@@ -1,0 +1,40 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  {# SEO básico #}
+  <meta name="description" content="{% block description %}Hotel de gestión hotelera{% endblock %}">
+  <meta name="author" content="Hotel LJE">
+  
+  {# Favicon #}
+  <link rel="icon" type="image/x-icon" href="{% static 'img/icons/favicon.ico' %}">
+  
+  <title>{% block title %}Hotel LJE{% endblock %}</title>
+  
+  <link href="{% static 'vendor/bootstrap-5.3.8-dist/css/bootstrap.min.css' %}" rel="stylesheet">
+  
+  <link href="{% static 'css/core/core.css' %}" rel="stylesheet">
+  
+  {# Bloque para CSS #}
+  {% block styles %}{% endblock %}
+</head>
+<body>
+  {% include "hotel/components/header.html" %}
+  
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  
+  {% include "hotel/components/footer.html" %}
+  
+  <script src="{% static 'vendor/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js' %}"></script>
+
+  <script src="{% static 'js/global.js' %}"></script>
+  
+  {# Bloque para scripts opcionales #}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

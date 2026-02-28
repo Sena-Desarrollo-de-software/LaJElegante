@@ -1,10 +1,14 @@
-{% extends "base.html" %}
-
+{% extends "hotel/layouts/base.html" %}
+{% load static %}
 {% block title %}Lobby - Hotel LJE{% endblock %}
+
+{% block styles %}
+  <link href="{% static 'css/core/lobby.css' %}" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
 <div class="container text-center">
-    {% include 'hotel/components/carousel.html' with carousel_id="carouselLobby" %}
+    {% include 'hotel/components/carousel.html' with items=carousel_items %}
     {% include 'hotel/components/bottom_nav.html' %}
 </div>
 {% endblock %}

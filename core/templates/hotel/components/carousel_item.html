@@ -1,15 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>carousel_item</title>
-</head>
-<body>
-    <section style="padding: 12px; border: 1px solid #ddd; margin: 8px 0;">
-  <h3 style="margin: 0 0 6px 0;">{{ title }}</h3>
-  <p style="margin: 0;">{{ text }}</p>
-</section>
-
-</body>
-</html>
+{% comment %}
+    CarouselItem Component
+    Uso: {% include "hotel/components/carousel_item.html" with img="nombre_imagen.webp" titulo="Texto" descripcion="Texto" active=False %}
+{% endcomment %}
+{% load static %}
+<div class="carousel-item {% if active %}active{% endif %} position-relative">
+  <img src="{% static img %}" class="d-block w-100 rounded" alt="{{ titulo }}">
+    <div class="carousel-caption d-flex flex-column justify-content-center h-100">
+        <h2 class="text-white fw-bold">{{ titulo }}</h2>
+        <p class="lead">{{ descripcion }}</p>
+    </div>
+</div>
