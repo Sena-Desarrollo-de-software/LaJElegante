@@ -1,0 +1,23 @@
+{% load static %}
+{% comment %}
+    Componente: navbar_main.html
+    Uso: {% include "hotel/components/nav/nav_main.html" with promos=promo_list %}
+{% endcomment %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-opacity-50 py-2 mb-4" style="backdrop-filter: blur(10px);">
+    <div class="container-fluid">
+        {% include "hotel/components/nav/nav_logo.html" %}
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarHotel">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarHotel">
+            {% include "hotel/components/nav/nav_left_section.html" %}
+
+            {% include "hotel/components/nav/nav_carousel.html" with promos=promos %}
+
+            {% include "hotel/components/nav/nav_right_section.html" %}
+        </div>
+    </div>
+</nav>

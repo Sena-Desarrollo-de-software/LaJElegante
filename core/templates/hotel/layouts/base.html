@@ -22,13 +22,13 @@
   {% block styles %}{% endblock %}
 </head>
 <body>
-  {% include "hotel/components/header.html" %}
+  {% include "hotel/components/nav/nav_main.html" %}
   
   <main>
     {% block content %}{% endblock %}
   </main>
   
-  {% include "hotel/components/footer.html" %}
+  {% include "hotel/components/footer/footer.html" %}
   
   <script src="{% static 'vendor/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js' %}"></script>
 

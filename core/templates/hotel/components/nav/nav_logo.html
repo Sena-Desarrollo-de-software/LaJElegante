@@ -1,0 +1,14 @@
+{% load static %}
+{% comment %}
+    Componente: navbar_logo.html
+    Uso: {% include "hotel/components/nav/nav_logo.html" with logo_url="img/logo-hotel.webp" logo_height=70 %}
+{% endcomment %}
+
+<a class="navbar-brand me-4" href="{% url 'lobby' %}">
+    <img src="{% static logo_url|default:'img/logoHotel.webp' %}" 
+         alt="Hotel Logo" 
+         height="{{ logo_height|default:75 }}" 
+         style="width: auto;">
+</a>
+
+<div class="vr text-white me-4 d-none d-lg-block" style="opacity: 0.5; height: 5rem; margin-top: 0.365rem;"></div>

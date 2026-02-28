@@ -1,12 +1,12 @@
 {% comment %}
     Carousel Component
-    Uso: {% include "hotel/components/carousel.html" with items=carousel_items %}
+    Uso: {% include "hotel/components/lobby/carousel.html" with items=carousel_items %}
 {% endcomment %}
 
 <div id="carouselLobby" class="carousel slide w-100 mx-auto mb-4" data-bs-ride="carousel">
   <div class="carousel-inner">
     {% for item in items %}
-      {% include "hotel/components/carousel_item.html" with img=item.img titulo=item.titulo descripcion=item.descripcion active=forloop.first %}
+      {% include "hotel/components/lobby/carousel_item.html" with img=item.img titulo=item.titulo descripcion=item.descripcion active=forloop.first %}
       {% endfor %}
   </div>
 
