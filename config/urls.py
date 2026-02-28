@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView 
 from core import views as core_views
 from finance import views as finance_views
 from restaurant import views as restaurant_views
@@ -24,11 +25,10 @@ from users import views as users_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", include("core.urls")),
-    path("", include("finance.urls")),
-    path("", include("restaurant.urls")),
-    path("", include("rooms.urls")),
-    path("", include("users.urls")),
+    path('', RedirectView.as_view(url='/hotel/lobby/', permanent=False)),
+    path("hotel/", include("core.urls")),
+    path("finance/", include("finance.urls")),
+    path("restaurant/", include("restaurant.urls")),
+    path("rooms/", include("rooms.urls")),
+    path("users/", include("users.urls")),
 ]
-
-    
