@@ -1,15 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bottom_nav</title>
-</head>
-<body>
-    <nav style="position: fixed; left: 0; right: 0; bottom: 0; padding: 10px; border-top: 1px solid #ddd; background: #fff;">
-  {% include "hotel/components/bottom_nav_route.html" with href="/hotel/lobby/" label="Lobby" only %}
-  {% include "hotel/components/bottom_nav_route.html" with href="/hotel/habitaciones/" label="Habitaciones" only %}
-  {% include "hotel/components/bottom_nav_route.html" with href="/hotel/restaurante/" label="Restaurante" only %}
-</nav>
-</body>
-</html>
+<div class="row justify-content-center mt-3">
+  {% include "hotel/components/bottom_nav_route.html" with url_name="restaurante" texto="Restaurante" %}
+  {% include "hotel/components/bottom_nav_route.html" with url_name="habitaciones" texto="Habitaciones" %}
+  {% include "hotel/components/bottom_nav_route.html" with url_name="tyc" texto="Términos & Condiciones" %}
+</div>

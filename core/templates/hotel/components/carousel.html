@@ -1,19 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>carousel</title>
-</head>
-<body>
-    <div id="{{ carousel_id|default:'carouselDefault' }}">
-  {% if items %}
+{% comment %}
+    Carousel Component
+    Uso: {% include "hotel/components/carousel.html" with items=carousel_items %}
+{% endcomment %}
+
+<div id="carouselLobby" class="carousel slide w-100 mx-auto mb-4" data-bs-ride="carousel">
+  <div class="carousel-inner">
     {% for item in items %}
-      {% include "hotel/components/carousel_item.html" with title=item.title text=item.text only %}
-    {% endfor %}
-  {% else %}
-    {% include "hotel/components/carousel_item.html" with title="Bienvenido" text="Contenido del carrusel pendiente." only %}
-  {% endif %}
+      {% include "hotel/components/carousel_item.html" with img=item.img titulo=item.titulo descripcion=item.descripcion active=forloop.first %}
+      {% endfor %}
+  </div>
+
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselLobby" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Anterior</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselLobby" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Siguiente</span>
+  </button>
 </div>
-</body>
-</html>

@@ -1,11 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bottom_nav_route</title>
-</head>
-<body>
-<a href="{{ href }}" style="margin-right: 12px;">{{ label }}</a>    
-</body>
-</html>
+{% comment %}
+    BottomNavRoute Component
+    Uso: {% include "hotel/components/bottom_nav_route.html" with url_name="nombre_ruta" texto="Texto del botón" %}
+{% endcomment %}
+
+<div class="col-md-4 mb-4">
+    <a href="{% url url_name %}" class="btn btn-color btn-lg w-100 text-white">
+        {{ texto }}
+    </a>
+</div>

@@ -1,0 +1,12 @@
+{% load static %}
+{% comment %} 
+    NavBarItem Component
+    Uso: {% include "hotel/components/nav_item.html" with url_name="ruta" icono="nombre_archivo" texto="Texto" %}
+{% endcomment %}
+
+<li class="nav-item flex-fill">
+    <a class="nav-link d-flex flex-column align-items-center" href="{% url url_name %}">
+        <img src="{% static 'img/icons/'|add:icono|add:'.webp' %}" alt="{{ texto }}" style="width:50px; height:50px;">
+        <span class="mt-1">{{ texto }}</span>
+    </a>
+</li>
