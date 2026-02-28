@@ -12,24 +12,24 @@
         <h5 class="text-uppercase">Enlaces rápidos</h5>
         <ul class="list-unstyled">
           <li><a href="{% url 'lobby' %}" class="text-decoration-none text-muted">Inicio</a></li>
-          {% include "hotel/components/footer_link.html" with url_name="habitaciones" texto="Habitaciones" %}
-          {% include "hotel/components/footer_link.html" with url_name="restaurante" texto="Restaurante" %}
+          {% include "hotel/components/footer/footer_link.html" with url_name="habitaciones" texto="Habitaciones" %}
+          {% include "hotel/components/footer/footer_link.html" with url_name="restaurante" texto="Restaurante" %}
         </ul>
       </div>
 
       <div class="col-lg-4 col-md-12 mb-4">
         <h5 class="text-uppercase">Atención al cliente</h5>
         <ul class="list-unstyled">
-          {% include "hotel/components/footer_link.html" with url_name="login" texto="Iniciar sesión" %}
-          {% include "hotel/components/footer_link.html" with url_name="signup" texto="Registrarse" %}
-          {% include "hotel/components/footer_link.html" with url_name="tyc" texto="Términos y condiciones" %}
+          {% include "hotel/components/footer/footer_link.html" with url_name="login" texto="Iniciar sesión" %}
+          {% include "hotel/components/footer/footer_link.html" with url_name="signup" texto="Registrarse" %}
+          {% include "hotel/components/footer/footer_link.html" with url_name="tyc" texto="Términos y condiciones" %}
           <li><a href="#" class="text-decoration-none text-muted">Contacto</a></li>
         </ul>
       </div>
     </div>
   </div>
 
-  <div class="text-center p-3 bg-dark text-white">
+  <div class="text-center p-3 bg-footer text-white">
     &copy; 2026 Hotel La J Elegante. Todos los derechos reservados.
   </div>
 </footer>

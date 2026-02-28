@@ -1,0 +1,11 @@
+{% comment %}
+    Componente: navbar_left_section.html
+    Uso: {% include "hotel/components/nav/nav_left_section.html" %}
+{% endcomment %}
+
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    {% include "hotel/components/nav/nav_item.html" with url_name="lobby" icono="lobby" texto="Lobby" %}
+    {% include "hotel/components/nav/nav_item.html" with url_name="restaurante" icono="restaurante" texto="Restaurante" %}
+    {% include "hotel/components/nav/nav_item.html" with url_name="habitaciones" icono="habitaciones" texto="Habitaciones" %}
+    {% include "hotel/components/nav/nav_item.html" with url_name="tyc" icono="terminos" texto="T&C" %}
+</ul>

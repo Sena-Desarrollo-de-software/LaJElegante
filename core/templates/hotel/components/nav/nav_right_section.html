@@ -1,0 +1,21 @@
+{% load static %}
+{% comment %}
+    Componente: navbar_right_section.html
+    Uso: {% include "hotel/components/nav/nav_right_section.html" with show_login=True %}
+{% endcomment %}
+
+<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+    {% include "hotel/components/nav/nav_item.html" with url_name="lobby" icono="login" texto="Registrarse" %}
+    {% include "hotel/components/nav/nav_item.html" with url_name="lobby" icono="lobby" texto="Contacto" %}
+    
+    {% if show_login|default:True %}
+    <li class="nav-item">
+        <a class="nav-link d-flex flex-column align-items-center" href="{% url 'login' %}">
+            <img src="{% static 'img/icons/login.webp' %}" alt="Login" style="width:50px; height:50px;">
+            <span class="mt-1">Login</span>
+        </a>
+    </li>
+    {% endif %}
+    
+    {% include "hotel/components/nav/nav_selector.html" %}
+</ul>

@@ -1,0 +1,23 @@
+{% load static %}
+{% comment %}
+    Componente: nav_selector.html
+    Uso: {% include "hotel/components/nav/nav_selector.html" with language='ESP' currency='COP' %}
+{% endcomment %}
+
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+        <span>{{ language|default:'ESP' }}</span> 
+        <span class="mx-1">|</span> 
+        <span>{{ currency|default:'COP' }}</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end">
+        <li><h6 class="dropdown-header">Idiomas</h6></li>
+        <li><a class="dropdown-item" href="?lang=es">Español</a></li>
+        <li><a class="dropdown-item" href="?lang=en">English</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><h6 class="dropdown-header">Monedas</h6></li>
+        <li><a class="dropdown-item" href="?cur=COP">COP</a></li>
+        <li><a class="dropdown-item" href="?cur=USD">USD</a></li>
+        <li><a class="dropdown-item" href="?cur=EUR">EUR</a></li>
+    </ul>
+</li>

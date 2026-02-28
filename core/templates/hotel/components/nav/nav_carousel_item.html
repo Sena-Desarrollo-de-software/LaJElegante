@@ -1,0 +1,12 @@
+{% load static %}
+{% comment %}
+    Componente: nav_carousel_item.html
+    Uso: {% include "hotel/components/navbar/navbar_carousel_item.html" with promo_image="img/promo1.webp" active=True %}
+{% endcomment %}
+
+<div class="carousel-item {% if active %}active{% endif %}">
+    <img src="{% static promo_image %}" 
+         class="d-block mx-auto" 
+         alt="{{ promo_alt|default:'Promoción' }}" 
+         style="height: 85px; width: auto; max-width: 100%; object-fit: contain; background-color: rgba(0,0,0,0.2);">
+</div>

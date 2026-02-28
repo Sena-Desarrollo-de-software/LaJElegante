@@ -1,0 +1,17 @@
+{% load static %}
+{% comment %}
+    Componente: nav_carousel.html
+    Uso: {% include "hotel/components/nav/nav_carousel.html" with carousel_id="navbarCarousel" %}
+    
+    Nota: Define las promos en el contexto o pásalas como variable
+{% endcomment %}
+
+<div class="d-none d-lg-block mx-auto" style="max-width: 300px;">
+    <div id="{{ carousel_id|default:'navbarCarousel' }}" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner rounded">
+                {% include "hotel/components/nav/nav_carousel_item.html" with promo_image='img/recepcionHotel.webp' active=True %}
+                {% include "hotel/components/nav/nav_carousel_item.html" with promo_image='img/restauranteHotel.webp' %}
+                {% include "hotel/components/nav/nav_carousel_item.html" with promo_image='img/restauranteHotel2.webp' %}
+        </div>
+    </div>
+</div>
