@@ -1,0 +1,24 @@
+<div class="card shadow-sm border-0 login-card">
+  <div class="card-body p-4">
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Usuario o correo</label>
+        <input type="text" class="form-control" name="username" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Contraseña</label>
+        <input type="password" class="form-control" id="password">
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">
+        Iniciar sesión
+      </button>
+
+    </form>
+
+  </div>
+</div>
