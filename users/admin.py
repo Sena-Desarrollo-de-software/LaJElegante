@@ -2,7 +2,9 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.contrib.auth.models import Group
 from django.utils import timezone
-from .models import Usuario
+from .models import Usuario, GrupoProxy
+
+admin.site.unregister(Group)
 
 @admin.register(Usuario)
 class UsuarioAdmin(UserAdmin):
@@ -93,6 +95,7 @@ class UsuarioAdmin(UserAdmin):
         self.message_user(request, f"{updated} usuarios marcados como eliminados.")
     marcar_como_eliminado.short_description = "Marcar como eliminados (soft delete)"
 
+@admin.register(GrupoProxy)
 class GrupoAdmin(GroupAdmin):
     list_display = ('id', 'name', 'user_count', 'lista_usuarios')
     search_fields = ('name',)
@@ -119,9 +122,6 @@ class GrupoAdmin(GroupAdmin):
             'classes': ('wide',),
         }),
     )
-
-admin.site.unregister(Group)
-admin.site.register(Group, GrupoAdmin)
 
 admin.site.site_header = 'Panel de Administración'
 admin.site.site_title = 'Admin'
