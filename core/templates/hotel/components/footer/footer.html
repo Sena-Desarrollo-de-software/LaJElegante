@@ -1,29 +1,29 @@
-<footer class="bg-light text-center text-lg-start mt-5">
+<footer id="main-footer" class="bg-footer-upper text-center text-lg-start mt-5">
   <div class="container p-4">
     <div class="row">
       <div class="col-lg-4 col-md-6 mb-4">
-        <h5 class="text-uppercase">Hotel La J Elegante</h5>
-        <p class="text-muted">
+        <h5 class="text-uppercase" style="color: #301a10;">Hotel La J Elegante</h5>
+        <p>
           Tu descanso y confort en un solo lugar. Experiencias únicas y servicio exclusivo.
         </p>
       </div>
 
       <div class="col-lg-4 col-md-6 mb-4">
-        <h5 class="text-uppercase">Enlaces rápidos</h5>
+        <h5 class="text-uppercase" style="color: #301a10;">Enlaces rápidos</h5>
         <ul class="list-unstyled">
-          <li><a href="{% url 'lobby' %}" class="text-decoration-none text-muted">Inicio</a></li>
+          {% include "hotel/components/footer/footer_link.html" with url_name="lobby" texto="Inicio" %}
           {% include "hotel/components/footer/footer_link.html" with url_name="habitaciones" texto="Habitaciones" %}
           {% include "hotel/components/footer/footer_link.html" with url_name="restaurante" texto="Restaurante" %}
         </ul>
       </div>
 
       <div class="col-lg-4 col-md-12 mb-4">
-        <h5 class="text-uppercase">Atención al cliente</h5>
+        <h5 class="text-uppercase" style="color: #301a10;">Atención al cliente</h5>
         <ul class="list-unstyled">
           {% include "hotel/components/footer/footer_link.html" with url_name="login" texto="Iniciar sesión" %}
           {% include "hotel/components/footer/footer_link.html" with url_name="signup" texto="Registrarse" %}
           {% include "hotel/components/footer/footer_link.html" with url_name="tyc" texto="Términos y condiciones" %}
-          <li><a href="#" class="text-decoration-none text-muted">Contacto</a></li>
+          <li><a href="#" class="text-decoration-none" style="color: #301a10;">Contacto</a></li>
         </ul>
       </div>
     </div>
