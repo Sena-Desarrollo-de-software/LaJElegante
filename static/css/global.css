@@ -1,0 +1,18 @@
+/* NAVBAR GLOBAL */
+
+.custom-navbar{
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+}
+
+.custom-navbar .nav-link{
+    color: rgba(255,255,255,0.9);
+}
+
+.custom-navbar .nav-link:hover{
+    color: white;
+}
+
+.custom-navbar .navbar-brand{
+    color: white;
+}

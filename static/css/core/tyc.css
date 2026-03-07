@@ -1,0 +1,20 @@
+/* TyC: estilos aislados para esta vista */
+
+.tyc-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: default;
+}
+
+.tyc-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.12) !important;
+}
+
+/* Gradientes (prefijo tyc- para no chocar con Bootstrap) */
+.tyc-bg-primary  { background: linear-gradient(135deg, #1a237e, #283593) !important; }
+.tyc-bg-success  { background: linear-gradient(135deg, #2e7d32, #388e3c) !important; }
+.tyc-bg-danger   { background: linear-gradient(135deg, #c62828, #d32f2f) !important; }
+.tyc-bg-warning  { background: linear-gradient(135deg, #f57c00, #ff9800) !important; }
+.tyc-bg-info     { background: linear-gradient(135deg, #0277bd, #0288d1) !important; }
+.tyc-bg-secondary{ background: linear-gradient(135deg, #455a64, #546e7a) !important; }
+.tyc-bg-dark     { background: linear-gradient(135deg, #212121, #424242) !important; }
