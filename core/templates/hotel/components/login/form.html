@@ -5,13 +5,13 @@
       {% csrf_token %}
 
       <div class="mb-3">
-        <label class="form-label fw-semibold">Usuario o correo</label>
-        <input type="text" class="form-control" name="username" required>
+        <label for="username" class="form-label fw-semibold">Usuario o correo</label>
+        <input type="text" id="username" class="form-control" name="username" required>
       </div>
 
       <div class="mb-3">
-        <label class="form-label fw-semibold">Contraseña</label>
-        <input type="password" class="form-control" id="password">
+        <label for="password" class="form-label fw-semibold">Contraseña</label>
+        <input type="password" id="password" class="form-control">
       </div>
 
       <button type="submit" class="btn btn-primary w-100">
