@@ -1,14 +1,7 @@
 from django.contrib import admin
 from django.utils import timezone
 from .models import TipoHabitacion, Habitacion, DetallesReservaHabitacion, ReservaHabitacion
-
-#Constantes de auditoria
-AUDITORIA_FIELDSET = ('Auditoría', {
-    'fields': ('created_at', 'updated_at', 'deleted_at'),
-    'classes': ('collapse',),
-})
-
-AUDITORIA_READONLY = ('created_at', 'updated_at', 'deleted_at')
+from core.admin import AUDITORIA_FIELDSET,AUDITORIA_READONLY
 
 @admin.register(TipoHabitacion)
 class TipoHabitacionAdmin(admin.ModelAdmin):
