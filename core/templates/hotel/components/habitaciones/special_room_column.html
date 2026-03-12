@@ -1,0 +1,25 @@
+{% comment %}
+    Special Room Column Component
+    Uso: {% include "hotel/components/habitaciones/special_room_column.html" with special=special_room %}
+    Donde special_room tiene: img, titulo, subtitulo, precio, precio_texto, btn_texto
+{% endcomment %}
+
+{% load static %}
+<div class="col-md-6 position-relative d-flex flex-column align-items-center justify-content-between text-center p-4 text-white overflow-hidden habitacion-card"
+     style="background: url('{% static special.img %}') no-repeat center center/cover; min-height: 80vh;">
+    
+    <div class="mb-auto">
+        <h4 class="fw-bold">Descubre nuestras habitaciones</h4>
+        <p>Confort y elegancia en cada detalle</p> 
+    </div>
+    
+    <div class="mt-auto pb-3 z-2">
+        <a href="#" class="btn btn-reserva btn-lg px-5">{{ special.btn_texto }}</a>
+    </div>
+
+    <div class="overlay d-flex flex-column justify-content-center align-items-center text-center">
+        <h3 class="fw-bold">{{ special.titulo }}</h3>
+        <p class="lead">{{ special.subtitulo }}</p>
+        {% include "hotel/components/habitaciones/circle_price.html" with price=special.precio text=special.precio_texto %}
+    </div>
+</div>
