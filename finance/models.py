@@ -175,9 +175,8 @@ class TarifaImpuesto(models.Model):
         verbose_name="impuesto"
     )
     
-    activo = models.BooleanField(
+    is_active = models.BooleanField(
         default=True,
-        verbose_name="activo"
     )
     
     class Meta:
@@ -250,28 +249,49 @@ class Tarifa(BaseAuditModel):
 
     def __str__(self):
         return f"{self.tipo_habitacion} - {self.temporada} - ${self.precio_base}"
-    
-    def _calcular_precios(self, es_extranjero=False):
+
+    def calcular_precio_final(self, es_extranjero=False):
+
+        precio, _ = self._calcular_precios(es_extranjero)
+        return precio
+
+    def get_desglose_impuestos(self, es_extranjero=False):
+        _, desglose = self._calcular_precios(es_extranjero)
+        return desglose
+
+    def _calcular_precios(self, es_extranjero=False, impuestos_ids=None):
         from django.utils import timezone
         
-        precio = self.precio_base
+        precio = self.precio_base or Decimal('0.00')
         desglose = {}
         
         # Aplicar modificador de temporada
-        if self.temporada and abs(self.temporada.modificador_precio - Decimal('1.0')) > Decimal('0.000001'):
+        if self.temporada_id:
             precio = precio * self.temporada.modificador_precio
         
-        # Obtener impuestos aplicables
-        impuestos_aplicables = self.impuestos.filter(
-            activo=True,
-            fecha_vigencia_inicio__lte=timezone.now().date()
-        ).filter(
-            models.Q(fecha_vigencia_fin__isnull=True) |
-            models.Q(fecha_vigencia_fin__gte=timezone.now().date())
-        )
-        # Q para realizar consultar con OR
+        # Obtener IDs de impuestos (pasados como parámetro o desde la instancia)
+        if impuestos_ids is None and self.pk:
+            # Si ya existe en BD, usar relación
+            impuestos_qs = self.impuestos.filter(
+                is_active=True,
+                fecha_vigencia_inicio__lte=timezone.now().date()
+            ).filter(
+                models.Q(fecha_vigencia_fin__isnull=True) |
+                models.Q(fecha_vigencia_fin__gte=timezone.now().date())
+            )
+        else:
+            # Si es nuevo, usar IDs proporcionados
+            impuestos_qs = Impuesto.objects.filter(
+                id__in=impuestos_ids or [],
+                is_active=True,
+                fecha_vigencia_inicio__lte=timezone.now().date()
+            ).filter(
+                models.Q(fecha_vigencia_fin__isnull=True) |
+                models.Q(fecha_vigencia_fin__gte=timezone.now().date())
+            )
+        
         # Aplicar impuestos
-        for impuesto in impuestos_aplicables:
+        for impuesto in impuestos_qs:
             if es_extranjero and not impuesto.aplica_extranjeros:
                 continue
             
@@ -283,28 +303,22 @@ class Tarifa(BaseAuditModel):
                 'nombre': impuesto.nombre,
                 'porcentaje': impuesto.porcentaje,
                 'valor': valor_impuesto,
-                'texto_info': impuesto.texto_informativo if impuesto.requiere_informacion_adicional else None
             }
             precio += valor_impuesto
         
         return precio, desglose
 
-    def calcular_precio_final(self, es_extranjero=False):
-
-        precio, _ = self._calcular_precios(es_extranjero)
-        return precio
-
-    def get_desglose_impuestos(self, es_extranjero=False):
-        _, desglose = self._calcular_precios(es_extranjero)
-        return desglose
-
     def save(self, *args, **kwargs):
-
-        super().save(*args, **kwargs)
-
-        self.precio_final, _ = self._calcular_precios(es_extranjero=False)
+        if not self.pk:
+            impuestos_ids = kwargs.pop('impuestos_ids', None)
+            self.precio_final, _ = self._calcular_precios(
+                es_extranjero=False, 
+                impuestos_ids=impuestos_ids
+            )
+        else:
+            self.precio_final, _ = self._calcular_precios(es_extranjero=False)
         
-        super().save(update_fields=['precio_final'])
+        super().save(*args, **kwargs)
 
 # Metodo helper
 def obtener_tarifa_vigente(tipo_habitacion_id, fecha):
