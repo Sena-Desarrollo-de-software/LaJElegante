@@ -1,10 +1,22 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Términos y Condiciones - Hotel LJE{% endblock %}
 
 {% block content %}
-<main class="container text-center">
-  <h1>Términos y Condiciones</h1>
-  <p>Sección legal del sitio. Contenido por definir.</p>
+
+<link rel="stylesheet" href="{% static 'css/core/tyc.css' %}">
+
+<main class="container my-5">
+
+  {% include "hotel/components/tyc/hero.html" %}
+
+  {% include "hotel/components/tyc/terms_cards.html" %}
+
+  {% include "hotel/components/tyc/prohibiciones.html" %}
+
+  {% include "hotel/components/tyc/nota_final.html" %}
+
 </main>
+
 {% endblock %}

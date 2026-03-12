@@ -144,7 +144,7 @@ class DetallesReservaHabitacion(BaseAuditModel):
         verbose_name="precio total"
     )
 
-    observacion = models.TextField(blank=True)
+    observacion = models.TextField(blank=True, null=True)
 
     class Meta:
         verbose_name = "detalle de reserva"

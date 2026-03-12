@@ -1,0 +1,15 @@
+{% extends "layouts/base_form.html" %}
+
+{% block title %}Eliminar Habitación{% endblock %}
+{% block header %}Eliminar Habitación{% endblock %}
+
+{% block content %}
+<p>¿Seguro que quieres eliminar (soft delete) la habitación {{ habitacion.numero_habitacion }}?</p>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Sí, eliminar</button>
+  <a href="{% url 'rooms:habitacion_list' %}">Cancelar</a>
+</form>
+{% endblock %}
