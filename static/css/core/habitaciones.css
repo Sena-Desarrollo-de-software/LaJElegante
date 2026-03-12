@@ -1,0 +1,99 @@
+@import url('core.css');
+
+.room-card img {
+    transition: transform 0.5s ease;
+}
+
+.room-card:hover img {
+    transform: scale(1.1);
+}
+.room-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    text-align: center;
+}
+.room-card:hover .room-overlay {
+    opacity: 1;
+}
+
+.circle-card-lg {
+    height: 180px;
+    width: 180px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color2), #5f1e09);
+    color: var(--color5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.bg-button-hab{
+    background: linear-gradient(135deg, var(--color2), #5f1e09);
+}
+
+.habitacion-card {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+}
+
+.habitacion-card .overlay {
+    position: absolute;
+    inset: 0; /* cubre toda la tarjeta */
+    background: rgba(0,0,0,0.6);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    color: #fff;
+    padding: 20px;
+}
+
+.habitacion-card:hover .overlay {
+    opacity: 1;
+}
+
+.circle-card-2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; 
+    background: radial-gradient(circle at 30% 30%, var(--color4), var(--color2));
+    color: white;
+    font-weight: 700;
+    transform: rotate(-35deg);
+    transition: transform 0.3s ease, box-shadow 0.4s ease, background 0.4s ease;
+    height: 100px;
+    width: 100px;
+    font-size: 1rem;
+
+    box-shadow: 0 0 10px rgba(252, 181, 66, 0.11),
+                0 0 20px rgba(75, 24, 7, 0.5),
+                inset 0 0 10px rgba(252, 181, 66, 0.123);
+}
+
+@media (min-width: 576px) {
+    .circle-card-2 {
+        height: 120px;
+        width: 120px;
+        font-size: 1.25rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .circle-card {
+        height: 140px;
+        width: 140px;
+        font-size: 1.5rem;
+    }
+}
+
+.circle-card-2:hover {
+    transform: rotate(0deg) scale(1.08);
+}

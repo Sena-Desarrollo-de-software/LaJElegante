@@ -23,3 +23,22 @@ body{
     opacity: 95%;
     font-size: 1.2rem;
 }
+
+.btn-reserva {
+    background: linear-gradient(135deg, var(--color2), #5f1e09, var(--color2));
+    background-size: 200% 200%;
+    background-position: left center;
+    color: var(--color5);
+    font-weight: 600;
+    border: none;
+    border-radius: 50px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: all 0.5s ease, background-position 0.8s ease;
+}
+
+.btn-reserva:hover {
+    background-position: right center; /* Mueve el gradiente */
+    transform: scale(1.05);
+    color: var(--color5);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
