@@ -1,0 +1,23 @@
+{% comment %}
+    Rooms Grid Component
+    Uso: {% include "hotel/components/habitaciones/rooms_grid.html" with rooms=rooms_list promo=promo_data %}
+{% endcomment %}
+
+<div class="col-md-6 ps-3">
+    <div class="row g-3 h-100">
+        
+        {% for room in rooms %}
+            <div class="col-md-6">
+                {% include "hotel/components/habitaciones/room_card.html" with room=room %}
+            </div>
+            
+            {% comment %} Insertar el círculo promocional después de la tercera habitación {% endcomment %}
+            {% if forloop.counter == 3 and promo %}
+                <div class="col-md-6 d-flex justify-content-center align-items-center">
+                    {% include "hotel/components/habitaciones/promo_circle.html" with text=promo.texto %}
+                </div>
+            {% endif %}
+        {% endfor %}
+        
+    </div>
+</div>

@@ -1,10 +1,21 @@
 {% extends "hotel/layouts/base.html" %}
-
+{% load static %}
 {% block title %}Habitaciones - Hotel LJE{% endblock %}
 
+{% block styles %}
+  <link href="{% static 'css/core/habitaciones.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-<main>
-  <h1>Habitaciones</h1>
-  <p>Listado de habitaciones disponibles. Se integrará con la base de datos.</p>
-</main>
+<div class="container-fluid my-4">
+    <div class="row m-4" style="min-height: 85vh;">
+        
+        {% comment %} Columna izquierda: habitación especial {% endcomment %}
+        {% include "hotel/components/habitaciones/special_room_column.html" with special=special_room %}
+        
+        {% comment %} Columna derecha: grid de habitaciones {% endcomment %}
+        {% include "hotel/components/habitaciones/rooms_grid.html" with rooms=regular_rooms promo=promo_data %}
+        
+    </div>
+</div>
 {% endblock %}

@@ -1,0 +1,14 @@
+{% comment %}
+    Room Card Component
+    Uso: {% include "hotel/components/habitaciones/room_card.html" with room=room_object %}
+    Donde room_object tiene: img, titulo, precio
+{% endcomment %}
+
+{% load static %}
+<div class="room-card position-relative overflow-hidden h-100">
+    <img src="{% static room.img %}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ room.titulo }}">
+    <div class="room-overlay d-flex flex-column justify-content-center align-items-center text-white">
+        <h5 class="fw-bold">{{ room.titulo }}</h5>
+        {% include "hotel/components/habitaciones/room_badge.html" with price=room.precio %}
+    </div>
+</div>

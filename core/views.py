@@ -32,7 +32,42 @@ def tyc(request):
 
 @require_GET
 def habitaciones(request):
-    return render(request, "hotel/habitaciones.html")
+    special_room = {
+        'img': 'img/habitacionespecialHotel.webp',
+        'titulo': 'Habitación Especial',
+        'subtitulo': 'Confort exclusivo y lujo',
+        'precio': '210.000',
+        'precio_texto': 'noche',
+        'btn_texto': 'Hacer Reserva'
+    }
+    
+    regular_rooms = [
+        {
+            'img': 'img/habitacionbasicaHotel.webp',
+            'titulo': 'Básica',
+            'precio': '70.000'
+        },
+        {
+            'img': 'img/habitacionfamiliarHotel.webp',
+            'titulo': 'Familiar',
+            'precio': '170.000'
+        },
+        {
+            'img': 'img/habitacionparejaHotel.webp',
+            'titulo': 'Pareja',
+            'precio': '120.000'
+        }
+    ]
+    
+    promo_data = {
+        'texto': '20% en tu primera reserva'
+    }
+    
+    return render(request, 'hotel/habitaciones.html', {
+        'special_room': special_room,
+        'regular_rooms': regular_rooms,
+        'promo_data': promo_data
+    })
 
 @require_GET
 def restaurante(request):
