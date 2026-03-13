@@ -4,7 +4,7 @@ from django.utils import timezone
 from .models import Habitacion
 from .forms import HabitacionCreateForm, HabitacionUpdateForm, HabitacionDeleteForm
 
-
+HABITACION_LIST_REDIRECT = "rooms:habitacion_list"
 def habitacion_list(request):
     habitaciones = Habitacion.objects.filter(is_active=True).order_by("numero_habitacion")
     return render(request, "rooms/habitacion_list.html", {"habitaciones": habitaciones})
@@ -15,7 +15,7 @@ def habitacion_create(request):
         form = HabitacionCreateForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect("rooms:habitacion_list")
+            return redirect(HABITACION_LIST_REDIRECT)
     else:
         form = HabitacionCreateForm()
     return render(request, "rooms/habitacion_create.html", {"form": form})
@@ -27,7 +27,7 @@ def habitacion_update(request, pk):
         form = HabitacionUpdateForm(request.POST, instance=habitacion)
         if form.is_valid():
             form.save()
-            return redirect("rooms:habitacion_list")
+            return redirect(HABITACION_LIST_REDIRECT)
     else:
         form = HabitacionUpdateForm(instance=habitacion)
 
@@ -43,7 +43,7 @@ def habitacion_delete(request, pk):
             habitacion.is_active = False
             habitacion.deleted_at = timezone.now()
             habitacion.save(update_fields=["is_active", "deleted_at"])
-            return redirect("rooms:habitacion_list")
+            return redirect(HABITACION_LIST_REDIRECT)
     else:
         form = HabitacionDeleteForm()
 
