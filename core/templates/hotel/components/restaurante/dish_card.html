@@ -1,0 +1,14 @@
+{% comment %}
+    Dish Card Component
+    Uso: {% include "hotel/components/restaurante/dish_card.html" with dish=dish_object %}
+    Donde dish_object tiene: img, nombre, precio
+{% endcomment %}
+
+{% load static %}
+<div class="d-flex flex-column h-100 overflow-hidden bg-prom">
+    <div class="flex-fill plato-img" style="background-image: url('{% static dish.img %}');"></div>
+    <div class="flex-fill d-flex flex-column justify-content-center align-items-center p-3 text-white">
+        <h3 class="fw-bold">{{ dish.nombre }}</h3>
+        {% include "hotel/components/restaurante/price_circle_rest.html" with price=dish.precio %}
+    </div>
+</div>

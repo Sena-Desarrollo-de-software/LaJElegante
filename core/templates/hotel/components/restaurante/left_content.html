@@ -1,0 +1,13 @@
+{% comment %}
+    Left Column Content Component
+    Uso: {% include "hotel/components/restaurante/left_content.html" with disponibilidad=disponibilidad_data %}
+    Donde disponibilidad_data tiene: titulo, subtitulo, contador
+{% endcomment %}
+
+<div class="mb-auto">
+    <div class="d-flex flex-column align-items-center">
+        <h4 class="fw-bold text-white">{{ disponibilidad.titulo }}</h4>
+        <h5 class="text-white">{{ disponibilidad.subtitulo }}</h5>
+        <h6 class="text-white">{{ disponibilidad.contador }}</h6>
+    </div>
+</div>
