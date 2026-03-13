@@ -1,0 +1,7 @@
+.signup-card{
+  border-radius: 12px;
+}
+
+.signup-card .form-control{
+  padding: 0.65rem 0.75rem;
+}
