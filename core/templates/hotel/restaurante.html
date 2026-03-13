@@ -1,10 +1,22 @@
 {% extends "hotel/layouts/base.html" %}
+{% load static %}
 
 {% block title %}Restaurante - Hotel LJE{% endblock %}
 
+{% block styles %}
+    <link href="{% static 'css/core/restaurante.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-<main class="container text-center">
-  <h1>Restaurante del Hotel</h1>
-  <p>Menú y servicios del restaurante. Pendiente de integración.</p>
-</main>
+<div class="container-fluid my-4">
+    <div class="row" style="min-height: 80vh;">
+        
+        {% comment %} Left Column Component {% endcomment %}
+        {% include "hotel/components/restaurante/left_column.html" with disponibilidad=disponibilidad_data boton=boton_data %}
+        
+        {% comment %} Right Column Component {% endcomment %}
+        {% include "hotel/components/restaurante/right_column.html" with platos=platos_list %}
+        
+    </div>
+</div>
 {% endblock %}
