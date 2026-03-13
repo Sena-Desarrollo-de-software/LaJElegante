@@ -19,12 +19,19 @@ def habitacion_list(request):
 @csrf_protect
 def habitacion_create(request):
     if request.method == "POST":
-        form = HabitacionCreateForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect(HABITACION_LIST_REDIRECT)
+        return handle_habitacion_create_post(request)
     else:
-        form = HabitacionCreateForm()
+        return handle_habitacion_create_get(request)
+
+def handle_habitacion_create_post(request):
+    form = HabitacionCreateForm(request.POST)
+    if form.is_valid():
+        form.save()
+        return redirect(HABITACION_LIST_REDIRECT)
+    return render(request, "rooms/habitacion_create.html", {"form": form})
+
+def handle_habitacion_create_get(request):
+    form = HabitacionCreateForm()
     return render(request, "rooms/habitacion_create.html", {"form": form})
 
 @require_http_methods(["GET", "POST"])
@@ -32,15 +39,21 @@ def habitacion_create(request):
 @csrf_protect
 def habitacion_update(request, pk):
     habitacion = get_object_or_404(Habitacion, pk=pk, is_active=True)
-
+    
     if request.method == "POST":
-        form = HabitacionUpdateForm(request.POST, instance=habitacion)
-        if form.is_valid():
-            form.save()
-            return redirect(HABITACION_LIST_REDIRECT)
+        return handle_habitacion_update_post(request, habitacion)
     else:
-        form = HabitacionUpdateForm(instance=habitacion)
+        return handle_habitacion_update_get(request, habitacion)
 
+def handle_habitacion_update_post(request, habitacion):
+    form = HabitacionUpdateForm(request.POST, instance=habitacion)
+    if form.is_valid():
+        form.save()
+        return redirect(HABITACION_LIST_REDIRECT)
+    return render(request, "rooms/habitacion_update.html", {"form": form, "habitacion": habitacion})
+
+def handle_habitacion_update_get(request, habitacion):
+    form = HabitacionUpdateForm(instance=habitacion)
     return render(request, "rooms/habitacion_update.html", {"form": form, "habitacion": habitacion})
 
 @require_POST
@@ -48,15 +61,13 @@ def habitacion_update(request, pk):
 @csrf_protect
 def habitacion_delete(request, pk):
     habitacion = get_object_or_404(Habitacion, pk=pk, is_active=True)
+    return handle_habitacion_delete_post(request, habitacion)
 
-    if request.method == "POST":
-        form = HabitacionDeleteForm(request.POST)
-        if form.is_valid():
-            habitacion.is_active = False
-            habitacion.deleted_at = timezone.now()
-            habitacion.save(update_fields=["is_active", "deleted_at"])
-            return redirect(HABITACION_LIST_REDIRECT)
-    else:
-        form = HabitacionDeleteForm()
-
+def handle_habitacion_delete_post(request, habitacion):
+    form = HabitacionDeleteForm(request.POST)
+    if form.is_valid():
+        habitacion.is_active = False
+        habitacion.deleted_at = timezone.now()
+        habitacion.save(update_fields=["is_active", "deleted_at"])
+        return redirect(HABITACION_LIST_REDIRECT)
     return render(request, "rooms/habitacion_delete.html", {"form": form, "habitacion": habitacion})
