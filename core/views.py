@@ -71,7 +71,35 @@ def habitaciones(request):
 
 @require_GET
 def restaurante(request):
-    return render(request, "hotel/restaurante.html")
+    disponibilidad_data = {
+        'titulo': 'Mesas disponibles para hoy',
+        'subtitulo': 'Consulta en tiempo real la disponibilidad',
+        'contador': '--#--'
+    }
+    
+    boton_data = {
+        'texto': '¡Reservar ahora!',
+        'url': '#'
+    }
+    
+    platos_list = [
+        {
+            'img': 'img/plato1.webp',
+            'nombre': 'Ajiaco Santafereño',
+            'precio': '23.000'
+        },
+        {
+            'img': 'img/plato2.webp',
+            'nombre': 'Corrientazo del día',
+            'precio': '20.500'
+        }
+    ]
+    
+    return render(request, 'hotel/restaurante.html', {
+        'disponibilidad_data': disponibilidad_data,
+        'boton_data': boton_data,
+        'platos_list': platos_list
+    })
 
 @require_GET
 def signup(request):
