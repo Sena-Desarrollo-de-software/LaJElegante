@@ -1,0 +1,9 @@
+{% comment %}
+    Left Column Component
+    Uso: {% include "hotel/components/restaurante/left_column.html" with disponibilidad=disponibilidad_data boton=boton_data %}
+{% endcomment %}
+
+<div class="col-md-6 d-flex flex-column justify-content-between text-center bg-light bg-restaurant p-4">
+    {% include "hotel/components/restaurante/left_content.html" with disponibilidad=disponibilidad %}
+    {% include "hotel/components/restaurante/left_button.html" with boton=boton %}
+</div>

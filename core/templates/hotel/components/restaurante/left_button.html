@@ -1,0 +1,9 @@
+{% comment %}
+    Left Column Button Component
+    Uso: {% include "hotel/components/restaurante/left_button.html" with boton=boton_data %}
+    Donde boton_data tiene: texto, url
+{% endcomment %}
+
+<div class="mt-auto pb-3">
+    <a href="{{ boton.url }}" class="btn btn-reserva btn-lg px-5">{{ boton.texto }}</a>
+</div>

@@ -1,0 +1,14 @@
+{% comment %}
+    Right Column Component
+    Uso: {% include "hotel/components/restaurante/right_column.html" with platos=platos_list %}
+{% endcomment %}
+
+<div class="col-md-6 d-flex flex-column align-items-center justify-content-center">
+    <div class="row g-3 h-100">
+        {% for plato in platos %}
+            <div class="col-md-6">
+                {% include "hotel/components/restaurante/dish_card.html" with dish=plato %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
