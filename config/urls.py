@@ -17,11 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView 
-from core import views as core_views
-from finance import views as finance_views
-from restaurant import views as restaurant_views
-from rooms import views as rooms_views
-from users import views as users_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,3 +29,6 @@ urlpatterns = [
     path("rooms/", include("rooms.urls")),
     path("users/", include("users.urls")),
 ]
+# Se recomienda usar solo media cuando estamos en desarrollo, para producción hay que usar otras alternativas
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
