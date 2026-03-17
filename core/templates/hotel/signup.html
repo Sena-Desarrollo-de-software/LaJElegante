@@ -1,32 +1,10 @@
 {% extends "hotel/layouts/base.html" %}
-{% load static %}
 
 {% block title %}Registro - Hotel LJE{% endblock %}
 
-{% block styles %}
-<link rel="stylesheet" href="{% static 'css/core/signup.css' %}">
-{% endblock %}
-
 {% block content %}
-
-<main class="container py-5">
-
-  <div class="row justify-content-center">
-    <div class="col-12 col-md-9 col-lg-6">
-
-      {% include "hotel/components/signup/hero.html" %}
-
-      {% include "hotel/components/signup/form.html" %}
-
-      {% include "hotel/components/signup/extras.html" %}
-
-    </div>
-  </div>
-
+<main class="container text-center">
+  <h1>Registro de Usuario</h1>
+  <p>Formulario de registro pendiente de implementación.</p>
 </main>
-
-{% endblock %}
-
-{% block scripts %}
-<script src="{% static 'js/core/signup.js' %}"></script>
 {% endblock %}
