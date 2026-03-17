@@ -1,12 +1,22 @@
 {% load static %}
 {% comment %}
     Componente: nav_carousel_item.html
-    Uso: {% include "hotel/components/navbar/navbar_carousel_item.html" with promo_image="img/promo1.webp" active=True %}
+    Uso 1 (con objeto): {% include "hotel/components/nav/nav_carousel_item.html" with promo=promo_object active=False %}
+    Uso 2 (fallback): {% include "hotel/components/nav/nav_carousel_item.html" with fallback_image='img/defaultPromo.webp' active=True %}
 {% endcomment %}
 
 <div class="carousel-item {% if active %}active{% endif %}">
-    <img src="{% static promo_image %}" 
-         class="d-block mx-auto" 
-         alt="{{ promo_alt|default:'Promoción' }}" 
-         style="height: 85px; width: auto; max-width: 100%; object-fit: contain; background-color: rgba(0,0,0,0.2);">
+    {% if promo and promo.imagen_pequena %}
+        {# Si tenemos un objeto promo válido, usamos su imagen #}
+        <img src="{{ promo.imagen_pequena.url }}" 
+             class="d-block mx-auto" 
+             alt="{{ promo.titulo }}" 
+             style="height: 85px; width: auto; max-width: 100%; object-fit: contain; background-color: rgba(0,0,0,0.2);">
+    {% elif fallback_image %}
+        {# Si es fallback, usamos imagen estática #}
+        <img src="{% static fallback_image %}" 
+             class="d-block mx-auto" 
+             alt="Promoción por defecto" 
+             style="height: 85px; width: auto; max-width: 100%; object-fit: contain; background-color: rgba(0,0,0,0.2);">
+    {% endif %}
 </div>

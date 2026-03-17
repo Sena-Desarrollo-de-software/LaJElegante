@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.views.decorators.http import require_GET,require_http_methods
+from .models import Promocion
+from django.utils import timezone
 
 @require_GET
 def lobby(request):
@@ -24,7 +26,16 @@ def lobby(request):
         },
     ]
     
-    return render(request, "hotel/lobby.html", {'carousel_items': carousel_items})
+    ahora = timezone.now()
+    promociones_nav = Promocion.objects.filter(
+        estado='PUBLICADO',
+        tipo__in=['NAVBAR','AMBOS'],
+        orden_navbar__isnull=False,
+        fecha_inicio__lte=ahora,
+        fecha_fin__gte=ahora,
+    ).order_by('orden_navbar')
+
+    return render(request, "hotel/lobby.html", {'carousel_items': carousel_items, 'promociones_nav' : promociones_nav})
 
 @require_GET
 def tyc(request):
