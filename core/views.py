@@ -3,6 +3,16 @@ from django.views.decorators.http import require_GET,require_http_methods
 from .models import Promocion
 from django.utils import timezone
 
+AHORA = timezone.now()
+
+PROMOCIONES_NAV = Promocion.objects.filter(
+    estado='PUBLICADO',
+    tipo__in=['NAVBAR','AMBOS'],
+    orden_navbar__isnull=False,
+    fecha_inicio__lte=AHORA,
+    fecha_fin__gte=AHORA,
+).order_by('orden_navbar')
+
 @require_GET
 def lobby(request):
     carousel_items = [
@@ -25,21 +35,12 @@ def lobby(request):
             'active': False
         },
     ]
-    
-    ahora = timezone.now()
-    promociones_nav = Promocion.objects.filter(
-        estado='PUBLICADO',
-        tipo__in=['NAVBAR','AMBOS'],
-        orden_navbar__isnull=False,
-        fecha_inicio__lte=ahora,
-        fecha_fin__gte=ahora,
-    ).order_by('orden_navbar')
 
-    return render(request, "hotel/lobby.html", {'carousel_items': carousel_items, 'promociones_nav' : promociones_nav})
+    return render(request, "hotel/lobby.html", {'carousel_items': carousel_items, 'promos' : PROMOCIONES_NAV})
 
 @require_GET
 def tyc(request):
-    return render(request, "tyc/lobby.html")
+    return render(request, "hotel/tyc.html",{'promos' : PROMOCIONES_NAV})
 
 @require_GET
 def habitaciones(request):
@@ -77,7 +78,8 @@ def habitaciones(request):
     return render(request, 'hotel/habitaciones.html', {
         'special_room': special_room,
         'regular_rooms': regular_rooms,
-        'promo_data': promo_data
+        'promo_data': promo_data,
+        'promos' : PROMOCIONES_NAV
     })
 
 @require_GET
@@ -109,13 +111,26 @@ def restaurante(request):
     return render(request, 'hotel/restaurante.html', {
         'disponibilidad_data': disponibilidad_data,
         'boton_data': boton_data,
-        'platos_list': platos_list
+        'platos_list': platos_list,
+        'promos' : PROMOCIONES_NAV
     })
 
 @require_GET
+def promociones(request):
+    promociones_nav_lp = Promocion.objects.filter(
+        estado='PUBLICADO',
+        tipo__in=['PAGINA','AMBOS'],
+        orden_navbar__isnull=False,
+        fecha_inicio__lte=AHORA,
+        fecha_fin__gte=AHORA,
+    ).order_by('orden_navbar')
+    return render(request, "h" \
+    "otel/promociones.html",{"promociones_nav" : promociones_nav_lp,'promos' : PROMOCIONES_NAV})
+
+@require_GET
 def signup(request):
-    return render(request, "hotel/signup.html")
+    return render(request, "hotel/signup.html",{'promos' : PROMOCIONES_NAV})
 
 @require_GET
 def login(request):
-    return render(request, "hotel/login.html")
+    return render(request, "hotel/login.html",{'promos' : PROMOCIONES_NAV})
