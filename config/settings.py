@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #Componentes adicionales
+    'django.contrib.humanize',
     # Hotel apps
     'core',
     'finance',
@@ -115,6 +117,8 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'es-co'
 
 TIME_ZONE = 'America/Bogota'
+
+USE_L10N = True 
 
 USE_I18N = True
 

@@ -1,0 +1,17 @@
+{% extends "hotel/layouts/base.html" %}
+{% load static %}
+
+{% block title %}Promociones - Hotel LJE{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/core/login.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="container my-5">
+
+    <h1 class="text-center mb-5">Promociones Especiales</h1>
+    {% include "hotel/components/promociones/promo_grid.html" with promos=promociones_nav %}
+
+</main>
+{% endblock %}

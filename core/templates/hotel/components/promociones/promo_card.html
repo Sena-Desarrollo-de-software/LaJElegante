@@ -1,0 +1,37 @@
+{% load static %}
+{% comment %}
+    Componente: promo_card.html
+    Uso: {% include "hotel/components/promociones/promo_card.html" with promo=promo_object %}
+    
+    Tarjeta de promoción con:
+    - Imagen destacada (formato 16:9 o 1:1 según CSS)
+    - Título sobre la imagen (overlay)
+    - Descripción (opcional)
+    - Footer con fechas de vigencia
+{% endcomment %}
+
+<div class="card h-100 shadow-sm border-0 promo-card">
+    {# Contenedor de imagen con relación de aspecto 16:9 #}
+    <div class="position-relative" style="padding-top: 56.25%; overflow: hidden;">
+        <img src="{{ promo.imagen_grande.url }}" 
+             class="position-absolute top-0 start-0 w-100 h-100"
+             alt="{{ promo.titulo }}"
+             style="object-fit: cover; object-position: center;">
+        
+        {# Overlay con título (siempre visible) #}
+        <div class="position-absolute bottom-0 start-0 w-100 p-3 text-white" 
+             style="background: linear-gradient(transparent, rgba(0,0,0,0.8));">
+            <h3 class="h5 mb-0">{{ promo.titulo }}</h3>
+        </div>
+    </div>
+    
+    {# Cuerpo de la card con descripción #}
+    {% if promo.descripcion %}
+        <div class="card-body">
+            <p class="card-text">{{ promo.descripcion|linebreaksbr }}</p>
+        </div>
+    {% endif %}
+    
+    {# Footer con fechas #}
+    {% include "hotel/components/promociones/promo_footer.html" with promo=promo %}
+</div>

@@ -1,0 +1,29 @@
+{% comment %}
+    Componente: promo_footer.html
+    Uso: {% include "hotel/components/promociones/promo_footer.html" with promo=promo_object %}
+    
+    Muestra las fechas de vigencia de la promoción
+{% endcomment %}
+{% load l10n %}
+{% load humanize %}
+
+<div class="card-footer bg-transparent">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-calendar-event me-2 text-primary"></i>
+            <span title="{{ promo.fecha_inicio|date:'d M Y' }} - {{ promo.fecha_fin|date:'d M Y' }}">
+                {{ promo.fecha_inicio|naturalday|capfirst }} - {{ promo.fecha_fin|naturalday|capfirst }}
+            </span>
+        </div>
+            <small class="text-success">
+                <i class="bi bi-check-circle"></i>
+                {{ promo.fecha_fin|timeuntil }} restantes
+            </small>
+    </div>
+    
+    {# Fecha exacta visible en móviles o como texto secundario #}
+    <div class="text-muted small mt-1 d-md-none">
+        <i class="bi bi-calendar3 me-1"></i>
+        {{ promo.fecha_inicio|date:'d M Y' }} - {{ promo.fecha_fin|date:'d M Y' }}
+    </div>
+</div>
