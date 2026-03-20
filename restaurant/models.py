@@ -2,6 +2,22 @@ from django.db import models
 from core.models import BaseAuditModel
 from core.models import ReservaServicio
 
+
+# === DÍA DE LA SEMANA ===
+class DiaSemana(models.Model):
+    """Catálogo de días de la semana"""
+    numero = models.PositiveSmallIntegerField(unique=True)  # 1-7
+    nombre = models.CharField(max_length=10)
+    nombre_corto = models.CharField(max_length=3)  # Lun, Mar, etc.
+    
+    class Meta:
+        verbose_name = "día de la semana"
+        verbose_name_plural = "días de la semana"
+        ordering = ['numero']
+    
+    def __str__(self):
+        return self.nombre
+
 # === HORARIO DE SERVICIO ===
 class HorarioServicio(BaseAuditModel):
     """
@@ -25,10 +41,10 @@ class HorarioServicio(BaseAuditModel):
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
     
-    # Control de disponibilidad
-    dias_semana = models.JSONField(
-        default=list,
-        help_text="Días disponibles (1=Lunes, 7=Domingo)"
+    dias_disponibles = models.ManyToManyField(
+        DiaSemana,
+        related_name="horarios",
+        verbose_name="días disponibles"
     )
     
     requiere_reserva_previa = models.BooleanField(default=True)
