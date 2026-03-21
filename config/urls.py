@@ -28,6 +28,7 @@ urlpatterns = [
     path("restaurant/", include("restaurant.urls")),
     path("rooms/", include("rooms.urls")),
     path("users/", include("users.urls")),
+    path("backoffice/", include("backoffice.urls")),
 ]
 # Se recomienda usar solo media cuando estamos en desarrollo, para producción hay que usar otras alternativas
 if settings.DEBUG:
