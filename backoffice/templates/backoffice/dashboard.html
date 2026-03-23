@@ -1,0 +1,12 @@
+{% extends 'backoffice/layouts/base.html'%}
+{% load static %}
+{% block title %}Dashboard - Hotel LJE{% endblock %}
+
+{% block styles %}
+  <link href="{% static 'css/backoffice/dashboard.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    {% include 'backoffice/components/action_shortcut.html' %}
+    {% include 'backoffice/components/widget_query_container.html'%}
+{% endblock %}
