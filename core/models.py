@@ -1,4 +1,6 @@
 from django.db import models
+from users.models import Usuario
+from django.apps import apps
 
 class BaseAuditModel(models.Model):
     is_active = models.BooleanField(default=True)  # Soft delete
@@ -94,3 +96,103 @@ class Promocion(BaseAuditModel):
             self.estado == 'PUBLICADO' and
             self.fecha_inicio <= ahora <= self.fecha_fin
         )
+    # Todas las clases aqui son para el sistema
+class Reserva(BaseAuditModel):
+    """
+    Contenedor de una reserva que puede incluir múltiples servicios.
+    """
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name="reservas"
+    )
+    fecha_reserva = models.DateTimeField(auto_now_add=True)
+    ESTADO_CHOICES = [
+        ('PENDIENTE', 'Pendiente'),
+        ('CONFIRMADA', 'Confirmada'),
+        ('CANCELADA', 'Cancelada'),
+        ('COMPLETADA', 'Completada'),
+    ]
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='PENDIENTE')
+    
+    class Meta:
+        verbose_name = "reserva"
+        verbose_name_plural = "reservas"
+    
+    def __str__(self):
+        return f"Reserva #{self.id} - {self.usuario.username}"
+    
+    @property
+    def total(self):
+        """
+        Calcula el total sumando todos los servicios asociados.
+        """
+        total = 0
+        
+        # Configuración de servicios: (app, model_name, related_name)
+        servicios_config = [
+            ('rooms', 'ReservaHabitacion', 'habitaciones'),
+            ('restaurant', 'ReservaRestaurante', 'restaurantes'),
+            """
+            ('spa', 'ReservaSpa', 'spa'),  # Como agregar futuros modelos de servicios
+            ('eventos', 'ReservaEvento', 'eventos'),
+            """
+        ]
+        
+        for app, model_name, related_name in servicios_config:
+            try:
+                # Obtener el modelo usando apps.get_model
+                model = apps.get_model(app, model_name)
+                
+                # Verificar que el modelo existe y que la reserva tiene esa relación
+                if model and hasattr(self, related_name):
+                    queryset = getattr(self, related_name).all()
+                    total += sum(item.precio_total for item in queryset)
+                    
+            except LookupError:
+                # El modelo no existe en esa app (ej: spa aún no instalado)
+                continue
+            except AttributeError:
+                # La relación no existe o el campo precio_total no está
+                continue
+            except Exception:
+                # Cualquier otro error
+                continue
+        
+        return total
+
+
+class ReservaServicio(BaseAuditModel):
+    """
+    Clase abstracta para cualquier servicio reservable.
+    """
+    reserva = models.ForeignKey(
+        Reserva,
+        on_delete=models.CASCADE,
+        #Asociacion de abstraccion que se define en cada clase
+    )
+    tarifa_aplicada = models.ForeignKey(
+        'finance.Tarifa',
+        on_delete=models.PROTECT,
+        null=True,
+        editable=False
+    )
+    cantidad = models.PositiveIntegerField(default=1)
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
+    descuento = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    recargo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    precio_total = models.DecimalField(max_digits=12, decimal_places=2, editable=False)
+    observaciones = models.TextField(blank=True)
+    
+    class Meta:
+        abstract = True
+    
+    def get_tarifa_vigente(self):
+        raise NotImplementedError
+    
+    def calcular_precio(self):
+        raise NotImplementedError
+    
+    def save(self, *args, **kwargs):
+        self.calcular_precio()
+        super().save(*args, **kwargs)

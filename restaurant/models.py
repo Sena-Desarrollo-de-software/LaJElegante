@@ -1,101 +1,116 @@
 from django.db import models
-from core.models import BaseAuditModel
-from users.models import Usuario
+from core.models import BaseAuditModel, ReservaServicio
 
-# === Mesa ===
-class Mesa(BaseAuditModel):
-    numero_mesa = models.SmallIntegerField(
-        verbose_name="número de mesa"
+# === HORARIO ===
+class Horario(BaseAuditModel):
+    TURNO_CHOICES = [
+        ('MAÑANA','Desayuno'),
+        ('TARDE','Almuerzo'),
+        ('NOCHE','Cena'),
+    ]
+
+    turno = models.CharField(
+        max_length=10, 
+        choices=TURNO_CHOICES,
+        verbose_name='Franja Horaria',
+        unique=True)
+
+    hora_inicio = models.TimeField(
+        verbose_name='Inicio del horario'
     )
-    capacidad = models.SmallIntegerField(
-        verbose_name="capacidad de personas"
+
+    hora_fin = models.TimeField(
+        verbose_name='Fin del horario'
     )
-    zona = models.CharField(
-        max_length=50,
-        verbose_name="zona del restaurante"
-    )
-    ubicacion_detalle = models.CharField(
-        max_length=150,
-        verbose_name="ubicación detallada"
+
+    capacidad_maxima = models.PositiveIntegerField(
+        verbose_name='Capacidad maxima de esta franja'
     )
 
     class Meta:
-        verbose_name = "mesa"
-        verbose_name_plural = "mesas"
-        ordering = ['zona', 'numero_mesa']
-        unique_together = ['numero_mesa', 'zona']
-
+        verbose_name = "horario"
+        verbose_name_plural = "horarios"
+        indexes = [
+            models.Index(fields=['turno']),
+        ]
+    
     def __str__(self):
-        return f"Mesa {self.numero_mesa} - {self.zona} ({self.capacidad} pers.)"
+        return f"{self.get_turno_display()} {self.hora_inicio} - {self.hora_fin}"
 
-# === Reserva Restaurante ===
-class ReservaRestaurante(BaseAuditModel):
-    usuario = models.ForeignKey(
-        Usuario,
-        on_delete=models.CASCADE,
-        related_name="reservas_restaurante",
-        verbose_name="cliente"
+class Turno(BaseAuditModel):
+    horario = models.ForeignKey(
+        Horario,
+        on_delete=models.PROTECT,
+        related_name='turnos'
     )
 
-    mesa = models.ForeignKey(
-        Mesa,
-        on_delete=models.CASCADE,
-        related_name='reservas',
-        verbose_name="mesa asignada"
+    fecha = models.DateField(
+        verbose_name='fecha'
     )
-    
-    hora_reserva = models.TimeField(
-        verbose_name="hora de la reserva"
+
+    cantidad_personas = models.PositiveIntegerField(
+        default=0,
+        verbose_name='cantidad personas'
     )
+
+    class Meta:
+        verbose_name = 'turno'
+        verbose_name_plural = 'turnos'
+        unique_together = ['fecha','horario']
+        indexes = [
+            models.Index(fields=['fecha','horario'])
+        ]
     
-    numero_personas = models.SmallIntegerField(
-        verbose_name="número de personas"
+    @property
+    def capacidad_disponible(self):
+        return self.horario.capacidad_maxima - self.cantidad_personas
+    
+    def disponible(self, personas):
+        return self.capacidad_disponible >= personas
+    
+    def __str__(self):
+        return f"{self.horario} - {self.fecha} ({self.cantidad_personas} / {self.horario.capacidad_maxima})"
+
+# === RESERVA RESTAURANTE ===
+class ReservaRestaurante(ReservaServicio):
+    turno = models.ForeignKey(
+        Turno,
+        on_delete=models.PROTECT,
+        related_name='reservas'
+    )
+
+    numero_personas = models.PositiveIntegerField(
+        verbose_name='número de personas'
     )
 
     ESTADO_RESERVA_CHOICES = [
         ('PENDIENTE', 'Pendiente'),
         ('CONFIRMADA', 'Confirmada'),
         ('CANCELADA', 'Cancelada'),
+        ('COMPLETADA', 'Completada'),
     ]
 
-    estado_reserva = models.CharField(
+    estado = models.CharField(
         max_length=20,
         choices=ESTADO_RESERVA_CHOICES,
-        default='PENDIENTE',
-        verbose_name="estado de la reserva"
+        default='PENDIENTE',        
+        verbose_name='estado reserva'
     )
 
-    class Meta:
-        verbose_name = "reserva de restaurante"
-        verbose_name_plural = "reservas de restaurante"
-        ordering = ['-created_at', 'hora_reserva']
-        indexes = [
-            models.Index(fields=['estado_reserva', 'hora_reserva']),
-        ]
+    def save(self, *args, **kwargs): #Al guardar actualiza la capacidad del turno
+        if self.pk:
+            anterior = ReservaRestaurante.objects.get(pk= self.pk)
+            diferencia = self.numero_personas - anterior.numero_personas
+        else:
+            diferencia = self.numero_personas
+        
+        self.turno.cantidad_personas += diferencia
+        self.turno.save()
 
-    def __str__(self):
-        return f"Reserva #{self.id} - {self.usuario.username} - {self.mesa}"
-
-    def get_estado_display_color(self):
-        estados_color = {
-            'PENDIENTE': 'Pendiente',
-            'CONFIRMADA': 'Confirmada',
-            'CANCELADA': 'Cancelada',
-        }
-        return estados_color.get(self.estado_reserva, self.estado_reserva)
-
-    def get_hora_formateada(self):
-        """Devuelve la hora en formato HH:MM AM/PM"""
-        return self.hora_reserva.strftime('%I:%M %p')
-
-    def capacidad_suficiente(self):
-        return self.mesa.capacidad >= self.numero_personas
-    capacidad_suficiente.boolean = True
-    capacidad_suficiente.short_description = 'Capacidad suficiente'
-
-    def verificar_disponibilidad(self, fecha):
-        return not ReservaRestaurante.objects.filter(
-            mesa=self.mesa,
-            created_at__date=fecha,
-            estado_reserva__in=['PENDIENTE', 'CONFIRMADA']
-        ).exclude(id=self.id).exists()
+        super().save(*args,**kwargs)
+    
+    def get_tarifa_vigente(self): #Faltan modelos de finance para servicios
+        return super().get_tarifa_vigente()
+    
+    def calcular_precio(self): #Faltan modelos de finance para servicios
+        return super().calcular_precio
