@@ -25,41 +25,41 @@ def trashcan_horario(request):
 # === MESA ===
 @require_GET
 def index_mesa(request):
-    return render(request,'backoffice/horarios/mesa_index.html')
+    return render(request,'backoffice/mesas/mesa_index.html')
 
 @require_POST
 def create_mesa(request):
-    return render(request,'backoffice/horarios/mesa_create.html')
+    return render(request,'backoffice/mesas/mesa_create.html')
 
 @require_http_methods(['POST','GET'])
 def update_mesa(request):
-    return render(request,'backoffice/horarios/mesa_update.html')
+    return render(request,'backoffice/mesas/mesa_update.html')
 
 @require_http_methods(['POST','GET'])
 def delete_mesa(request):
-    return render(request, 'backoffice/horarios/mesa_delete.html')
+    return render(request, 'backoffice/mesas/mesa_delete.html')
 
 @require_http_methods(['POST','GET'])
 def trashcan_mesa(request):
-    return render(request,'backoffice/horarios/mesa_trashcan.html')
+    return render(request,'backoffice/mesas/mesa_trashcan.html')
 
 # === RESERVA RESTAURANTE ===
 @require_GET
 def index_reserva_restaurante(request):
-    return render(request,'backoffice/horarios/reserva_restaurante_index.html')
+    return render(request,'backoffice/reservas_restaurante/reserva_restaurante_index.html')
 
 @require_POST
 def create_reserva_restaurante(request):
-    return render(request,'backoffice/horarios/reserva_restaurante_create.html')
+    return render(request,'backoffice/reservas_restaurante/reserva_restaurante_create.html')
 
 @require_http_methods(['POST','GET'])
 def update_reserva_restaurante(request):
-    return render(request,'backoffice/horarios/reserva_restaurante_update.html')
+    return render(request,'backoffice/reservas_restaurante/reserva_restaurante_update.html')
 
 @require_http_methods(['POST','GET'])
 def delete_reserva_restaurante(request):
-    return render(request, 'backoffice/horarios/reserva_restaurante_delete.html')
+    return render(request, 'backoffice/reservas_restaurante/reserva_restaurante_delete.html')
 
 @require_http_methods(['POST','GET'])
 def trashcan_reserva_restaurante(request):
-    return render(request,'backoffice/horarios/reserva_restaurante_trashcan.html')
+    return render(request,'backoffice/reservas_restaurante/reserva_restaurante_trashcan.html')
