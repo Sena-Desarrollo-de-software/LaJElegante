@@ -77,26 +77,26 @@ def handle_delete_habitacion_post(request, habitacion):
 def trashcan_habitacion(request):
     return render(request,'backoffice/habitaciones/habitacion_trashcan.html')
 
-# === RESERVA RESTAURANTE ===
+# === RESERVA HABITACION ===
 @require_GET
-def index_reserva_restaurante(request):
-    return render(request,'backoffice/reserva_restaurante/reserva_restaurante_index.html')
+def index_reserva_habitacion(request):
+    return render(request,'backoffice/reserva_habitaciones/reserva_habitacion_index.html')
 
 @require_POST
-def create_reserva_restaurante(request):
-    return render(request,'backoffice/reserva_restaurante/reserva_restaurante_create.html')
+def create_reserva_habitacion(request):
+    return render(request,'backoffice/reserva_habitaciones/reserva_habitacion_create.html')
 
 @require_http_methods(['POST','GET'])
-def update_reserva_restaurante(request):
-    return render(request,'backoffice/reserva_restaurante/reserva_restaurante_update.html')
+def update_reserva_habitacion(request):
+    return render(request,'backoffice/reserva_habitaciones/reserva_habitacion_update.html')
 
 @require_http_methods(['POST','GET'])
-def delete_reserva_restaurante(request):
-    return render(request, 'backoffice/reserva_restaurante/reserva_restaurante_delete.html')
+def delete_reserva_habitacion(request):
+    return render(request, 'backoffice/reserva_habitaciones/reserva_habitacion_delete.html')
 
 @require_http_methods(['POST','GET'])
-def trashcan_reserva_restaurante(request):
-    return render(request,'backoffice/reserva_restaurante/reserva_restaurante_trashcan.html')
+def trashcan_reserva_habitacion(request):
+    return render(request,'backoffice/reserva_habitaciones/reserva_habitacion_trashcan.html')
 
 # === TIPO HABITACION ===
 @require_GET
