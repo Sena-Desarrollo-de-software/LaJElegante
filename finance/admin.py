@@ -5,6 +5,22 @@ from django.utils.html import format_html
 from core.admin import AUDITORIA_READONLY, AUDITORIA_FIELDSET
 from .models import Impuesto, Temporada, Tarifa, TarifaImpuesto
 
+# === FUNCIONES AUXILIARES ===
+def get_servicio_nombre(obj):
+    if obj.servicio:
+        return str(obj.servicio)
+    return f"{obj.servicio_tipo} #{obj.servicio_id}"
+get_servicio_nombre.short_description = 'Servicio'
+
+def formatear_precio(precio):
+    if not precio:
+        return "Pendiente"
+    return f"${precio:,.2f}".replace(',','.')
+
+def get_precio_final_formateado(obj):
+    return formatear_precio(obj.precio_final)
+get_precio_final_formateado.short_description = 'Precio Final'
+
 class TarifaImpuestoInline(admin.TabularInline):
     model = TarifaImpuesto
     extra = 1
@@ -18,14 +34,13 @@ class TarifaImpuestoInline(admin.TabularInline):
 class TarifaInline(admin.TabularInline):
     model = Tarifa
     extra = 0
-    fields = ('tipo_habitacion', 'precio_base', 'estado', 'get_precio_final_display')
-    readonly_fields = ('get_precio_final_display',)
-    
-    def get_precio_final_display(self, obj):
-        if obj.precio_final:
-            return f"${obj.precio_final}"
-        return "Pendiente"
-    get_precio_final_display.short_description = "Precio final"
+    fields = (
+        get_servicio_nombre,
+        'precio_base', 
+        'estado', 
+        get_precio_final_formateado
+    )
+    readonly_fields = (get_servicio_nombre,get_precio_final_formateado,)
 
 @admin.register(Impuesto)
 class ImpuestoAdmin(admin.ModelAdmin):
@@ -146,10 +161,10 @@ class TemporadaAdmin(admin.ModelAdmin):
 class TarifaAdmin(admin.ModelAdmin):
     list_display = (
         'id',
-        'tipo_habitacion',
+        get_servicio_nombre,
         'temporada',
         'precio_base',
-        'precio_final_formateado',
+        get_precio_final_formateado,
         'estado',
         'total_impuestos',
         'is_active'
@@ -158,19 +173,17 @@ class TarifaAdmin(admin.ModelAdmin):
     list_filter = (
         'estado',
         'is_active',
-        'tipo_habitacion',
         'temporada',
         'created_at'
     )
     
     search_fields = (
-        'tipo_habitacion__nombre_tipo',
         'temporada__nombre'
     )
     
     fieldsets = (
         ('Configuración Básica', {
-            'fields': ('tipo_habitacion', 'temporada', 'estado')
+            'fields': ('servicio_tipo', 'servicio_id', 'temporada', 'estado')
         }),
         ('Precios', {
             'fields': ('precio_base', 'precio_final'),
@@ -182,15 +195,11 @@ class TarifaAdmin(admin.ModelAdmin):
         AUDITORIA_FIELDSET,
     )
     
-    readonly_fields = AUDITORIA_READONLY + ('precio_final',)
+    readonly_fields = AUDITORIA_READONLY + (get_precio_final_formateado,)
     
     inlines = [TarifaImpuestoInline]
-    
-    def precio_final_formateado(self, obj):
-        if obj.precio_final:
-            return f"${obj.precio_final:,.2f}".replace(',', '.')
-        return "Pendiente"
-    precio_final_formateado.short_description = 'Precio final'
+
+    raw_id_fields = ('servicio_tipo',)
     
     def total_impuestos(self, obj):
         count = obj.tarifaimpuesto_set.filter(is_active=True).count()
