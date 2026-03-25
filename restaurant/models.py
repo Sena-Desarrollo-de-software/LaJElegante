@@ -78,12 +78,16 @@ class Turno(BaseAuditModel):
         return self.capacidad_disponible >= personas
     
     def reservar(self, personas):
+        if personas <= 0:
+            return
         if not self.disponible(personas):
-            raise ValidationError("No hay cupo disponible")
+            raise ValidationError(f"No hay cupo disponible. Solo quedan {self.capacidad_disponible} lugares")
         self.cantidad_personas += personas
         self.save()
     
     def cancelar(self, personas):
+        if personas <= 0:
+            return
         self.cantidad_personas -= personas
         self.save()
     
@@ -119,8 +123,11 @@ class ReservaRestaurante(ReservaServicio):
         if ahora() > limite:
             raise ValidationError(f"Las reservas solo pueden modificarse hasta {TIEMPO_LIMITE_RESTAURANTE_HORAS} horas antes del servicio.")
         
+        if fecha_reserva < ahora():
+            raise ValidationError("No se puede reservar en una fecha pasada.")
+        
         if ahora() > fecha_reserva:
-            raise ValidationError("No se puede modificar una reserva que ha expirado")
+            raise ValidationError("No se puede modificar una reserva que ha expirado.")
     
     def get_tarifa_vigente(self):
         from django.contrib.contenttypes.models import ContentType
@@ -136,6 +143,8 @@ class ReservaRestaurante(ReservaServicio):
 
     def save(self, *args, **kwargs):
         with transaction.atomic():
+            turno = Turno.objects.select_for_update().get(pk=self.turno_id)
+            turno.reservar(self.cantidad)
             if self.pk:
                 anterior = ReservaRestaurante.objects.select_for_update().get(pk=self.pk)
                 self._validar_modificacion(anterior)
