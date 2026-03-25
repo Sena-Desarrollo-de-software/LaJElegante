@@ -316,10 +316,11 @@ class Tarifa(BaseAuditModel):
         super().save(*args, **kwargs)
 
 # Metodo helper
-def obtener_tarifa_vigente(tipo_habitacion_id, fecha):
+def get_tarifa_vigente(servicio_tipo,servicio_id, fecha):
     # Obtiene la tarifa vigente para un tipo de habitación en una fecha específica.
     return Tarifa.objects.filter(
-        tipo_habitacion_id=tipo_habitacion_id,
+        servicio_tipo=servicio_tipo,
+        servicio_id=servicio_id,
         estado='VIGENTE',
         temporada__fecha_inicio__lte=fecha,
         temporada__fecha_fin__gte=fecha
