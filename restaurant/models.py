@@ -23,11 +23,6 @@ class Horario(BaseAuditModel):
 
     hora_fin = models.TimeField(verbose_name='Fin del horario')
 
-    precio_por_persona = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2,
-        verbose_name='Precio por persona - Buffet')
-
     capacidad_maxima = models.PositiveIntegerField(
         default=CAPACIDAD_MAXIMA_TURNO,
         verbose_name='Capacidad maxima de esta franja horaria'
@@ -37,7 +32,7 @@ class Horario(BaseAuditModel):
         verbose_name = "configuración de horario"
         verbose_name_plural = "conguración de horarios"
         indexes = [
-            models.Index(fields=['turno','precio_por_persona','capacidad_maxima']),
+            models.Index(fields=['turno','capacidad_maxima']),
         ]
     
     def __str__(self):
@@ -60,15 +55,6 @@ class Turno(BaseAuditModel):
     )
 
     #Campos para sobreescritura de configuración de horarios por si es necesaria
-    precio_por_persona = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name='Precio por persona',
-        help_text='Precios especiales sobreescriben a los precios de horarios (dejar vacio si no es necesario)'
-    )
-
     capacidad_maxima = models.PositiveIntegerField(
         null=True,
         blank=True,
@@ -81,16 +67,12 @@ class Turno(BaseAuditModel):
         verbose_name_plural = 'turnos'
         unique_together = ['fecha','horario']
         indexes = [
-            models.Index(fields=['fecha','horario','precio_por_persona','capacidad_maxima'])
+            models.Index(fields=['fecha','horario','capacidad_maxima'])
         ]
     
     @property
     def capacidad_disponible(self):
         return self.horario.capacidad_maxima - self.cantidad_personas
-    
-    @property
-    def precio_efectivo(self):
-        return self.precio_por_persona or self.horario.precio_por_persona
 
     @property
     def capacidad_efectiva(self):
@@ -184,11 +166,9 @@ class ReservaRestaurante(ReservaServicio):
 
     def calcular_precio(self): 
         tarifa = self.get_tarifa_vigente()
-
-        if tarifa:
-            self.precio_total = tarifa.precio_final
-            self.precio_unitario = tarifa.precio_final
-        else:
-            self.precio_unitario = self.turno.precio_efectivo
-
+        if not tarifa:
+            raise ValidationError("No hay tarifa vigente para este horario")
+        
+        self.tarifa_aplicada = tarifa
+        self.precio_unitario = tarifa.precio_final
         self.precio_total = (self.precio_unitario * self.cantidad) - self.descuento #Comentario para recordar agregar recargo, descuento por ahora es un numero fijo
