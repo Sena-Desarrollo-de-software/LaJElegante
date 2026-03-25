@@ -23,6 +23,11 @@ class Horario(BaseAuditModel):
         verbose_name='Fin del horario'
     )
 
+    precio_por_persona = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2,
+        verbose_name='Precio por persona - Buffet')
+
     capacidad_maxima = models.PositiveIntegerField(
         verbose_name='Capacidad maxima de esta franja'
     )
@@ -79,24 +84,6 @@ class ReservaRestaurante(ReservaServicio):
         related_name='reservas'
     )
 
-    numero_personas = models.PositiveIntegerField(
-        verbose_name='número de personas'
-    )
-
-    ESTADO_RESERVA_CHOICES = [
-        ('PENDIENTE', 'Pendiente'),
-        ('CONFIRMADA', 'Confirmada'),
-        ('CANCELADA', 'Cancelada'),
-        ('COMPLETADA', 'Completada'),
-    ]
-
-    estado = models.CharField(
-        max_length=20,
-        choices=ESTADO_RESERVA_CHOICES,
-        default='PENDIENTE',        
-        verbose_name='estado reserva'
-    )
-
     def save(self, *args, **kwargs): #Al guardar actualiza la capacidad del turno
         if self.pk:
             anterior = ReservaRestaurante.objects.get(pk= self.pk)
@@ -109,8 +96,25 @@ class ReservaRestaurante(ReservaServicio):
 
         super().save(*args,**kwargs)
     
-    def get_tarifa_vigente(self): #Faltan modelos de finance para servicios
-        return super().get_tarifa_vigente()
-    
-    def calcular_precio(self): #Faltan modelos de finance para servicios
-        return super().calcular_precio
+    def get_tarifa_vigente(self):
+        from django.contrib.contenttypes.models import ContentType
+        from finance.models import get_tarifa_vigente
+        
+        content_type = ContentType.objects.get_for_model(Horario)
+
+        return get_tarifa_vigente(
+            servicio_tipo=content_type,
+            servicio_id=self.turno.horario_id,
+            fecha=self.turno.fecha
+        )
+
+    def calcular_precio(self): 
+        tarifa = self.get_tarifa_vigente()
+
+        if not tarifa:
+            self.precio_total = 0
+            self.precio_unitario = 0
+            return
+        self.tarifa_aplicada = tarifa
+        self.precio_final = tarifa.precio_final
+        self.precio_total = (self.precio_unitario * self.cantidad) - self.descuento #Comentario para recordar agregar recargo, descuento por ahora es un numero fijo
