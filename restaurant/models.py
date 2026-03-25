@@ -1,5 +1,8 @@
-from django.db import models
+from django.db import models, transaction
 from core.models import BaseAuditModel, ReservaServicio
+from django.core.exceptions import ValidationError
+from core.utils import ahora,dentro_de,combinar_fecha_hora
+from core.constants import TIEMPO_LIMITE_RESTAURANTE_HORAS, CAPACIDAD_MAXIMA_TURNO
 
 # === HORARIO ===
 class Horario(BaseAuditModel):
@@ -29,6 +32,7 @@ class Horario(BaseAuditModel):
         verbose_name='Precio por persona - Buffet')
 
     capacidad_maxima = models.PositiveIntegerField(
+        default=CAPACIDAD_MAXIMA_TURNO,
         verbose_name='Capacidad maxima de esta franja'
     )
 
@@ -73,6 +77,23 @@ class Turno(BaseAuditModel):
     def disponible(self, personas):
         return self.capacidad_disponible >= personas
     
+    def reservar(self, personas):
+        if not self.disponible(personas):
+            raise ValidationError("No hay cupo disponible")
+        self.cantidad_personas += personas
+        self.save()
+    
+    def cancelar(self, personas):
+        self.cantidad_personas -= personas
+        self.save()
+    
+    def ajustar(self, personas_anteriores, personas_nuevas):
+        diferencia = personas_nuevas - personas_anteriores
+        if diferencia > 0:
+            self.reservar(diferencia)
+        elif diferencia < 0:
+            self.cancelar(-diferencia)
+    
     def __str__(self):
         return f"{self.horario} - {self.fecha} ({self.cantidad_personas} / {self.horario.capacidad_maxima})"
 
@@ -84,17 +105,22 @@ class ReservaRestaurante(ReservaServicio):
         related_name='reservas'
     )
 
-    def save(self, *args, **kwargs): #Al guardar actualiza la capacidad del turno
-        if self.pk:
-            anterior = ReservaRestaurante.objects.get(pk= self.pk)
-            diferencia = self.numero_personas - anterior.numero_personas
-        else:
-            diferencia = self.numero_personas
+    def _validar_modificacion(self, original):
+        if not original:
+            return
         
-        self.turno.cantidad_personas += diferencia
-        self.turno.save()
+        fecha_reserva = combinar_fecha_hora(
+            self.turno.fecha,
+            self.turno.horario.hora_inicio
+        )
 
-        super().save(*args,**kwargs)
+        limite = fecha_reserva - dentro_de(TIEMPO_LIMITE_RESTAURANTE_HORAS)
+
+        if ahora() > limite:
+            raise ValidationError(f"Las reservas solo pueden modificarse hasta {TIEMPO_LIMITE_RESTAURANTE_HORAS} horas antes del servicio.")
+        
+        if ahora() > fecha_reserva:
+            raise ValidationError("No se puede modificar una reserva que ha expirado")
     
     def get_tarifa_vigente(self):
         from django.contrib.contenttypes.models import ContentType
@@ -108,6 +134,23 @@ class ReservaRestaurante(ReservaServicio):
             fecha=self.turno.fecha
         )
 
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            if self.pk:
+                anterior = ReservaRestaurante.objects.select_for_update().get(pk=self.pk)
+                self._validar_modificacion(anterior)
+
+                if anterior.turno_id != self.turno_id:
+                    anterior.turno.cancelar(anterior.cantidad)
+                    self.turno.reservar(self.cantidad)
+                
+                elif anterior.cantidad != self.cantidad:
+                    self.turno.ajustar(anterior.cantidad, self.cantidad)
+            else:
+                self.turno.reservar(self.cantidad)
+        super().save(*args, **kwargs)
+                
+
     def calcular_precio(self): 
         tarifa = self.get_tarifa_vigente()
 
@@ -116,5 +159,6 @@ class ReservaRestaurante(ReservaServicio):
             self.precio_unitario = 0
             return
         self.tarifa_aplicada = tarifa
+        self.precio_unitario =tarifa.precio_final
         self.precio_final = tarifa.precio_final
         self.precio_total = (self.precio_unitario * self.cantidad) - self.descuento #Comentario para recordar agregar recargo, descuento por ahora es un numero fijo
