@@ -66,14 +66,14 @@ class Turno(BaseAuditModel):
         null=True,
         blank=True,
         verbose_name='Precio por persona',
-        help_text='Precios especiales sobreescriben a los precios de horarios'
+        help_text='Precios especiales sobreescriben a los precios de horarios (dejar vacio si no es necesario)'
     )
 
     capacidad_maxima = models.PositiveIntegerField(
         null=True,
         blank=True,
         verbose_name='Precio por persona',
-        help_text='Precios especiales sobreescriben a los precios de horarios'
+        help_text='Precios especiales sobreescriben a los precios de horarios (dejar vacio si no es necesario)'
     )
 
     class Meta:
@@ -186,7 +186,7 @@ class ReservaRestaurante(ReservaServicio):
         tarifa = self.get_tarifa_vigente()
 
         if tarifa:
-            self.precio_total = tarifa
+            self.precio_total = tarifa.precio_final
             self.precio_unitario = tarifa.precio_final
         else:
             self.precio_unitario = self.turno.precio_efectivo
