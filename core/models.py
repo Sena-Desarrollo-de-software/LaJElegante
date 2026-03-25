@@ -171,17 +171,53 @@ class ReservaServicio(BaseAuditModel):
         on_delete=models.CASCADE,
         #Asociacion de abstraccion que se define en cada clase
     )
+    
     tarifa_aplicada = models.ForeignKey(
         'finance.Tarifa',
         on_delete=models.PROTECT,
         null=True,
         editable=False
     )
+
+    ESTADO_RESERVA_CHOICES = [
+        ('PENDIENTE', 'Pendiente'),
+        ('CONFIRMADA', 'Confirmada'),
+        ('CANCELADA', 'Cancelada'),
+        ('COMPLETADA', 'Completada'),
+    ]
+
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_RESERVA_CHOICES,
+        default='PENDIENTE',        
+        verbose_name='estado reserva'
+    )
+
     cantidad = models.PositiveIntegerField(default=1)
-    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
-    descuento = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    recargo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    precio_total = models.DecimalField(max_digits=12, decimal_places=2, editable=False)
+    precio_unitario = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        editable=False
+        )
+    descuento = models.DecimalField( #Por ahora es manual se planea hacer lo mismo que con Recargo
+        max_digits=10, 
+        decimal_places=2, 
+        default=0
+        )
+    """
+    Futura implimentación de logica de negocio, debido que necesita su propia logica de negocio
+    recargo = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2,
+        default=0
+        )
+    """
+    precio_total = models.DecimalField(
+        max_digits=12,
+        decimal_places=2, 
+        editable=False
+        )
+
     observaciones = models.TextField(blank=True)
     
     class Meta:

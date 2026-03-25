@@ -1,5 +1,8 @@
-from django.db import models
+from django.db import models, transaction
 from core.models import BaseAuditModel, ReservaServicio
+from django.core.exceptions import ValidationError
+from core.utils import ahora,dentro_de,combinar_fecha_hora
+from core.constants import TIEMPO_LIMITE_RESTAURANTE_HORAS, CAPACIDAD_MAXIMA_TURNO
 
 # === HORARIO ===
 class Horario(BaseAuditModel):
@@ -13,25 +16,23 @@ class Horario(BaseAuditModel):
         max_length=10, 
         choices=TURNO_CHOICES,
         verbose_name='Franja Horaria',
-        unique=True)
-
-    hora_inicio = models.TimeField(
-        verbose_name='Inicio del horario'
+        unique=True
     )
 
-    hora_fin = models.TimeField(
-        verbose_name='Fin del horario'
-    )
+    hora_inicio = models.TimeField(verbose_name='Inicio del horario')
+
+    hora_fin = models.TimeField(verbose_name='Fin del horario')
 
     capacidad_maxima = models.PositiveIntegerField(
-        verbose_name='Capacidad maxima de esta franja'
+        default=CAPACIDAD_MAXIMA_TURNO,
+        verbose_name='Capacidad maxima de esta franja horaria'
     )
 
     class Meta:
-        verbose_name = "horario"
-        verbose_name_plural = "horarios"
+        verbose_name = "configuración de horario"
+        verbose_name_plural = "conguración de horarios"
         indexes = [
-            models.Index(fields=['turno']),
+            models.Index(fields=['turno','capacidad_maxima']),
         ]
     
     def __str__(self):
@@ -53,20 +54,53 @@ class Turno(BaseAuditModel):
         verbose_name='cantidad personas'
     )
 
+    #Campos para sobreescritura de configuración de horarios por si es necesaria
+    capacidad_maxima = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Precio por persona',
+        help_text='Precios especiales sobreescriben a los precios de horarios (dejar vacio si no es necesario)'
+    )
+
     class Meta:
         verbose_name = 'turno'
         verbose_name_plural = 'turnos'
         unique_together = ['fecha','horario']
         indexes = [
-            models.Index(fields=['fecha','horario'])
+            models.Index(fields=['fecha','horario','capacidad_maxima'])
         ]
     
     @property
     def capacidad_disponible(self):
         return self.horario.capacidad_maxima - self.cantidad_personas
+
+    @property
+    def capacidad_efectiva(self):
+        return self.capacidad_maxima or self.horario.capacidad_maxima
     
     def disponible(self, personas):
         return self.capacidad_disponible >= personas
+    
+    def reservar(self, personas):
+        if personas <= 0:
+            return
+        if not self.disponible(personas):
+            raise ValidationError(f"No hay cupo disponible. Solo quedan {self.capacidad_disponible} lugares")
+        self.cantidad_personas += personas
+        self.save()
+    
+    def cancelar(self, personas):
+        if personas <= 0:
+            return
+        self.cantidad_personas -= personas
+        self.save()
+    
+    def ajustar(self, personas_anteriores, personas_nuevas):
+        diferencia = personas_nuevas - personas_anteriores
+        if diferencia > 0:
+            self.reservar(diferencia)
+        elif diferencia < 0:
+            self.cancelar(-diferencia)
     
     def __str__(self):
         return f"{self.horario} - {self.fecha} ({self.cantidad_personas} / {self.horario.capacidad_maxima})"
@@ -79,38 +113,62 @@ class ReservaRestaurante(ReservaServicio):
         related_name='reservas'
     )
 
-    numero_personas = models.PositiveIntegerField(
-        verbose_name='número de personas'
-    )
-
-    ESTADO_RESERVA_CHOICES = [
-        ('PENDIENTE', 'Pendiente'),
-        ('CONFIRMADA', 'Confirmada'),
-        ('CANCELADA', 'Cancelada'),
-        ('COMPLETADA', 'Completada'),
-    ]
-
-    estado = models.CharField(
-        max_length=20,
-        choices=ESTADO_RESERVA_CHOICES,
-        default='PENDIENTE',        
-        verbose_name='estado reserva'
-    )
-
-    def save(self, *args, **kwargs): #Al guardar actualiza la capacidad del turno
-        if self.pk:
-            anterior = ReservaRestaurante.objects.get(pk= self.pk)
-            diferencia = self.numero_personas - anterior.numero_personas
-        else:
-            diferencia = self.numero_personas
+    def _validar_modificacion(self, original):
+        if not original:
+            return
         
-        self.turno.cantidad_personas += diferencia
-        self.turno.save()
+        fecha_reserva = combinar_fecha_hora(
+            self.turno.fecha,
+            self.turno.horario.hora_inicio
+        )
 
-        super().save(*args,**kwargs)
+        limite = fecha_reserva - dentro_de(TIEMPO_LIMITE_RESTAURANTE_HORAS)
+
+        if ahora() > limite:
+            raise ValidationError(f"Las reservas solo pueden modificarse hasta {TIEMPO_LIMITE_RESTAURANTE_HORAS} horas antes del servicio.")
+        
+        if fecha_reserva < ahora():
+            raise ValidationError("No se puede reservar en una fecha pasada.")
+        
+        if ahora() > fecha_reserva:
+            raise ValidationError("No se puede modificar una reserva que ha expirado.")
     
-    def get_tarifa_vigente(self): #Faltan modelos de finance para servicios
-        return super().get_tarifa_vigente()
-    
-    def calcular_precio(self): #Faltan modelos de finance para servicios
-        return super().calcular_precio
+    def get_tarifa_vigente(self):
+        from django.contrib.contenttypes.models import ContentType
+        from finance.models import get_tarifa_vigente
+        
+        content_type = ContentType.objects.get_for_model(Horario)
+
+        return get_tarifa_vigente(
+            servicio_tipo=content_type,
+            servicio_id=self.turno.horario_id,
+            fecha=self.turno.fecha
+        )
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            turno = Turno.objects.select_for_update().get(pk=self.turno_id)
+            turno.reservar(self.cantidad)
+            if self.pk:
+                anterior = ReservaRestaurante.objects.select_for_update().get(pk=self.pk)
+                self._validar_modificacion(anterior)
+
+                if anterior.turno_id != self.turno_id:
+                    anterior.turno.cancelar(anterior.cantidad)
+                    self.turno.reservar(self.cantidad)
+                
+                elif anterior.cantidad != self.cantidad:
+                    self.turno.ajustar(anterior.cantidad, self.cantidad)
+            else:
+                self.turno.reservar(self.cantidad)
+        super().save(*args, **kwargs)
+                
+
+    def calcular_precio(self): 
+        tarifa = self.get_tarifa_vigente()
+        if not tarifa:
+            raise ValidationError("No hay tarifa vigente para este horario")
+        
+        self.tarifa_aplicada = tarifa
+        self.precio_unitario = tarifa.precio_final
+        self.precio_total = (self.precio_unitario * self.cantidad) - self.descuento #Comentario para recordar agregar recargo, descuento por ahora es un numero fijo

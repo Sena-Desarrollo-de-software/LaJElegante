@@ -1,8 +1,10 @@
-from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from rooms.models import TipoHabitacion
 from core.models import BaseAuditModel
+from django.db import models
 from decimal import Decimal
+
 
 # === IMPUESTO ===
 class Impuesto(BaseAuditModel):
@@ -201,14 +203,15 @@ class Tarifa(BaseAuditModel):
         default=Estado.VIGENTE,
         verbose_name="estado"
     )
-
-    tipo_habitacion = models.ForeignKey(
-        TipoHabitacion,
-        on_delete=models.CASCADE,
-        related_name='tarifas',
-        db_column='id_tipo_habitacion',
-        verbose_name="tipo de habitación"
+    #Relacion polimorfica de llaves foraneas
+    servicio_tipo = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE
     )
+    
+    servicio_id = models.PositiveIntegerField()
+
+    servicio = GenericForeignKey('servicio_tipo','servicio_id')
     
     temporada = models.ForeignKey(
         Temporada,
@@ -240,18 +243,10 @@ class Tarifa(BaseAuditModel):
     )
 
     class Meta:
-        verbose_name = "tarifa"
-        verbose_name_plural = "tarifas"
-        unique_together = ['tipo_habitacion', 'temporada']
-        indexes = [
-            models.Index(fields=['estado', 'tipo_habitacion', 'temporada']),
-        ]
-
-    def __str__(self):
-        return f"{self.tipo_habitacion} - {self.temporada} - ${self.precio_base}"
-
+        verbose_name = 'tarifa'
+        verbose_name_plural = 'tarifas'
+    
     def calcular_precio_final(self, es_extranjero=False):
-
         precio, _ = self._calcular_precios(es_extranjero)
         return precio
 
@@ -321,10 +316,11 @@ class Tarifa(BaseAuditModel):
         super().save(*args, **kwargs)
 
 # Metodo helper
-def obtener_tarifa_vigente(tipo_habitacion_id, fecha):
+def get_tarifa_vigente(servicio_tipo,servicio_id, fecha):
     # Obtiene la tarifa vigente para un tipo de habitación en una fecha específica.
     return Tarifa.objects.filter(
-        tipo_habitacion_id=tipo_habitacion_id,
+        servicio_tipo=servicio_tipo,
+        servicio_id=servicio_id,
         estado='VIGENTE',
         temporada__fecha_inicio__lte=fecha,
         temporada__fecha_fin__gte=fecha
