@@ -145,6 +145,22 @@ class ReservaRestaurante(ReservaServicio):
             fecha=self.turno.fecha
         )
 
+    def cancelar(self):
+        with transaction.atomic():
+            self.estado = 'CANCELADA'
+            self.save()
+            self.turno.cancelar(self.cantidad)
+
+    def confirmar(self):
+        with transaction.atomic():
+            self.estado = 'CONFIRMADA'
+            self.save()
+
+    def completar(self):
+        with transaction.atomic():
+            self.estado = 'COMPLETADA'
+            self.save()
+
     def save(self, *args, **kwargs):
         with transaction.atomic():
             turno = Turno.objects.select_for_update().get(pk=self.turno_id)
@@ -164,7 +180,6 @@ class ReservaRestaurante(ReservaServicio):
                 turno.reservar(self.cantidad)
         super().save(*args, **kwargs)
                 
-
     def calcular_precio(self): 
         tarifa = self.get_tarifa_vigente()
         if not tarifa:

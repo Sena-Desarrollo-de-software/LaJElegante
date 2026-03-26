@@ -10,6 +10,8 @@ AUDITORIA_FIELDSET = ('Auditoría', {
 })
 
 AUDITORIA_READONLY = ('created_at', 'updated_at', 'deleted_at')
+        
+AUDITORIA_LIST_DISPLAY ='is_active','created_at','updated_at'
 
 @admin.register(Promocion)
 class PromocionAdmin(admin.ModelAdmin):
