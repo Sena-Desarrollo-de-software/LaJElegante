@@ -148,19 +148,20 @@ class ReservaRestaurante(ReservaServicio):
     def save(self, *args, **kwargs):
         with transaction.atomic():
             turno = Turno.objects.select_for_update().get(pk=self.turno_id)
-            turno.reservar(self.cantidad)
             if self.pk:
                 anterior = ReservaRestaurante.objects.select_for_update().get(pk=self.pk)
                 self._validar_modificacion(anterior)
 
                 if anterior.turno_id != self.turno_id:
-                    anterior.turno.cancelar(anterior.cantidad)
-                    self.turno.reservar(self.cantidad)
-                
+                    anterior.estado = 'CANCELADA'
+                    anterior.save()
+                    anterior.turno.cancelar(anterior.cantidad)                
+                    turno.reservar(self.cantidad)
+
                 elif anterior.cantidad != self.cantidad:
-                    self.turno.ajustar(anterior.cantidad, self.cantidad)
+                    turno.ajustar(anterior.cantidad, self.cantidad)
             else:
-                self.turno.reservar(self.cantidad)
+                turno.reservar(self.cantidad)
         super().save(*args, **kwargs)
                 
 
