@@ -170,6 +170,8 @@ class ReservaServicio(BaseAuditModel):
         Reserva,
         on_delete=models.CASCADE,
         #Asociacion de abstraccion que se define en cada clase
+        null=True,
+        blank=True
     )
     
     tarifa_aplicada = models.ForeignKey(
@@ -197,7 +199,8 @@ class ReservaServicio(BaseAuditModel):
     precio_unitario = models.DecimalField(
         max_digits=10, 
         decimal_places=2, 
-        editable=False
+        editable=False,
+        default=0
         )
     descuento = models.DecimalField( #Por ahora es manual se planea hacer lo mismo que con Recargo
         max_digits=10, 
@@ -215,7 +218,8 @@ class ReservaServicio(BaseAuditModel):
     precio_total = models.DecimalField(
         max_digits=12,
         decimal_places=2, 
-        editable=False
+        editable=False,
+        default=0
         )
 
     observaciones = models.TextField(blank=True)

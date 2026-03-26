@@ -59,14 +59,14 @@ class TurnoAdmin(admin.ModelAdmin):
     list_display = (
         'horario',
         'fecha',
-        'cantidad_personas',
+        'quorum',
         'capacidad_efectiva',
         'capacidad_disponible',
         'is_active'
         )
     list_filter = ('horario', 'fecha', 'is_active')
     search_fields = ('fecha', 'horario__turno')
-    readonly_fields = AUDITORIA_READONLY + ('cantidad_personas', 'capacidad_disponible', 'capacidad_efectiva')
+    readonly_fields = AUDITORIA_READONLY + ('quorum', 'capacidad_disponible', 'capacidad_efectiva')
     
     fieldsets = (
         ('Información del Turno', {
@@ -88,7 +88,7 @@ class TurnoAdmin(admin.ModelAdmin):
     
     def capacidad_disponible(self, obj):
         efectiva = obj.capacidad_maxima or obj.horario.capacidad_maxima
-        return efectiva - obj.cantidad_personas
+        return efectiva - obj.quorum
     capacidad_disponible.short_description = 'Lugares libres'
 
 

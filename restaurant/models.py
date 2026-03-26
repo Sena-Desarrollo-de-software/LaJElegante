@@ -110,7 +110,9 @@ class ReservaRestaurante(ReservaServicio):
     turno = models.ForeignKey(
         Turno,
         on_delete=models.PROTECT,
-        related_name='reservas'
+        related_name='reservas',
+        null=True,
+        blank=True
     )
 
     def _validar_modificacion(self, original):
