@@ -206,10 +206,14 @@ class Tarifa(BaseAuditModel):
     #Relacion polimorfica de llaves foraneas
     servicio_tipo = models.ForeignKey(
         ContentType,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
     )
     
-    servicio_id = models.PositiveIntegerField()
+    servicio_id = models.PositiveIntegerField(
+        default=0
+    )
 
     servicio = GenericForeignKey('servicio_tipo','servicio_id')
     

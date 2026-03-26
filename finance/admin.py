@@ -178,7 +178,7 @@ class TarifaAdmin(admin.ModelAdmin):
     )
     
     search_fields = (
-        'temporada__nombre'
+        'temporada__nombre',
     )
     
     fieldsets = (

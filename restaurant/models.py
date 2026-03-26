@@ -49,17 +49,17 @@ class Turno(BaseAuditModel):
         verbose_name='fecha'
     )
 
-    cantidad_personas = models.PositiveIntegerField(
+    quorum = models.PositiveIntegerField(
         default=0,
-        verbose_name='cantidad personas'
+        verbose_name='Personas reservadas'
     )
 
     #Campos para sobreescritura de configuración de horarios por si es necesaria
     capacidad_maxima = models.PositiveIntegerField(
         null=True,
         blank=True,
-        verbose_name='Precio por persona',
-        help_text='Precios especiales sobreescriben a los precios de horarios (dejar vacio si no es necesario)'
+        verbose_name='Capacidad maxima',
+        help_text='Sobreescribe capacidad maxima de los horarios (dejar vacio si no es necesario)'
     )
 
     class Meta:
@@ -72,7 +72,7 @@ class Turno(BaseAuditModel):
     
     @property
     def capacidad_disponible(self):
-        return self.horario.capacidad_maxima - self.cantidad_personas
+        return self.horario.capacidad_maxima - self.quorum
 
     @property
     def capacidad_efectiva(self):
@@ -86,13 +86,13 @@ class Turno(BaseAuditModel):
             return
         if not self.disponible(personas):
             raise ValidationError(f"No hay cupo disponible. Solo quedan {self.capacidad_disponible} lugares")
-        self.cantidad_personas += personas
+        self.quorum += personas
         self.save()
     
     def cancelar(self, personas):
         if personas <= 0:
             return
-        self.cantidad_personas -= personas
+        self.quorum -= personas
         self.save()
     
     def ajustar(self, personas_anteriores, personas_nuevas):
@@ -103,14 +103,16 @@ class Turno(BaseAuditModel):
             self.cancelar(-diferencia)
     
     def __str__(self):
-        return f"{self.horario} - {self.fecha} ({self.cantidad_personas} / {self.horario.capacidad_maxima})"
+        return f"{self.horario} - {self.fecha} ({self.quorum} / {self.horario.capacidad_maxima})"
 
 # === RESERVA RESTAURANTE ===
 class ReservaRestaurante(ReservaServicio):
     turno = models.ForeignKey(
         Turno,
         on_delete=models.PROTECT,
-        related_name='reservas'
+        related_name='reservas',
+        null=True,
+        blank=True
     )
 
     def _validar_modificacion(self, original):
@@ -145,25 +147,41 @@ class ReservaRestaurante(ReservaServicio):
             fecha=self.turno.fecha
         )
 
+    def cancelar(self):
+        with transaction.atomic():
+            self.estado = 'CANCELADA'
+            self.save()
+            self.turno.cancelar(self.cantidad)
+
+    def confirmar(self):
+        with transaction.atomic():
+            self.estado = 'CONFIRMADA'
+            self.save()
+
+    def completar(self):
+        with transaction.atomic():
+            self.estado = 'COMPLETADA'
+            self.save()
+
     def save(self, *args, **kwargs):
         with transaction.atomic():
             turno = Turno.objects.select_for_update().get(pk=self.turno_id)
-            turno.reservar(self.cantidad)
             if self.pk:
                 anterior = ReservaRestaurante.objects.select_for_update().get(pk=self.pk)
                 self._validar_modificacion(anterior)
 
                 if anterior.turno_id != self.turno_id:
-                    anterior.turno.cancelar(anterior.cantidad)
-                    self.turno.reservar(self.cantidad)
-                
+                    anterior.estado = 'CANCELADA'
+                    anterior.save()
+                    anterior.turno.cancelar(anterior.cantidad)                
+                    turno.reservar(self.cantidad)
+
                 elif anterior.cantidad != self.cantidad:
-                    self.turno.ajustar(anterior.cantidad, self.cantidad)
+                    turno.ajustar(anterior.cantidad, self.cantidad)
             else:
-                self.turno.reservar(self.cantidad)
+                turno.reservar(self.cantidad)
         super().save(*args, **kwargs)
                 
-
     def calcular_precio(self): 
         tarifa = self.get_tarifa_vigente()
         if not tarifa:
