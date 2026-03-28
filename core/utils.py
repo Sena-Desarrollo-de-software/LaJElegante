@@ -7,7 +7,7 @@ def ahora():
     return timezone.now()
 
 def dentro_de(horas):
-    return ahora() + timedelta(hours=horas)
+    return timedelta(hours=horas)
 
 def combinar_fecha_hora(fecha,hora):
     return timezone.make_aware(datetime.combine(fecha,hora))
