@@ -4,7 +4,7 @@ from .models import Habitacion
 class HabitacionCreateForm(forms.ModelForm):
     class Meta:
         model = Habitacion
-        fields = ["tipo_habitacion", "numero_habitacion", "estado_habitacion"]
+        fields = ["tipo_habitacion", "numero_habitacion", "estado"]
 
     def clean_numero_habitacion(self):
         num = self.cleaned_data["numero_habitacion"]
@@ -17,7 +17,7 @@ class HabitacionCreateForm(forms.ModelForm):
 class HabitacionUpdateForm(forms.ModelForm):
     class Meta:
         model = Habitacion
-        fields = ["tipo_habitacion", "numero_habitacion", "estado_habitacion"]
+        fields = ["tipo_habitacion", "numero_habitacion", "estado"]
 
     def clean_numero_habitacion(self):
         num = self.cleaned_data["numero_habitacion"]

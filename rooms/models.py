@@ -1,9 +1,11 @@
-from django.db import models
+from django.db import models, transaction
 from django.core.exceptions import ValidationError
-from core.models import BaseAuditModel
-from users.models import Usuario
+from django.contrib.contenttypes.models import ContentType
+from core.models import BaseAuditModel, ReservaServicio
+from core.utils import calcular_dias, validar_capacidad, validar_fechas
+from finance.models import get_tarifa_vigente
+from .utils import validar_tiempo_reserva_nueva,validar_tiempo_modificacion_reserva,validar_fechas_no_expiradas
 
-# === TipoHabitacion ===
 class TipoHabitacion(BaseAuditModel):
     NOMBRE_TIPO_CHOICES = [
         ("FAMILIAR", "familiar"),
@@ -13,17 +15,12 @@ class TipoHabitacion(BaseAuditModel):
     ]
 
     nombre_tipo = models.CharField(
-        max_length=20, 
+        max_length=20,
         choices=NOMBRE_TIPO_CHOICES,
         verbose_name="nombre del tipo"
     )
-    descripcion = models.TextField(
-        blank=True,
-        verbose_name="descripción"
-    )
-    capacidad_maxima = models.PositiveIntegerField(
-        verbose_name="capacidad máxima"
-    )
+    descripcion = models.TextField(blank=True, verbose_name="descripción")
+    capacidad_maxima = models.PositiveIntegerField(verbose_name="capacidad máxima")
 
     class Meta:
         verbose_name = "tipo de habitación"
@@ -33,7 +30,6 @@ class TipoHabitacion(BaseAuditModel):
         return f"{self.get_nombre_tipo_display()} (cap. {self.capacidad_maxima})"
 
 
-# === Habitacion ===
 class Habitacion(BaseAuditModel):
     tipo_habitacion = models.ForeignKey(
         TipoHabitacion,
@@ -41,22 +37,20 @@ class Habitacion(BaseAuditModel):
         related_name="habitaciones",
         verbose_name="tipo de habitación"
     )
-
     numero_habitacion = models.PositiveIntegerField(
         unique=True,
         verbose_name="número de habitación"
     )
-
     ESTADO_HABITACION_CHOICES = [
-        ("EN_SERVICIO", "en servicio"),
+        ("DISPONIBLE", "disponible"),
         ("MANTENIMIENTO", "mantenimiento"),
         ("OCUPADA", "ocupada"),
+        ("RESERVADA", "reservada"),
     ]
-
-    estado_habitacion = models.CharField(
+    estado = models.CharField(
         max_length=20,
         choices=ESTADO_HABITACION_CHOICES,
-        default="EN_SERVICIO",
+        default="DISPONIBLE",
         verbose_name="estado de la habitación"
     )
 
@@ -65,128 +59,109 @@ class Habitacion(BaseAuditModel):
         verbose_name_plural = "habitaciones"
 
     def __str__(self):
-        return f"Habitación {self.numero_habitacion} - {self.get_estado_habitacion_display()}"
+        return f"Habitación {self.numero_habitacion} - {self.get_estado_display()}"
 
-# === ReservaHabitacion ===
-class ReservaHabitacion(BaseAuditModel):
-    usuario = models.ForeignKey(
-        Usuario,
-        on_delete=models.CASCADE,
-        related_name="reservas_habitacion",
-        verbose_name="cliente"
+    def disponible_en_fechas(self, fecha_inicio, fecha_fin, reserva_id=None):
+        """Verifica si la habitación está disponible en un rango de fechas"""
+        if self.estado in ['MANTENIMIENTO', 'OCUPADA']:
+            return False
+
+        reservas = ReservaHabitacion.objects.filter(
+            habitacion=self,
+            fecha_inicio__lt=fecha_fin,
+            fecha_fin__gt=fecha_inicio,
+            estado__in=['PENDIENTE', 'CONFIRMADA']
+        )
+        if reserva_id:
+            reservas = reservas.exclude(id=reserva_id)
+
+        return not reservas.exists()
+
+
+class ReservaHabitacion(ReservaServicio):
+    habitacion = models.ForeignKey(
+        Habitacion,
+        on_delete=models.PROTECT,
+        related_name='reservas',
+        verbose_name="habitación"
     )
+    fecha_inicio = models.DateField(verbose_name="fecha de entrada")
+    fecha_fin = models.DateField(verbose_name="fecha de salida")
+    cantidad_personas = models.PositiveIntegerField(verbose_name="cantidad de personas")
+
+    # Campos calculados
+    cantidad_noches = models.PositiveIntegerField(editable=False, default=0)
 
     class Meta:
         verbose_name = "reserva de habitación"
         verbose_name_plural = "reservas de habitaciones"
+        indexes = [
+            models.Index(fields=['fecha_inicio', 'fecha_fin']),
+            models.Index(fields=['habitacion', 'fecha_inicio', 'fecha_fin']),
+        ]
 
     def __str__(self):
-        return f"Reserva #{self.id} - {self.usuario.username}"
-
-# === DetallesReservaHabitacion ===
-class DetallesReservaHabitacion(BaseAuditModel):
-    habitacion = models.ForeignKey(
-        Habitacion,
-        on_delete=models.PROTECT,
-        related_name="detalles_reserva"
-    )
-
-    reserva_habitacion = models.ForeignKey(
-        ReservaHabitacion,
-        on_delete=models.CASCADE,
-        related_name="detalles"
-    )
-
-    fecha_inicio = models.DateField(verbose_name="fecha de inicio")
-    fecha_fin = models.DateField(verbose_name="fecha de fin")
-
-    cantidad_personas = models.PositiveIntegerField(verbose_name="cantidad de personas")
-    
-    # Relación con tarifa (opcional, se puede calcular)
-    tarifa_aplicada = models.ForeignKey(
-        "finance.Tarifa", # Hay que importar con String FK para evitar problemas circular (las entidades se necesitan mutuamente, infinitamente)
-        on_delete=models.PROTECT,
-        null=True,
-        editable=False,
-        verbose_name="tarifa aplicada"
-    )
-    
-    precio_por_noche = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2,
-        editable=False,
-        verbose_name="precio por noche"
-    )
-    
-    cantidad_noches = models.PositiveIntegerField(
-        editable=False,
-        verbose_name="cantidad de noches"
-    )
-    
-    descuento_aplicado = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        default=0.0,
-        verbose_name="descuento adicional"
-    )
-    
-    recargo_aplicado = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        default=0.0,
-        verbose_name="recargo adicional"
-    )
-    
-    precio_total = models.DecimalField(
-        max_digits=12, 
-        decimal_places=2,
-        editable=False,
-        verbose_name="precio total"
-    )
-
-    observacion = models.TextField(blank=True)
-
-    class Meta:
-        verbose_name = "detalle de reserva"
-        verbose_name_plural = "detalles de reservas"
-
-    def get_tarifa_vigente(self):
-        from finance.models import Tarifa  # Import local para evitar circular
-        
-        tipo_hab = self.habitacion.tipo_habitacion
-        
-        # Buscar tarifa VIGENTE para este tipo y que cubra la fecha
-        tarifas = Tarifa.objects.filter(
-            tipo_habitacion=tipo_hab,
-            estado='VIGENTE',
-            temporada__fecha_inicio__lte=self.fecha_inicio,
-            temporada__fecha_fin__gte=self.fecha_inicio
-        ).select_related('temporada')
-        
-        if tarifas.exists():
-            return tarifas.first()
-        return None
+        return f"Reserva Hab #{self.id} - Hab {self.habitacion.numero_habitacion} ({self.fecha_inicio} al {self.fecha_fin})"
 
     def clean(self):
-        if self.fecha_inicio and self.fecha_fin:
-            if self.fecha_inicio >= self.fecha_fin:
-                raise ValidationError("La fecha de fin debe ser posterior a la fecha de inicio")
+        """Validaciones básicas antes de guardar"""
+        super().clean()
+        validar_fechas(self.fecha_inicio, self.fecha_fin)
+        validar_capacidad(self.cantidad_personas, self.habitacion.tipo_habitacion.capacidad_maxima)
+        validar_fechas_no_expiradas(self.fecha_inicio)
 
-    def save(self, *args, **kwargs):
-        if not self.fecha_inicio or not self.fecha_fin:
-            raise ValidationError("Debe especificar fecha de inicio y fin")
-        
-        delta = self.fecha_fin - self.fecha_inicio
-        self.cantidad_noches = delta.days
-        
+    def _validar_reserva_nueva(self):
+        """Validaciones exclusivas para nueva reserva"""
+        validar_tiempo_reserva_nueva(self.fecha_inicio)
+
+        if not self.habitacion.disponible_en_fechas(self.fecha_inicio, self.fecha_fin):
+            raise ValidationError("La habitación no está disponible en esas fechas")
+
+    def _validar_modificacion(self, original):
+        """Validaciones exclusivas para modificación de reserva"""
+        validar_tiempo_modificacion_reserva(self.fecha_inicio)
+
+        # Si cambió de habitación o fechas, verificar disponibilidad
+        if (original.habitacion_id != self.habitacion_id or
+            original.fecha_inicio != self.fecha_inicio or
+            original.fecha_fin != self.fecha_fin):
+
+            if not self.habitacion.disponible_en_fechas(
+                self.fecha_inicio, self.fecha_fin, self.pk
+            ):
+                raise ValidationError("La habitación no está disponible en las nuevas fechas")
+
+    def get_tarifa_vigente(self):
+        """Obtiene tarifa vigente para el tipo de habitación en la fecha de inicio"""
+        content_type = ContentType.objects.get_for_model(TipoHabitacion)
+
+        return get_tarifa_vigente(
+            servicio_tipo=content_type,
+            servicio_id=self.habitacion.tipo_habitacion_id,
+            fecha=self.fecha_inicio
+        )
+
+    def calcular_precio(self):
+        """Calcula precio total basado en tarifa vigente"""
+        self.cantidad_noches = calcular_dias(self.fecha_inicio, self.fecha_fin)
+
         tarifa = self.get_tarifa_vigente()
         if not tarifa:
-            raise ValidationError("No hay tarifa vigente para esta fecha")
-        
+            raise ValidationError("No hay tarifa vigente para estas fechas")
+
         self.tarifa_aplicada = tarifa
-        self.precio_por_noche = tarifa.precio_final
-        
-        base = self.precio_por_noche * self.cantidad_noches
-        self.precio_total = base - self.descuento_aplicado + self.recargo_aplicado
-        
-        super().save(*args, **kwargs)
+        self.precio_unitario = tarifa.precio_final  # precio por noche
+        self.precio_total = (self.precio_unitario * self.cantidad_noches) - self.descuento
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            self.full_clean()  # Ejecuta clean()
+
+            if self.pk:
+                anterior = ReservaHabitacion.objects.select_for_update().get(pk=self.pk)
+                self._validar_modificacion(anterior)
+            else:
+                self._validar_reserva_nueva()
+
+            self.calcular_precio()
+            super().save(*args, **kwargs)
