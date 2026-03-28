@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Horario, Turno, ReservaRestaurante
-from core.admin import AUDITORIA_READONLY, AUDITORIA_FIELDSET, AUDITORIA_LIST_DISPLAY
+from core.admin import AUDITORIA_READONLY, AUDITORIA_FIELDSET, AUDITORIA_LIST_DISPLAY, ReservaServicioInline, ReservaAdmin
 
 # === FUNCIONES AUXILIARES ===
 def formatear_precio(precio):
@@ -32,6 +32,14 @@ class ReservaRestauranteInline(admin.TabularInline):
     def has_add_permission(self, request, obj=None):
         return False
 
+class ReservaRestauranteServicioInline(ReservaServicioInline):
+    """Inline para agregar servicios de restaurante desde ReservaAdmin"""
+    model = ReservaRestaurante
+    # Puedes personalizar los campos si quieres
+    fields = ('turno', 'cantidad', 'estado', 'get_precio_total')
+    readonly_fields = ('get_precio_total',)
+
+ReservaAdmin.inlines.append(ReservaRestauranteServicioInline)
 # === ADMINISTRADORES ===
 @admin.register(Horario)
 class HorarioAdmin(admin.ModelAdmin):
