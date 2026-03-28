@@ -1,8 +1,6 @@
 from django.contrib import admin
 from django.utils import timezone
-from django.urls import reverse
-from django.utils.html import format_html
-from .models import Promocion
+from .models import Promocion, Reserva
 
 AUDITORIA_FIELDSET = ('Auditoría', {
     'fields': ('created_at', 'updated_at', 'deleted_at'),
@@ -86,3 +84,82 @@ class PromocionAdmin(admin.ModelAdmin):
             f"{queryset.count()} promoción(es) duplicada(s)."
         )
     duplicar_promocion.short_description = "Duplicar promociones seleccionadas"
+
+class ReservaServicioInline(admin.TabularInline):
+    """Inline base para servicios - se extiende en cada app"""
+    model = None  # Se define en las subclases
+    extra = 0
+    fields = ('get_servicio_info', 'cantidad', 'estado', 'get_precio_total')
+    readonly_fields = fields
+    
+    def get_servicio_info(self, obj):
+        return str(obj)
+    get_servicio_info.short_description = 'Servicio'
+    
+    def get_precio_total(self, obj):
+        if obj.precio_total:
+            return f"${obj.precio_total:,.2f}".replace(',', '.')
+        return "Pendiente"
+    get_precio_total.short_description = 'Total'
+    
+    def has_add_permission(self, request, obj=None):
+        return True
+
+# Inline abstracto para servicios (se extiende en cada app)
+@admin.register(Reserva)
+class ReservaAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'usuario',
+        'fecha_reserva',
+        'estado',
+        'total_reserva',
+        'cantidad_servicios',
+        'is_active'
+    )
+    
+    list_filter = ('estado', 'is_active', 'fecha_reserva')
+    search_fields = ('usuario__username', 'usuario__email', 'id')
+    date_hierarchy = 'fecha_reserva'
+    readonly_fields = AUDITORIA_READONLY + ('total_reserva',)
+    
+    fieldsets = (
+        ('Información de la Reserva', {
+            'fields': ('usuario', 'estado')
+        }),
+        ('Totales', {
+            'fields': ('total_reserva',),
+            'description': 'Total calculado automáticamente desde los servicios'
+        }),
+        AUDITORIA_FIELDSET,
+    )
+
+    inlines = []
+    
+    def total_reserva(self, obj):
+        total = obj.total
+        return f"${total:,.2f}".replace(',', '.') if total else "$0.00"
+    total_reserva.short_description = 'Total'
+    
+    def cantidad_servicios(self, obj):
+        # Contar todos los servicios relacionados
+        count = 0
+        # Esto se puede mejorar con un registro dinámico
+        if hasattr(obj, 'reservarestaurantes'):
+            count += obj.reservarestaurantes.count()
+        return count
+    cantidad_servicios.short_description = 'Servicios'
+    
+    actions = ['confirmar_reservas', 'cancelar_reservas', 'completar_reservas']
+    
+    def confirmar_reservas(self, request, queryset):
+        updated = queryset.update(estado='CONFIRMADA')
+        self.message_user(request, f"{updated} reservas confirmadas.")
+    
+    def cancelar_reservas(self, request, queryset):
+        updated = queryset.update(estado='CANCELADA')
+        self.message_user(request, f"{updated} reservas canceladas.")
+    
+    def completar_reservas(self, request, queryset):
+        updated = queryset.update(estado='COMPLETADA')
+        self.message_user(request, f"{updated} reservas completadas.")

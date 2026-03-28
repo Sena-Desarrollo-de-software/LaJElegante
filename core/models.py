@@ -1,6 +1,7 @@
 from django.db import models
 from users.models import Usuario
 from django.apps import apps
+from .utils import get_servicios_activos
 
 class BaseAuditModel(models.Model):
     is_active = models.BooleanField(default=True)  # Soft delete
@@ -124,41 +125,14 @@ class Reserva(BaseAuditModel):
     
     @property
     def total(self):
-        """
-        Calcula el total sumando todos los servicios asociados.
-        """
         total = 0
-        
-        # Configuración de servicios: (app, model_name, related_name)
-        servicios_config = [
-            ('rooms', 'ReservaHabitacion', 'habitaciones'),
-            ('restaurant', 'ReservaRestaurante', 'restaurantes'),
-            """
-            ('spa', 'ReservaSpa', 'spa'),  # Como agregar futuros modelos de servicios
-            ('eventos', 'ReservaEvento', 'eventos'),
-            """
-        ]
-        
-        for app, model_name, related_name in servicios_config:
+        for servicio in get_servicios_activos():
             try:
-                # Obtener el modelo usando apps.get_model
-                model = apps.get_model(app, model_name)
-                
-                # Verificar que el modelo existe y que la reserva tiene esa relación
-                if model and hasattr(self, related_name):
-                    queryset = getattr(self, related_name).all()
+                if hasattr(self, servicio['related_name']):
+                    queryset = getattr(self, servicio['related_name']).all()
                     total += sum(item.precio_total for item in queryset)
-                    
-            except LookupError:
-                # El modelo no existe en esa app (ej: spa aún no instalado)
-                continue
-            except AttributeError:
-                # La relación no existe o el campo precio_total no está
-                continue
             except Exception:
-                # Cualquier otro error
                 continue
-        
         return total
 
 
@@ -170,8 +144,7 @@ class ReservaServicio(BaseAuditModel):
         Reserva,
         on_delete=models.CASCADE,
         #Asociacion de abstraccion que se define en cada clase
-        null=True,
-        blank=True
+        related_name='%(class)ss'
     )
     
     tarifa_aplicada = models.ForeignKey(
