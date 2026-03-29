@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'restaurant'
+
 urlpatterns = [
     # === HORARIOS ===
     path('horario/', views.index_horario, name='horario_index'),
@@ -9,11 +11,11 @@ urlpatterns = [
     path('horario-delete/<int:pk>', views.delete_horario, name='horario_delete'),
     path('horario-trashcan/<int:pk>', views.trashcan_horario, name='horario_trashcan'),
     # === MESAS ===
-    path('mesa/', views.index_mesa, name='mesa_index'),
-    path('mesa-create/', views.create_mesa, name='mesa_create'),
-    path('mesa-update/<int:pk>', views.update_mesa, name='mesa_update'),
-    path('mesa-delete/<int:pk>', views.delete_mesa, name='mesa_delete'),
-    path('mesa-trashcan/<int:pk>', views.trashcan_mesa, name='mesa_trashcan'),
+    path('turno/', views.index_turno, name='turno_index'),
+    path('turno-create/', views.create_turno, name='turno_create'),
+    path('turno-update/<int:pk>', views.update_turno, name='turno_update'),
+    path('turno-delete/<int:pk>', views.delete_turno, name='turno_delete'),
+    path('turno-trashcan/<int:pk>', views.trashcan_turno, name='turno_trashcan'),
     # === RESERVA RESTAURANTE ===
     path('reserva-restaurante/', views.index_reserva_restaurante, name='reserva_restaurante_index'),
     path('reserva-restaurante-create/', views.create_reserva_restaurante, name='reserva_restaurante_create'),
