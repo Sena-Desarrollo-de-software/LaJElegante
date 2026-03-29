@@ -24,24 +24,24 @@ def trashcan_horario(request):
 
 # === MESA ===
 @require_GET
-def index_mesa(request):
-    return render(request,'backoffice/mesas/mesa_index.html')
+def index_turno(request):
+    return render(request,'backoffice/turnos/turno_index.html')
 
 @require_POST
-def create_mesa(request):
-    return render(request,'backoffice/mesas/mesa_create.html')
+def create_turno(request):
+    return render(request,'backoffice/turnos/turno_create.html')
 
 @require_http_methods(['POST','GET'])
-def update_mesa(request):
-    return render(request,'backoffice/mesas/mesa_update.html')
+def update_turno(request):
+    return render(request,'backoffice/turnos/turno_update.html')
 
 @require_http_methods(['POST','GET'])
-def delete_mesa(request):
-    return render(request, 'backoffice/mesas/mesa_delete.html')
+def delete_turno(request):
+    return render(request, 'backoffice/turnos/turno_delete.html')
 
 @require_http_methods(['POST','GET'])
-def trashcan_mesa(request):
-    return render(request,'backoffice/mesas/mesa_trashcan.html')
+def trashcan_turno(request):
+    return render(request,'backoffice/turnos/turno_trashcan.html')
 
 # === RESERVA RESTAURANTE ===
 @require_GET

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'restaurant',
     'rooms',
     'users',
+    'backoffice',
 ]
 
 MIDDLEWARE = [
@@ -72,6 +73,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                #Context processors personalizados
+                'backoffice.context_processors.sidebar_context',
             ],
         },
     },
