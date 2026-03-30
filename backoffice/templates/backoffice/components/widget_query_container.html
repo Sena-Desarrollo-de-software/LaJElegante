@@ -1,3 +1,7 @@
 <div class="row">
-    
+  {% for key, widget in dashboard.items %}
+    <div class="col-md-6 col-lg-3 mb-3">
+      {% include 'backoffice/components/widget_query.html' with widget=widget key=key %}
+    </div>
+  {% endfor %}
 </div>
