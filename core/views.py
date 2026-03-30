@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.views.decorators.http import require_GET,require_http_methods
 from .models import Promocion
 from django.utils import timezone
@@ -148,3 +148,5 @@ class LoginUsuario(LoginView):
             return reverse_lazy('clientes:home')
         return reverse_lazy('backoffice:dashboard')
 
+class LogoutUsuario(LogoutView):
+    next_page = 'login'
