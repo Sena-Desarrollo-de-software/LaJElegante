@@ -75,6 +75,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 #Context processors personalizados
                 'backoffice.context_processors.sidebar_context',
+                'backoffice.context_processors.shortcut_action_context',
             ],
         },
     },

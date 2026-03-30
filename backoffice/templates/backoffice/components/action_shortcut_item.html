@@ -1,0 +1,14 @@
+<button type="button" onclick="window.location.href='{% url action.url_name %}'" class="btn w-100 text-start p-0 border-0 bg-transparent">
+  <div class="card shortcut-card h-100 border-0 shadow-sm rounded-3 p-4 text-center">w
+    <!-- Icono -->
+    <div class="mb-3">
+      <div class="bg-{{ action.color }} bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width:60px; height:60px;">
+        <i class="bi {{ action.icon }} fs-4 text-{{ action.color }}"></i>
+      </div>
+    </div>
+    <!-- Label -->
+    <div class="fw-semibold text-dark">
+      {{ action.label }}
+    </div>
+  </div>
+</button>

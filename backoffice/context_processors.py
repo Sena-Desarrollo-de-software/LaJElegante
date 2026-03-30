@@ -1,4 +1,4 @@
-from .constants import SIDEBAR_CONFIG
+from .constants import SIDEBAR_CONFIG, ACTIONS, ROLE_ACTION_KEYS
 
 MODEL_META = {
     'dashboard': {'label': 'Dashboard', 'icon': 'bi-house-door-fill', 'app': 'backoffice', 'url_name': 'dashboard'},
@@ -50,4 +50,37 @@ def sidebar_context(request):
     return {
         'sidebar_items': list(unique_sidebar),
         'is_admin': 'Administrador' in user_groups,
+    }
+
+def shortcut_action_context(request):
+    if not request.user.is_authenticated:
+        return {}
+
+    user_groups = set(request.user.groups.values_list('name', flat=True))
+
+    action_keys = set()
+
+    for group in user_groups:
+        keys = ROLE_ACTION_KEYS.get(group, [])
+        action_keys.update(keys)
+
+    shortcuts = []
+    for key in action_keys:
+        action = ACTIONS.get(key)
+
+        if not action:
+            continue
+
+        shortcuts.append({
+            'label': action['label'],
+            'icon': action['icon'],
+            'url_name': action['url_name'],
+            'color': action['color']
+        })
+
+    # se organiza en orden opcional
+    shortcuts = sorted(shortcuts, key=lambda x: x['label'])
+
+    return {
+        'shortcuts': shortcuts
     }
