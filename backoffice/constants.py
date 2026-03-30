@@ -139,3 +139,79 @@ ROLE_ACTION_KEYS = {
         'TARIFA_LIST',
     ],
 }
+
+DASHBOARD_WIDGETS = {
+    'RESERVAS_HOY': {
+        'label': 'Reservas hoy',
+        'method': 'reservas_hoy',
+        'icon': 'bi-calendar-check',
+        'color': 'primary',
+    },
+    'INGRESOS_HOY': {
+        'label': 'Ingresos hoy',
+        'method': 'ingresos_hoy',
+        'icon': 'bi-cash-stack',
+        'color': 'success',
+    },
+    'PERSONAS_HOTEL': {
+        'label': 'Personas alojadas',
+        'method': 'personas_en_hotel',
+        'icon': 'bi-people',
+        'color': 'info',
+    },
+    'CHECKINS_HOY': {
+        'label': 'Check-ins',
+        'method': 'checkins_hoy',
+        'icon': 'bi-box-arrow-in-right',
+        'color': 'primary',
+    },
+    'CHECKOUTS_HOY': {
+        'label': 'Check-outs',
+        'method': 'checkouts_hoy',
+        'icon': 'bi-box-arrow-left',
+        'color': 'secondary',
+    },
+    'RESTAURANTE_TURNO': {
+        'label': 'Turno restaurante',
+        'method': 'proximo_turno_restaurante',
+        'icon': 'bi-cup-hot',
+        'color': 'warning',
+    },
+}
+
+ROLE_WIDGET_KEYS = {
+
+    'Administrador': [
+        'RESERVAS_HOY',
+        'INGRESOS_HOY',
+        'PERSONAS_HOTEL',
+        'CHECKINS_HOY',
+        'CHECKOUTS_HOY',
+        'RESTAURANTE_TURNO',
+    ],
+
+    'Gerente General': [
+        'RESERVAS_HOY',
+        'INGRESOS_HOY',
+        'PERSONAS_HOTEL',
+        'RESTAURANTE_TURNO',
+    ],
+
+    'Gerente de Habitaciones': [
+        'PERSONAS_HOTEL',
+        'CHECKINS_HOY',
+        'CHECKOUTS_HOY',
+    ],
+
+    'Gerente de Comidas y Bebidas': [
+        'RESTAURANTE_TURNO',
+    ],
+
+    'Asistente Administrativo': [
+        'RESERVAS_HOY',
+        'PERSONAS_HOTEL',
+        'CHECKINS_HOY',
+        'CHECKOUTS_HOY',
+        'RESTAURANTE_TURNO',
+    ],
+}
