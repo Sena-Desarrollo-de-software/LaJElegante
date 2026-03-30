@@ -1,9 +1,11 @@
 from django.shortcuts import render
 from django.views.decorators.http import require_GET,require_http_methods
+from .models import DashboardService
 
 @require_GET
 def dashboard(request):
-    return render(request,'backoffice/dashboard.html')
+    querys = DashboardService.get_dashboard_for_user(request.user)
+    return render(request,'backoffice/dashboard.html', {'dashboard' : querys})
 
 @require_GET
 def create_reserva(request):
