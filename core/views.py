@@ -1,7 +1,9 @@
 from django.shortcuts import render
+from django.contrib.auth.views import LoginView
 from django.views.decorators.http import require_GET,require_http_methods
 from .models import Promocion
 from django.utils import timezone
+from django.urls import reverse_lazy
 
 AHORA = timezone.now()
 
@@ -131,6 +133,18 @@ def promociones(request):
 def signup(request):
     return render(request, "hotel/signup.html",{'promos' : PROMOCIONES_NAV})
 
-@require_GET
-def login(request):
-    return render(request, "hotel/login.html",{'promos' : PROMOCIONES_NAV})
+class LoginUsuario(LoginView):
+    template_name = 'hotel/login.html'
+    redirect_authenticated_user = True
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['promos'] = PROMOCIONES_NAV
+        return context
+    
+    def get_success_url(self):
+        user = self.request.user
+        if user.groups.filter(name='Cliente').exists():
+            return reverse_lazy('clientes:home')
+        return reverse_lazy('backoffice:dashboard')
+

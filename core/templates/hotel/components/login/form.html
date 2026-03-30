@@ -1,7 +1,7 @@
 <div class="card shadow-sm border-0 login-card">
   <div class="card-body p-4">
 
-    <form method="post">
+    <form method="post" action="">
       {% csrf_token %}
 
       <div class="mb-3">
@@ -11,13 +11,17 @@
 
       <div class="mb-3">
         <label for="password" class="form-label fw-semibold">Contraseña</label>
-        <input type="password" id="password" class="form-control">
+        <input type="password" id="password" name="password" class="form-control" required>      
       </div>
 
       <button type="submit" class="btn btn-primary w-100">
         Iniciar sesión
       </button>
-
+      {% if form.errors %}
+        <div class="alert alert-danger">
+          Usuario o contraseña incorrectos
+        </div>
+      {% endif %}
     </form>
 
   </div>
