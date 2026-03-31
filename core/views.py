@@ -1,13 +1,14 @@
 from django.shortcuts import render,redirect
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib.auth import login
 from django.views.generic.edit import CreateView
 from django.views.decorators.http import require_GET,require_http_methods
 from .models import Promocion
-from users.models import Group
-from .forms import RegistroForm
 from django.utils import timezone
+from .forms import RegistroForm
+from users.models import Group
 from django.urls import reverse_lazy
+from django.conf import settings
 
 AHORA = timezone.now()
 
@@ -171,3 +172,29 @@ class RegistroUsuario(CreateView):
         
 class LogoutUsuario(LogoutView):
     next_page = 'login'
+
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'hotel/password_reset.html'
+    email_template_name = 'hotel/password_reset_email.txt'
+    html_email_template_name = 'hotel/password_reset_email.html'
+    subject_template_name = 'hotel/components/auth/password_reset_subject.txt'
+    success_url = reverse_lazy('password_reset_done')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['domain'] = '127.0.0.1:8000'
+        context['protocol'] = 'http'
+        return context
+
+    def get_from_email(self):
+        return settings.FROM_EMAILS['ayuda']
+    
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = 'hotel/password_reset_done.html'
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'hotel/password_reset_confirm.html'
+    success_url = reverse_lazy('password_reset_complete')
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'hotel/password_reset_complete.html'
