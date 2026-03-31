@@ -1,8 +1,9 @@
-<div class="mt-4">
-  <a href="{% url 'login' %}" class="btn btn-primary w-100 mb-2">
-    Volver al inicio de sesión
-  </a>w
-  <a href="{% url 'password_reset' %}" class="btn btn-secondary d-block mt-2">
-    Intentar con otro correo
+<div class="mt-4 d-flex flex-column align-items-center gap-2">
+  <a href="{% url 'login' %}" class="btn btn-primary py-2 w-75">
+    <span class="text-white">Volver al inicio de sesión</span>
+  </a>
+
+  <a href="{% url 'password_reset' %}" class="btn btn-secondary py-2 w-75">
+    <span class="text-white">Intentar con otro correo</span>
   </a>
 </div>
