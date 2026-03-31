@@ -1,7 +1,19 @@
+<<<<<<< HEAD
 from django.shortcuts import render
+=======
+from django.shortcuts import render,redirect
+from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+from django.contrib.auth import login
+from django.views.generic.edit import CreateView
+>>>>>>> 0256cd4 (feat(core): implementacion recuperar contraseña)
 from django.views.decorators.http import require_GET,require_http_methods
 from .models import Promocion
 from django.utils import timezone
+<<<<<<< HEAD
+=======
+from django.urls import reverse_lazy
+from django.conf import settings
+>>>>>>> 0256cd4 (feat(core): implementacion recuperar contraseña)
 
 AHORA = timezone.now()
 
@@ -125,3 +137,71 @@ def promociones(request):
         fecha_fin__gte=AHORA,
     ).order_by('orden_navbar')
     return render(request, "hotel/promociones.html",{"promociones_nav" : promociones_nav_lp,'promos' : PROMOCIONES_NAV})
+<<<<<<< HEAD
+=======
+
+class LoginUsuario(LoginView):
+    template_name = 'hotel/login.html'
+    redirect_authenticated_user = True
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['promos'] = PROMOCIONES_NAV
+        return context
+    
+    def get_success_url(self):
+        user = self.request.user
+        if user.groups.filter(name='Cliente').exists():
+            return reverse_lazy('clientes:home')
+        return reverse_lazy('backoffice:dashboard')
+
+class RegistroUsuario(CreateView):
+    form_class = RegistroForm
+    template_name = 'hotel/signup.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['promos'] = PROMOCIONES_NAV
+        return context
+    
+    def get_success_url(self):
+        return reverse_lazy('backoffice:dashboard')
+
+    def form_valid(self, form):
+        user = form.save()
+
+        grupo, _ = Group.objects.get_or_create(name='Clientes')
+        user.groups.add(grupo)
+
+        login(self.request, user)
+
+        return redirect(self.get_success_url())
+        
+class LogoutUsuario(LogoutView):
+    next_page = 'login'
+
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'hotel/password_reset.html'
+    email_template_name = 'hotel/password_reset_email.html'
+    subject_template_name = 'hotel/password_reset_subject.txt'
+    success_url = reverse_lazy('password_reset_done')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['domain'] = '127.0.0.1:8000'
+        context['protocol'] = 'http'
+        return context
+    
+    def get_from_email(self):
+        return settings.FROM_EMAILS['ayuda']
+    
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = 'hotel/password_reset_done.html'
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'hotel/password_reset_confirm.html'
+    success_url = reverse_lazy('password_reset_complete')
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'hotel/password_reset_complete.html'
+>>>>>>> 0256cd4 (feat(core): implementacion recuperar contraseña)
