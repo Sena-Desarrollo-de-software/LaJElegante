@@ -21,10 +21,10 @@
   {# Bloque para CSS #}
   {% block styles %}{% endblock %}
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
   {% include "hotel/components/nav/nav_main.html" %}
   
-  <main class="container mt-4">
+  <main class="flex-fill container mt-4">
     {% block content %}{% endblock %}
   </main>
   
