@@ -3,8 +3,8 @@ from django.db import migrations
 
 def crear_grupos_y_permisos(apps, schema_editor):
     """
-    Crea los 5 grupos y asigna permisos según especificaciones.
-    Asume que los permisos ya existen (las otras apps migraron primero).
+    Crea los 6 grupos y asigna permisos según especificaciones.
+    Incluye grupo Clientes con permisos de solo lectura limitados.
     """
     Group = apps.get_model('auth', 'Group')
     Permission = apps.get_model('auth', 'Permission')
@@ -34,6 +34,7 @@ def crear_grupos_y_permisos(apps, schema_editor):
     restaurant_models = ['horario', 'turno', 'reservarestaurante']
     restaurant_perms_full = []
     restaurant_perms_no_delete = []
+    restaurant_perms_view_only = []  # Para clientes
     
     for model in restaurant_models:
         restaurant_perms_full.extend([
@@ -43,11 +44,13 @@ def crear_grupos_y_permisos(apps, schema_editor):
         restaurant_perms_no_delete.extend([
             f'add_{model}', f'change_{model}', f'view_{model}'
         ])
+        restaurant_perms_view_only.append(f'view_{model}')
     
     # App Rooms
     rooms_models = ['tipohabitacion', 'habitacion', 'reservahabitacion']
     rooms_perms_full = []
     rooms_perms_no_delete = []
+    rooms_perms_view_only = []  # Para clientes
     
     for model in rooms_models:
         rooms_perms_full.extend([
@@ -57,11 +60,13 @@ def crear_grupos_y_permisos(apps, schema_editor):
         rooms_perms_no_delete.extend([
             f'add_{model}', f'change_{model}', f'view_{model}'
         ])
+        rooms_perms_view_only.append(f'view_{model}')
     
     # App Users
     users_models = ['usuario', 'group']
     users_perms_full = []
     users_perms_no_delete = []
+    users_perms_view_only = []  # Clientes NO ven usuarios
     
     for model in users_models:
         users_perms_full.extend([
@@ -71,12 +76,14 @@ def crear_grupos_y_permisos(apps, schema_editor):
         users_perms_no_delete.extend([
             f'add_{model}', f'change_{model}', f'view_{model}'
         ])
+        # Clientes NO tienen permisos de users
     
     # App Core (modelo Reserva)
     core_models = ['reserva']
     core_perms_full = []
     core_perms_view_only = []
     core_perms_no_delete = []
+    core_perms_self_only = []  # Para clientes (ver solo sus reservas)
     
     for model in core_models:
         core_perms_full.extend([
@@ -86,6 +93,10 @@ def crear_grupos_y_permisos(apps, schema_editor):
         core_perms_view_only.append(f'view_{model}')
         core_perms_no_delete.extend([
             f'add_{model}', f'change_{model}', f'view_{model}'
+        ])
+        # Clientes: pueden ver sus reservas (filtrado por queryset) y crear nuevas
+        core_perms_self_only.extend([
+            f'add_{model}', f'view_{model}'  # Puede crear y ver, pero NO change/delete
         ])
     
     # ========== 2. CONFIGURACIÓN DE GRUPOS ==========
@@ -120,6 +131,16 @@ def crear_grupos_y_permisos(apps, schema_editor):
                 finance_perms_no_delete + restaurant_perms_no_delete + 
                 rooms_perms_no_delete + core_perms_no_delete
             )
+        },
+        'Clientes': {
+            'permisos': (
+                finance_perms_view_only +           # Ver tarifas, impuestos, temporadas
+                restaurant_perms_view_only +        # Ver horarios, turnos (solo lectura)
+                rooms_perms_view_only +             # Ver tipos de hab, habitaciones
+                core_perms_self_only                # Crear y ver SUS reservas
+            ),
+            # NOTA: Los clientes NO tienen permisos sobre users
+            # El filtrado por usuario se hará en las vistas/querysets
         }
     }
     
@@ -163,11 +184,11 @@ def crear_grupos_y_permisos(apps, schema_editor):
 
 
 def eliminar_grupos(apps, schema_editor):
-    """Rollback: elimina los 5 grupos"""
+    """Rollback: elimina los 6 grupos"""
     Group = apps.get_model('auth', 'Group')
     nombres = [
         'Administrador', 'Gerente General', 'Gerente de Habitaciones',
-        'Gerente de Comidas y Bebidas', 'Asistente Administrativo'
+        'Gerente de Comidas y Bebidas', 'Asistente Administrativo', 'Clientes'
     ]
     count = Group.objects.filter(name__in=nombres).delete()[0]
     if count:
@@ -178,8 +199,6 @@ class Migration(migrations.Migration):
     dependencies = [
         ('users', '0001_initial'),
         ('auth', '0012_alter_user_first_name_max_length'),
-        # Las dependencias __first__ aseguran que las tablas existen
-        # pero los permisos pueden no estar creados aún
         ('core', '__first__'),
         ('finance', '__first__'),
         ('restaurant', '__first__'),

@@ -1,12 +1,13 @@
-<div class="text-center mt-4">
-
-  <a href="#" class="d-block mb-2 text-decoration-none">
-    ¿Olvidaste tu contraseña?
+<div class="d-flex gap-3 mt-4">
+  <a href="{% url 'login' %}" class="btn btn-secondary py-3">
+    <span class="text-white">¿Olvidaste tu contraseña?</span>
+    <br>
+    <span class="text-white fw-semibold text-decoration-none fs-6">haz click para ayudarte!</span>
   </a>
 
-  <span class="text-muted">¿No tienes cuenta?</span>
-  <a href="{% url 'signup' %}" class="fw-semibold text-decoration-none">
-    Crear cuenta
+  <a href="{% url 'signup' %}" class="btn btn-primary py-3">
+    <span class="text-white">¿No has creado una cuenta?</span>
+    <br>
+    <span class="text-white fw-semibold text-decoration-none fs-6">haz click aqui!</span>
   </a>
-
 </div>

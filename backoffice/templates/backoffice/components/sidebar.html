@@ -3,5 +3,11 @@
         {% for item in sidebar_items %}
             {% include "backoffice/components/sidebar_item.html" with item=item %}
         {% endfor %}
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger">
+                Cerrar sesión
+            </button>
+        </form>
     </ul>
 </div>
