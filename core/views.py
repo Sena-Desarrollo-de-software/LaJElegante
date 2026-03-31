@@ -1,19 +1,14 @@
-<<<<<<< HEAD
-from django.shortcuts import render
-=======
 from django.shortcuts import render,redirect
 from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib.auth import login
 from django.views.generic.edit import CreateView
->>>>>>> 0256cd4 (feat(core): implementacion recuperar contraseña)
 from django.views.decorators.http import require_GET,require_http_methods
 from .models import Promocion
 from django.utils import timezone
-<<<<<<< HEAD
-=======
+from .forms import RegistroForm
+from users.models import Group
 from django.urls import reverse_lazy
 from django.conf import settings
->>>>>>> 0256cd4 (feat(core): implementacion recuperar contraseña)
 
 AHORA = timezone.now()
 
@@ -137,8 +132,6 @@ def promociones(request):
         fecha_fin__gte=AHORA,
     ).order_by('orden_navbar')
     return render(request, "hotel/promociones.html",{"promociones_nav" : promociones_nav_lp,'promos' : PROMOCIONES_NAV})
-<<<<<<< HEAD
-=======
 
 class LoginUsuario(LoginView):
     template_name = 'hotel/login.html'
@@ -204,4 +197,3 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'hotel/password_reset_complete.html'
->>>>>>> 0256cd4 (feat(core): implementacion recuperar contraseña)
