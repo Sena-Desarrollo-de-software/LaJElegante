@@ -3,7 +3,7 @@
     <form method="post" novalidate>
       {% csrf_token %}
       <div class="mb-3">
-        <label class="form-label fw-semibold">Correo electrónico</label>
+        <span class="form-label fw-semibold m-1">Correo electrónico</span>
 
         <input type="email" name="email"
                class="form-control {% if form.email.errors %}is-invalid{% endif %}"

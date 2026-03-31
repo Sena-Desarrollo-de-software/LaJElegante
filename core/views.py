@@ -175,8 +175,9 @@ class LogoutUsuario(LogoutView):
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'hotel/password_reset.html'
-    email_template_name = 'hotel/password_reset_email.html'
-    subject_template_name = 'hotel/password_reset_subject.txt'
+    email_template_name = 'hotel/password_reset_email.txt'
+    html_email_template_name = 'hotel/password_reset_email.html'
+    subject_template_name = 'hotel/components/auth/password_reset_subject.txt'
     success_url = reverse_lazy('password_reset_done')
 
     def get_context_data(self, **kwargs):
@@ -184,7 +185,7 @@ class CustomPasswordResetView(PasswordResetView):
         context['domain'] = '127.0.0.1:8000'
         context['protocol'] = 'http'
         return context
-    
+
     def get_from_email(self):
         return settings.FROM_EMAILS['ayuda']
     
