@@ -13,6 +13,7 @@ urlpatterns = [
     path("habitacion-restore/<int:pk>", views.restore_habitacion, name="habitacion_restore"),
     path('habitacion-import/', views.import_habitacion, name='habitacion_import'),
     path('habitacion-frame/', views.descargar_plantilla_habitaciones, name='habitacion_frame'),
+    path('habitacion-process/', views.procesar_import_habitacion, name='habitacion_process'),
     # === RESERVA HABITACIÓN ===
     path("reserva-habitacion/", views.index_reserva_habitacion, name="reserva_habitacion_index"),
     path("reserva-habitacion-create/", views.create_reserva_habitacion, name="reserva_habitacion_create"),

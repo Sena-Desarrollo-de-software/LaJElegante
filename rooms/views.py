@@ -6,6 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string
 from weasyprint import HTML
 import csv
+import pandas as pd
+from django.contrib import messages
+from django.db import transaction
 from django.http import HttpResponse
 from .models import Habitacion, TipoHabitacion, ReservaHabitacion
 from .forms import HabitacionCreateForm, HabitacionUpdateForm, HabitacionDeleteForm, HabitacionRestoreForm
@@ -201,14 +204,172 @@ def restore_habitacion(request, pk):
         "form": form,
         "habitacion": habitacion
     })
+
 @login_required
 @permission_required("rooms.add_habitacion", raise_exception=True)
-def import_habitacion(request):    
+def import_habitacion(request):
     context = {
         'title': 'Importar Habitaciones',
         'subtitle': 'Carga masiva de habitaciones desde archivo CSV/Excel',
+        'is_staff': request.user.is_staff,
+        'datawizard_url': '/admin/sources/filesource/add/' if request.user.is_staff else None,
     }
     return render(request, 'backoffice/habitaciones/habitacion_import.html', context)
+
+# rooms/views.py - Actualiza la parte de procesamiento
+
+@login_required
+@permission_required("rooms.add_habitacion", raise_exception=True)
+def procesar_import_habitacion(request):
+    """Procesa el archivo subido y realiza la importación"""
+    
+    if request.method != 'POST':
+        return redirect('rooms:habitacion_import')
+    
+    archivo = request.FILES.get('archivo')
+    if not archivo:
+        messages.error(request, "No se ha seleccionado ningún archivo")
+        return redirect('rooms:habitacion_import')
+    
+    # Opciones de importación
+    actualizar_existentes = request.POST.get('actualizar_existentes') == 'on'
+    
+    resultados = {
+        'creadas': 0,
+        'actualizadas': 0,
+        'errores': [],
+        'tipos_invalidos': [],  # Tipos que no coinciden
+    }
+    
+    try:
+        # Leer archivo
+        if archivo.name.endswith('.csv'):
+            archivo.seek(0)
+            try:
+                df = pd.read_csv(archivo, encoding='utf-8')
+            except UnicodeDecodeError:
+                archivo.seek(0)
+                df = pd.read_csv(archivo, encoding='latin-1')
+        else:
+            archivo.seek(0)
+            df = pd.read_excel(archivo)
+        
+        # Limpiar nombres de columnas
+        df.columns = df.columns.str.strip()
+        
+        # Validar columnas requeridas
+        columnas_requeridas = ['numero_habitacion', 'tipo_habitacion']
+        columnas_faltantes = [col for col in columnas_requeridas if col not in df.columns]
+        
+        if columnas_faltantes:
+            messages.error(request, 
+                f'Columnas requeridas faltantes: {", ".join(columnas_faltantes)}. '
+                f'Columnas encontradas: {", ".join(list(df.columns))}')
+            return redirect('rooms:habitacion_import')
+        
+        # Obtener tipo por defecto (BASICA)
+        try:
+            tipo_por_defecto = TipoHabitacion.objects.get(nombre_tipo='BASICA')
+        except TipoHabitacion.DoesNotExist:
+            messages.error(request, "El tipo de habitación 'BASICA' no existe. Por favor, créalo primero en el sistema.")
+            return redirect('rooms:habitacion_import')
+        
+        # Mapeo de nombres de tipos (para manejar variaciones)
+        mapeo_tipos = {
+            'familiar': 'FAMILIAR',
+            'pareja': 'PAREJA', 
+            'basica': 'BASICA',
+            'básica': 'BASICA',
+            'especial': 'ESPECIAL',
+            'simple': 'BASICA',
+            'doble': 'PAREJA',
+            'matrimonial': 'PAREJA',
+            'suite': 'ESPECIAL',
+        }
+        
+        with transaction.atomic():
+            for idx, row in df.iterrows():
+                try:
+                    numero = str(row['numero_habitacion']).strip()
+                    tipo_input = str(row['tipo_habitacion']).strip().lower()
+                    estado = str(row.get('estado', 'DISPONIBLE')).strip() if 'estado' in df.columns else 'DISPONIBLE'
+                    
+                    if not numero:
+                        resultados['errores'].append(f"Fila {idx+2}: Número de habitación vacío")
+                        continue
+                    
+                    # Validar tipo de habitación
+                    tipo = None
+                    tipo_normalizado = mapeo_tipos.get(tipo_input, tipo_input.upper())
+                    
+                    try:
+                        # Buscar el tipo exacto
+                        tipo = TipoHabitacion.objects.get(nombre_tipo=tipo_normalizado)
+                    except TipoHabitacion.DoesNotExist:
+                        # Si no existe, buscar por display name
+                        try:
+                            tipo = TipoHabitacion.objects.filter(
+                                nombre_tipo__in=[choice[0] for choice in TipoHabitacion.NOMBRE_TIPO_CHOICES]
+                            ).filter(
+                                models.Q(nombre_tipo=tipo_normalizado) |
+                                models.Q(nombre_tipo__iexact=tipo_input) |
+                                models.Q(descripcion__iexact=tipo_input)
+                            ).first()
+                        except:
+                            pass
+                        
+                        if not tipo:
+                            # Usar tipo por defecto
+                            tipo = tipo_por_defecto
+                            resultados['tipos_invalidos'].append(f"Fila {idx+2}: '{tipo_input}' → asignado a 'BASICA'")
+                    
+                    # Validar estado
+                    if estado not in ['DISPONIBLE', 'OCUPADA', 'RESERVADA', 'MANTENIMIENTO']:
+                        estado = 'DISPONIBLE'
+                    
+                    # Buscar o crear habitación
+                    habitacion, created = Habitacion.objects.get_or_create(
+                        numero_habitacion=numero,
+                        defaults={
+                            'tipo_habitacion': tipo,
+                            'estado': estado,
+                            'is_active': True,
+                        }
+                    )
+                    
+                    if not created:
+                        if actualizar_existentes:
+                            habitacion.tipo_habitacion = tipo
+                            habitacion.estado = estado
+                            habitacion.save()
+                            resultados['actualizadas'] += 1
+                        else:
+                            resultados['errores'].append(f"Fila {idx+2}: Habitación {numero} ya existe")
+                    else:
+                        resultados['creadas'] += 1
+                        
+                except Exception as e:
+                    resultados['errores'].append(f"Fila {idx+2}: {str(e)}")
+        
+        # Mensajes de resultado
+        if resultados['creadas'] > 0:
+            messages.success(request, f"{resultados['creadas']} habitaciones creadas")
+        if resultados['actualizadas'] > 0:
+            messages.info(request, f"{resultados['actualizadas']} habitaciones actualizadas")
+        if resultados['tipos_invalidos']:
+            messages.warning(request, 
+                f"⚠️ Tipos no válidos: {len(resultados['tipos_invalidos'])} fueron asignados a 'BASICA'. "
+                f"Detalles: {'; '.join(resultados['tipos_invalidos'][:3])}")
+        if resultados['errores']:
+            messages.error(request, f"{len(resultados['errores'])} errores: {'; '.join(resultados['errores'][:3])}")
+            request.session['import_errores'] = resultados['errores']
+            
+    except Exception as e:
+        messages.error(request, f"Error al procesar archivo: {str(e)}")
+        import traceback
+        traceback.print_exc()
+    
+    return redirect('rooms:habitacion_index')
 
 # === RESERVA HABITACION ===
 @require_GET
