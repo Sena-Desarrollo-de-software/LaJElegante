@@ -1,21 +1,51 @@
 {% extends "backoffice/layouts/base_form.html" %}
 
 {% block title %}Editar Habitación{% endblock %}
-{% block header %}Editar Habitación{% endblock %}
+
+{% block form_title %}Editar Habitación{% endblock %}
+{% block form_subtitle %}Modificar datos de la habitación{% endblock %}
+
+{% block form_actions %}
+  <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Volver
+  </a>
+{% endblock %}
 
 {% block content %}
 <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
+  {% csrf_token %}
 
-    <button type="submit">Guardar cambios</button>
-    <a href="{% url 'rooms:habitacion_list' %}">Cancelar</a>
-</form>
-
-{% if form.errors %}
-  <div style="color: red;">
-      <h3>Errores:</h3>
-      {{ form.errors }}
+  <div class="mb-3">
+    {{ form.tipo_habitacion.label_tag }}
+    {{ form.tipo_habitacion }}
+    {{ form.tipo_habitacion.errors }}
   </div>
+
+  <div class="mb-3">
+    {{ form.numero_habitacion.label_tag }}
+    {{ form.numero_habitacion }}
+    {{ form.numero_habitacion.errors }}
+  </div>
+
+  <div class="mb-3">
+    {{ form.estado.label_tag }}
+    {{ form.estado }}
+    {{ form.estado.errors }}
+  </div>
+
+  <div class="d-flex justify-content-end gap-2">
+    <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-secondary">
+      Cancelar
+    </a>
+    <button type="submit" class="btn btn-primary">
+      Guardar cambios
+    </button>
+  </div>
+</form>
+{% if form.errors %}
+<div class="alert alert-danger mt-3">
+    <strong>Errores:</strong>
+    {{ form.errors }}
+</div>
 {% endif %}
 {% endblock %}

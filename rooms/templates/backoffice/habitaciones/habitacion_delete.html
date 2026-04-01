@@ -1,15 +1,56 @@
 {% extends "backoffice/layouts/base_form.html" %}
 
 {% block title %}Eliminar Habitación{% endblock %}
-{% block header %}Eliminar Habitación{% endblock %}
+
+{% block form_title %}Eliminar Habitación{% endblock %}
+{% block form_subtitle %}Esta acción no elimina permanentemente, pero desactiva la habitación{% endblock %}
+
+{% block form_actions %}
+  <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Volver
+  </a>
+{% endblock %}
 
 {% block content %}
-<p>¿Seguro que quieres eliminar (soft delete) la habitación {{ habitacion.numero_habitacion }}?</p>
+
+<div class="alert alert-warning">
+  <strong>¿Estás seguro que deseas eliminar esta habitación?</strong>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <p><strong>Número:</strong> {{ habitacion.numero_habitacion }}</p>
+    <p><strong>Tipo:</strong> {{ habitacion.tipo_habitacion }}</p>
+    <p><strong>Estado:</strong> {{ habitacion.estado }}</p>
+    <p><strong>Creado:</strong> {{ habitacion.created_at }}</p>
+    <p><strong>Última actualización:</strong> {{ habitacion.updated_at }}</p>
+  </div>
+</div>
 
 <form method="post">
   {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Sí, eliminar</button>
-  <a href="{% url 'rooms:habitacion_list' %}">Cancelar</a>
+
+  <div class="form-check mb-3">
+    {{ form.confirm }}
+    <span class="form-check-label">
+      Escriba el numero de la habitación para continuar
+    </span>
+    {{ form.confirm.errors }}
+  </div>
+
+  <div class="d-flex justify-content-end gap-2">
+    <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-secondary">
+      Cancelar
+    </a>
+    <button type="submit" class="btn btn-danger">
+      Eliminar
+    </button>
+  </div>
 </form>
+{% if form.errors %}
+<div class="alert alert-danger mt-3">
+    <strong>Errores:</strong>
+    {{ form.errors }}
+</div>
+{% endif %}
 {% endblock %}

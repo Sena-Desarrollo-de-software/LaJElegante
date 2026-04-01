@@ -1,21 +1,43 @@
 {% extends "backoffice/layouts/base_form.html" %}
 
 {% block title %}Crear Habitación{% endblock %}
-{% block header %}Crear Habitación{% endblock %}
+
+{% block form_title %}Nueva Habitación{% endblock %}
+{% block form_subtitle %}Registrar una nueva habitación{% endblock %}
+
+{% block form_actions %}
+  <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Volver
+  </a>
+{% endblock %}
 
 {% block content %}
 <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
+  {% csrf_token %}
 
-    <button type="submit">Guardar</button>
-    <a href="{% url 'rooms:habitacion_list' %}">Cancelar</a>
-</form>
-
-{% if form.errors %}
-  <div style="color: red;">
-      <h3>Errores:</h3>
-      {{ form.errors }}
+  <div class="mb-3">
+    {{ form.tipo_habitacion.label_tag }}
+    {{ form.tipo_habitacion }}
   </div>
+
+  <div class="mb-3">
+    {{ form.numero_habitacion.label_tag }}
+    {{ form.numero_habitacion }}
+  </div>
+
+  <div class="mb-3">
+    {{ form.estado.label_tag }}
+    {{ form.estado }}
+  </div>
+
+  <button type="submit" class="btn btn-primary">
+    Guardar
+  </button>
+</form>
+{% if form.errors %}
+<div class="alert alert-danger mt-3">
+    <strong>Errores:</strong>
+    {{ form.errors }}
+</div>
 {% endif %}
 {% endblock %}

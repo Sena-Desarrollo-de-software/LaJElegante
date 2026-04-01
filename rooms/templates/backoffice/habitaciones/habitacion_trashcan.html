@@ -1,0 +1,60 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Papelera de Habitaciones{% endblock %}
+
+{% block form_title %}Papelera{% endblock %}
+{% block form_subtitle %}
+Habitaciones eliminadas (soft delete)
+{% endblock %}
+
+{% block form_actions %}
+  <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-outline-primary">
+    Volver al listado
+  </a>
+{% endblock %}
+
+{% block content %}
+
+{% if habitaciones %}
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Número</th>
+        <th>Tipo</th>
+        <th>Estado</th>
+        <th>Eliminado en</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for habitacion in habitaciones %}
+      <tr>
+        <td>{{ habitacion.numero_habitacion }}</td>
+        <td>{{ habitacion.tipo_habitacion }}</td>
+        <td>{{ habitacion.estado }}</td>
+        <td>{{ habitacion.deleted_at }}</td>
+
+        <td>
+            {% if perms.rooms.change_habitacion %}
+          <form method="post"
+                action="{% url 'rooms:habitacion_restore' habitacion.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success btn-sm">
+              Restaurar
+            </button>
+          </form>
+            {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+{% else %}
+  <div class="alert alert-info">
+    No hay habitaciones en la papelera.
+  </div>
+{% endif %}
+
+{% endblock %}
