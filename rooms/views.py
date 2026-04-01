@@ -3,8 +3,12 @@ from django.contrib.auth.decorators import permission_required
 from django.views.decorators.http import require_http_methods, require_POST, require_safe, require_GET
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from django.http import HttpResponse
 from .models import Habitacion, TipoHabitacion, ReservaHabitacion
 from .forms import HabitacionCreateForm, HabitacionUpdateForm, HabitacionDeleteForm, HabitacionRestoreForm
+from core.utils import ahora
 
 HABITACION_INDEX = "rooms:habitacion_index"
 
@@ -12,7 +16,7 @@ HABITACION_INDEX = "rooms:habitacion_index"
 def filtrar_habitaciones(request, queryset=None):
     if queryset is None:
         queryset = Habitacion.objects.all()
-
+    
     tipo = request.GET.get("tipo")
     estado = request.GET.get("estado")
     numero = request.GET.get("numero")
@@ -28,6 +32,22 @@ def filtrar_habitaciones(request, queryset=None):
 
     return queryset
 
+def generar_pdf_habitaciones(habitaciones, filtros, request):
+
+    context = {
+        'habitaciones' : habitaciones,
+        'filtros' : filtros,
+        'total_registros' : habitaciones.count(),
+        'usuario' : request.user,
+        'fecha_exportacion' : ahora(),
+        'tipos' : TipoHabitacion.objects.all(),
+    }
+
+    html_string = render_to_string('backoffice/habitaciones/habitacion_pdf.html', context)
+    pdf = HTML(string=html_string).write_pdf()
+
+    return pdf
+
 @login_required
 @permission_required("rooms.view_habitacion", raise_exception=True)
 @require_safe
@@ -35,6 +55,13 @@ def index_habitacion(request):
     habitaciones = filtrar_habitaciones(request)
 
     tipos = TipoHabitacion.objects.all()
+
+    if request.GET.get('export') == 'pdf':
+        pdf = generar_pdf_habitaciones(habitaciones, request.GET, request)
+        response = HttpResponse(pdf, content_type='application/pdf')
+        filename = f"habitaciones_{ahora().strftime('%Y%m%d_%H%M%S')}.pdf"
+        response['Content-Disposition'] = f'inline; filename={filename}'
+        return response
 
     return render(request, "backoffice/habitaciones/habitacion_index.html", {
         "habitaciones": habitaciones,
