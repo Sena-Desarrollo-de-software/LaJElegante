@@ -55,7 +55,7 @@ def generar_pdf_habitaciones(habitaciones, filtros, request):
 def descargar_plantilla_habitaciones(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="plantilla_habitaciones.csv"'
-    
+
     writer = csv.writer(response)
     
     writer.writerow([
@@ -63,32 +63,7 @@ def descargar_plantilla_habitaciones(request):
         'tipo_habitacion',
         'estado',
     ])
-    
-    tipos = TipoHabitacion.objects.filter(is_active=True)
-    
-    writer.writerow(['# INSTRUCCIONES:'])
-    writer.writerow(['# - numero_habitacion: Número único de la habitación (obligatorio)'])
-    writer.writerow(['# - tipo_habitacion: Debe coincidir exactamente con los nombres del sistema'])
-    writer.writerow(['# - estado: DISPONIBLE, OCUPADA, RESERVADA o MANTENIMIENTO (opcional)'])
-    writer.writerow(['#'])
-    writer.writerow(['# Tipos de habitación disponibles:'])
-    for tipo in tipos:
-        writer.writerow([f'#   - {tipo.get_nombre_tipo_display()}'])
-    writer.writerow(['#'])
-    writer.writerow(['# EJEMPLOS:'])
-    
-    if tipos.exists():
-        writer.writerow(['101', tipos[0].get_nombre_tipo_display(), 'DISPONIBLE'])
-        writer.writerow(['102', tipos[0].get_nombre_tipo_display(), 'OCUPADA'])
-        if tipos.count() > 1:
-            writer.writerow(['201', tipos[1].get_nombre_tipo_display(), 'RESERVADA'])
-    else:
-        writer.writerow(['101', 'Basica', 'DISPONIBLE'])
-        writer.writerow(['102', 'Basica', 'OCUPADA'])
-    
-    writer.writerow(['#'])
-    writer.writerow(['# Borrar esta línea y empezar a agregar tus datos:'])
-    
+
     return response
 
 @login_required
