@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     #Componentes adicionales
     'django.contrib.humanize',
+    'data_wizard',
+    'data_wizard.sources',
     # Hotel apps
     'core',
     'finance',
