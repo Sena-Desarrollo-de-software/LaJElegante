@@ -1,0 +1,81 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  {# SEO básico #}
+  <meta name="description" content="{% block description %}Gestión de formularios - Hotel LJE{% endblock %}">
+  <meta name="author" content="Hotel LJE">
+
+  {# Favicon #}
+  <link rel="icon" type="image/x-icon" href="{% static 'img/icons/favicon.ico' %}">
+
+  <title>{% block title %}Formulario | Hotel LJE{% endblock %}</title>
+
+  {# Bootstrap #}
+  <link href="{% static 'vendor/bootstrap-5.3.8-dist/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'vendor/bootstrap-5.3.8-dist/icons/font/bootstrap-icons.css' %}" rel="stylesheet">
+
+  {# Estilos globales #}
+  <link href="{% static 'css/backoffice/backoffice.css' %}" rel="stylesheet">
+
+  {% block styles %}{% endblock %}
+</head>
+
+<body>
+  <div class="d-flex">
+
+    {# Sidebar dinámico con permisos #}
+    {% include "backoffice/components/sidebar.html" %}
+
+    <main class="flex-grow-1 p-4">
+
+      {# Header del formulario #}
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="mb-0">{% block form_title %}Formulario{% endblock %}</h2>
+          <small class="text-muted">
+            {% block form_subtitle %}Gestión de datos{% endblock %}
+          </small>
+        </div>
+
+        {# Acciones globales (ej: volver, listar, eliminar) #}
+        <div>
+          {% block form_actions %}{% endblock %}
+        </div>
+      </div>
+
+      {# Mensajes del sistema (Django messages) #}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {# Card contenedora del formulario #}
+      <div class="card shadow-sm">
+        <div class="card-body">
+
+          {% block content %}
+          {# Aquí va el form específico #}
+          {% endblock %}
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  {# Scripts base #}
+  <script src="{% static 'vendor/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'vendor/chart.js-4.5.0/chart.umd.js' %}"></script>
+  <script src="{% static 'js/global.js' %}"></script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
