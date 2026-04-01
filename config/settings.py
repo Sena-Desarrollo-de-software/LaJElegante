@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     #Componentes adicionales
     'django.contrib.humanize',
+    'data_wizard',
+    'data_wizard.sources',
+    'rest_framework',
     # Hotel apps
     'core',
     'finance',
@@ -158,4 +161,9 @@ FROM_EMAILS = {
     'reservas': config('FROM_EMAIL_RESERVAS', default=DEFAULT_FROM_EMAIL),
     'info': config('FROM_EMAIL_INFO', default=DEFAULT_FROM_EMAIL),
     'ayuda': config('FROM_EMAIL_AYUDA', default=DEFAULT_FROM_EMAIL),
+}
+
+DATA_WIZARD = {
+    'BACKEND': 'data_wizard.backends.threading',
+    'PERMISSION': 'rest_framework.permissions.IsAdminUser',
 }
