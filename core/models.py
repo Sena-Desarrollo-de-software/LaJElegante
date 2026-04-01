@@ -4,11 +4,19 @@ from django.apps import apps
 from .utils import get_servicios_activos, ahora
 from django.conf import settings
 
+class ActiveManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_active=True)
+
 class BaseAuditModel(models.Model):
     is_active = models.BooleanField(default=True)  # Soft delete
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
+    
+    objects = ActiveManager()
+    all_objects = models.Manager()
+
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
