@@ -53,9 +53,8 @@
     <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-secondary">Limpiar</a>
     {% if perms.rooms.view_habitacion %}
     <a href="?{{ request.GET.urlencode }}&export=pdf" class="btn btn-outline-danger">Exportar PDF</a>
+    <a href="{% url 'rooms:habitacion_import' %}" class="btn btn-outline-success">Importar</a>
     {% endif %}
-
-    <a href="#" class="btn btn-outline-success">Importar CSV</a>
   </div>
 
 </form>

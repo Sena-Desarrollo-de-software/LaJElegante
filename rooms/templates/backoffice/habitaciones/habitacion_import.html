@@ -1,0 +1,60 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Importar Habitaciones{% endblock %}
+
+{% block form_title %}Importar Habitaciones{% endblock %}
+{% block form_subtitle %}Carga masiva de habitaciones desde archivo{% endblock %}
+
+{% block form_actions %}
+<div class="d-flex gap-2">
+    <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+    <a href="{% url 'rooms:habitacion_frame' %}" class="btn btn-info">
+        <i class="fas fa-download"></i> Descargar Plantilla
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Instrucciones</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>📌 Importante:</strong> Los tipos de habitación se importan por su NOMBRE.
+                    <a href="{% url 'rooms:habitacion_frame' %}" class="alert-link">Descarga la plantilla</a> para ver el formato correcto.
+                </div>
+                <ul>
+                    <li>Formatos soportados: CSV, Excel (.xlsx, .xls), JSON, XML</li>
+                    <li>Campos: <strong>numero_habitacion</strong>, <strong>tipo_habitacion</strong>, <strong>estado</strong></li>
+                    <li>Estados válidos: DISPONIBLE, OCUPADA, RESERVADA, MANTENIMIENTO</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Subir archivo</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center py-4">
+                    <a href="{% url 'data_wizard:run-list' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-cloud-upload-alt"></i> Ir a Importar Archivo
+                    </a>
+                    <p class="text-muted mt-3">
+                        Serás redirigido a la interfaz de importación de Data Wizard
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
