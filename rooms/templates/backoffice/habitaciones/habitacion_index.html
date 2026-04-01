@@ -86,7 +86,7 @@
             {% if perms.rooms.change_habitacion %}
             <a href="{% url 'rooms:habitacion_update' h.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
             {% endif %}
-            {% if perms.rooms.change_habitacion %}
+            {% if perms.rooms.delete_habitacion %}
             <a href="{% url 'rooms:habitacion_delete' h.id %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
             {% endif %}
           </td>
