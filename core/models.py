@@ -36,32 +36,31 @@ class BaseAuditModel(models.Model):
     class Meta:
         abstract = True
 
+    def _get_audit_update_fields(self, base_fields, user):
+        if user and hasattr(self, "updated_by"):
+            self.updated_by = user
+            base_fields.append("updated_by")
+        return base_fields
+
     def soft_delete(self, user=None):
         self.is_active = False
         self.deleted_at = ahora()
+
         fields = self._get_audit_update_fields(
             ["is_active", "deleted_at"], user
         )
-        self.save(update_fields=fields)
 
+        self.save(update_fields=fields)
 
     def restore(self, user=None):
         self.is_active = True
         self.deleted_at = None
+
         fields = self._get_audit_update_fields(
             ["is_active", "deleted_at"], user
         )
+
         self.save(update_fields=fields)
-
-
-    def restore(self, user=None):
-        self.is_active = True
-        self.deleted_at = None
-        update_fields = ["is_active", "deleted_at"]
-        if user and hasattr(self, "updated_by"):
-            self.updated_by = user
-            update_fields.append("updated_by")
-        self.save(update_fields=update_fields)
 
     class Meta:
         abstract = True
