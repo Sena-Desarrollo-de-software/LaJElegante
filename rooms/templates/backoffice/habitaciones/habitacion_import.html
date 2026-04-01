@@ -1,0 +1,144 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Importar Habitaciones{% endblock %}
+
+{% block form_title %}Importar Habitaciones{% endblock %}
+{% block form_subtitle %}Carga masiva de habitaciones desde archivo CSV/Excel{% endblock %}
+
+{% block form_actions %}
+<div class="d-flex gap-2">
+    <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+    <a href="{% url 'rooms:habitacion_frame' %}" class="btn btn-info">
+        <i class="fas fa-download"></i> Descargar Plantilla
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+{% if is_staff %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-tools"></i> Opción para Administradores
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p class="mb-2">
+                            <i class="fas fa-database"></i> 
+                            <strong>Data Wizard:</strong> Interfaz completa con mapeo avanzado de columnas.
+                        </p>
+                        <ul class="small text-muted">
+                            <li>Soporte para múltiples formatos (CSV, Excel, JSON, XML)</li>
+                            <li>Mapeo interactivo de columnas a campos</li>
+                            <li>Vista previa de datos antes de importar</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{{ datawizard_url }}" target="_blank" class="btn btn-outline-primary">
+                            <i class="fas fa-external-link-alt"></i> Abrir Data Wizard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cloud-upload-alt"></i> Importación Rápida
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" action="{% url 'rooms:habitacion_process' %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="archivo" class="form-label">Archivo CSV o Excel</label>
+                        <input type="file" class="form-control" id="archivo" name="archivo" 
+                               accept=".csv,.xlsx,.xls" required>
+                        <div class="form-text">
+                            El archivo debe tener las columnas: <strong>numero_habitacion</strong>, 
+                            <strong>tipo_habitacion</strong>, <strong>estado</strong> (opcional)
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="actualizar_existentes" 
+                                       name="actualizar_existentes">
+                                <label class="form-check-label" for="actualizar_existentes">
+                                    Actualizar habitaciones existentes
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Nota:</strong> Las habitaciones inactivas (en papelera) no se incluyen en esta importación.
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-file-import"></i> Importar
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Limpiar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Información adicional -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle"></i> Información Útil
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>📋 Formatos soportados:</h6>
+                        <ul>
+                            <li>CSV (comma separated values)</li>
+                            <li>Excel (.xlsx, .xls)</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>✅ Campos:</h6>
+                        <ul>
+                            <li><strong>numero_habitacion</strong> - Obligatorio</li>
+                            <li><strong>tipo_habitacion</strong> - Obligatorio</li>
+                            <li><strong>estado</strong> - Opcional (DISPONIBLE por defecto)</li>
+                        </ul>
+                    </div>
+                </div>
+                <hr>
+                <div class="alert alert-info">
+                    <i class="fas fa-lightbulb"></i>
+                    <strong>Consejo:</strong> Descarga la plantilla para ver el formato correcto. 
+                    Los tipos de habitación se importan por su NOMBRE, no por ID.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Habitacion
+from .models import Habitacion, TipoHabitacion
 
 class HabitacionCreateForm(forms.ModelForm):
     class Meta:
@@ -70,3 +70,42 @@ class HabitacionRestoreForm(forms.Form):
             raise forms.ValidationError("Ya existe una habitación activa con este número.")
 
         return cleaned_data
+    
+class HabitacionImportForm(forms.ModelForm):
+    class Meta:
+        model = Habitacion
+        fields = ['numero_habitacion', 'tipo_habitacion', 'estado']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['estado'].required = False
+        self.fields['tipo_habitacion'] = forms.CharField(
+            label='Tipo de habitación',
+            required=True,
+            help_text='Escribe el nombre del tipo (FAMILIAR, PAREJA, BASICA, ESPECIAL)'
+        )
+
+    def clean_tipo_habitacion(self):
+        nombre = self.cleaned_data['tipo_habitacion'].strip().upper()
+        mapeo = {
+            'FAMILIAR': 'FAMILIAR',
+            'PAREJA': 'PAREJA',
+            'BASICA': 'BASICA',
+            'BÁSICA': 'BASICA',
+            'ESPECIAL': 'ESPECIAL',
+            'SIMPLE': 'BASICA',
+            'DOBLE': 'PAREJA',
+            'MATRIMONIAL': 'PAREJA',
+            'SUITE': 'ESPECIAL',
+        }
+        clave = mapeo.get(nombre, nombre)
+        try:
+            return TipoHabitacion.objects.get(nombre_tipo=clave)
+        except TipoHabitacion.DoesNotExist:
+            raise forms.ValidationError(f"Tipo '{nombre}' no válido. Usa FAMILIAR, PAREJA, BASICA o ESPECIAL.")
+
+    def clean_estado(self):
+        estado = self.cleaned_data.get('estado', 'DISPONIBLE')
+        if estado not in dict(Habitacion.ESTADO_HABITACION_CHOICES):
+            return 'DISPONIBLE'
+        return estado

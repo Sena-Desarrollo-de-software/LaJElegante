@@ -16,7 +16,9 @@ idna==3.11
 itertable==2.2.0
 mysqlclient==2.2.8
 natural-keys==2.1.1
+numpy==2.4.4
 openpyxl==3.1.5
+pandas==3.0.2
 pillow==12.1.1
 pycparser==3.0
 pydyf==0.12.1
