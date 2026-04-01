@@ -1,13 +1,46 @@
 from django.db import models
 from users.models import Usuario
 from django.apps import apps
-from .utils import get_servicios_activos
+from .utils import get_servicios_activos, ahora
+from django.conf import settings
 
 class BaseAuditModel(models.Model):
     is_active = models.BooleanField(default=True)  # Soft delete
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)s_created"
+    )
+
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)s_updated"
+    )
+
+    class Meta:
+        abstract = True
+
+    def soft_delete(self, user=None):
+        self.is_active = False
+        self.deleted_at = ahora()
+        if user and hasattr(self, "updated_by"):
+            self.updated_by = user
+        self.save(update_fields=["is_active", "deleted_at", "updated_by"])
+
+    def restore(self, user=None):
+        self.is_active = True
+        self.deleted_at = None
+        if user and hasattr(self, "updated_by"):
+            self.updated_by = user
+        self.save(update_fields=["is_active", "deleted_at", "updated_by"])
 
     class Meta:
         abstract = True
