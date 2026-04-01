@@ -9,7 +9,8 @@ urlpatterns = [
     path("habitacion-create/", views.create_habitacion, name="habitacion_create"),
     path("habitacion-update/<int:pk>/", views.update_habitacion, name="habitacion_update"),
     path("habitacion-delete/<int:pk>", views.delete_habitacion, name="habitacion_delete"),
-    path('habitacion-trashcan/<int:pk>', views.trashcan_habitacion, name='habitacion_trashcan'),
+    path("habitacion/trashcan/", views.trashcan_habitacion, name="habitacion_trashcan"),
+    path("habitacion/<int:pk>/restore/", views.restore_habitacion, name="habitacion_restore"),
     # === RESERVA HABITACIÓN ===
     path("reserva-habitacion/", views.index_reserva_habitacion, name="reserva_habitacion_index"),
     path("reserva-habitacion-create/", views.create_reserva_habitacion, name="reserva_habitacion_create"),

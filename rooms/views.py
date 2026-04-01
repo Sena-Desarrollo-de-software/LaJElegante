@@ -1,82 +1,137 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
+from django.contrib.auth.decorators import permission_required
 from django.views.decorators.http import require_http_methods, require_POST, require_safe, require_GET
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
-from .models import Habitacion
-from .forms import HabitacionCreateForm, HabitacionUpdateForm, HabitacionDeleteForm
+from .models import Habitacion, TipoHabitacion, ReservaHabitacion
+from .forms import HabitacionCreateForm, HabitacionUpdateForm, HabitacionDeleteForm, HabitacionRestoreForm
 
-HABITACION_LIST_REDIRECT = "rooms:habitacion_list"
+HABITACION_INDEX = "rooms:habitacion_index"
 
 # === HABITACIÓN ===
-@require_safe
-@login_required
-def index_habitacion(request):
-    habitaciones = Habitacion.objects.filter(is_active=True).order_by("numero_habitacion")
-    return render(request, "backoffice/habitaciones/habitacion_index.html", {"habitaciones": habitaciones})
+def filtrar_habitaciones(request, queryset=None):
+    if queryset is None:
+        queryset = Habitacion.objects.all()
 
-@require_http_methods(["GET", "POST"])
+    tipo = request.GET.get("tipo")
+    estado = request.GET.get("estado")
+    numero = request.GET.get("numero")
+
+    if tipo:
+        queryset = queryset.filter(tipo_habitacion_id=tipo)
+
+    if estado:
+        queryset = queryset.filter(estado=estado)
+
+    if numero:
+        queryset = queryset.filter(numero_habitacion=numero)
+
+    return queryset
+
 @login_required
+@permission_required("rooms.view_habitacion", raise_exception=True)
+@require_safe
+def index_habitacion(request):
+    habitaciones = filtrar_habitaciones(request)
+
+    tipos = TipoHabitacion.objects.all()
+
+    return render(request, "backoffice/habitaciones/habitacion_index.html", {
+        "habitaciones": habitaciones,
+        "tipos": tipos,
+        "filtros": request.GET
+    })
+
+@login_required
+@permission_required("rooms.add_habitacion", raise_exception=True)
+@require_http_methods(["GET", "POST"])
 @csrf_protect
 def create_habitacion(request):
-    if request.method == "POST":
-        return handle_create_habitacion_post(request)
-    else:
-        return handle_create_habitacion_get(request)
+    form = HabitacionCreateForm(request.POST or None)
 
-def handle_create_habitacion_post(request):
-    form = HabitacionCreateForm(request.POST)
-    if form.is_valid():
-        form.save()
-        return redirect(HABITACION_LIST_REDIRECT)
-    return render(request, "backoffice/habitaciones/habitacion_create.html", {"form": form})
+    if request.method == "POST" and form.is_valid():
+        habitacion = form.save(commit=False)
+        habitacion.created_by = request.user
+        habitacion.updated_by = request.user
+        habitacion.save()
 
-def handle_create_habitacion_get(request):
-    form = HabitacionCreateForm()
-    return render(request, "backoffice/habitaciones/habitacion_create.html", {"form": form})
+        return redirect(HABITACION_INDEX)
 
-@require_http_methods(["GET", "POST"])
+    return render(request, "backoffice/habitaciones/habitacion_create.html", {
+        "form": form
+    })
+
 @login_required
+@permission_required("rooms.change_habitacion", raise_exception=True)
+@require_http_methods(["GET", "POST"])
 @csrf_protect
 def update_habitacion(request, pk):
-    habitacion = get_object_or_404(Habitacion, pk=pk, is_active=True)
-    
-    if request.method == "POST":
-        return handle_update_habitacion_post(request, habitacion)
-    else:
-        return handle_update_habitacion_get(request, habitacion)
+    habitacion = get_object_or_404(Habitacion.objects, pk=pk)
+    form = HabitacionUpdateForm(request.POST or None, instance=habitacion)
 
-def handle_update_habitacion_post(request, habitacion):
-    form = HabitacionUpdateForm(request.POST, instance=habitacion)
     if form.is_valid():
-        form.save()
-        return redirect(HABITACION_LIST_REDIRECT)
-    return render(request, "backoffice/habitaciones/habitacion_update.html", {"form": form, "habitacion": habitacion})
+        habitacion = form.save(commit=False)
+        habitacion.updated_by = request.user
+        habitacion.save()
 
-def handle_update_habitacion_get(request, habitacion):
-    form = HabitacionUpdateForm(instance=habitacion)
-    return render(request, "backoffice/habitaciones/habitacion_update.html", {"form": form, "habitacion": habitacion})
+        return redirect(HABITACION_INDEX)
 
-@require_POST
+    return render(request, "backoffice/habitaciones/habitacion_update.html", {
+        "form": form,
+        "habitacion": habitacion
+    })
+
 @login_required
+@permission_required("rooms.delete_habitacion", raise_exception=True)
+@require_http_methods(["GET", "POST"])
 @csrf_protect
 def delete_habitacion(request, pk):
-    habitacion = get_object_or_404(Habitacion, pk=pk, is_active=True)
-    return handle_delete_habitacion_post(request, habitacion)
+    habitacion = get_object_or_404(Habitacion.objects, pk=pk)
+    form = HabitacionDeleteForm(request.POST or None, habitacion=habitacion)
 
-def handle_delete_habitacion_post(request, habitacion):
-    form = HabitacionDeleteForm(request.POST)
     if form.is_valid():
-        habitacion.is_active = False
-        habitacion.deleted_at = timezone.now()
-        habitacion.save(update_fields=["is_active", "deleted_at"])
-        return redirect(HABITACION_LIST_REDIRECT)
-    return render(request, "backoffice/habitaciones/habitacion_delete.html", {"form": form, "habitacion": habitacion})
+        habitacion.soft_delete(user=request.user)
+        return redirect(HABITACION_INDEX)
 
-@require_http_methods(['POST','GET'])
+    return render(request, "backoffice/habitaciones/habitacion_delete.html", {
+        "form": form,
+        "habitacion": habitacion
+    })
+
+@login_required
+@permission_required("rooms.delete_habitacion", raise_exception=True)
+@require_safe
 def trashcan_habitacion(request):
-    return render(request,'backoffice/habitaciones/habitacion_trashcan.html')
+    habitaciones = Habitacion.all_objects.filter(is_active=False)
 
+    return render(request, "backoffice/habitaciones/habitacion_trashcan.html", {
+        "habitaciones": habitaciones
+    })
+
+@login_required
+@permission_required("rooms.change_habitacion", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@csrf_protect
+def restore_habitacion(request, pk):
+    habitacion = get_object_or_404(
+        Habitacion.all_objects,
+        pk=pk,
+        is_active=False
+    )
+
+    form = HabitacionRestoreForm(
+        request.POST or None,
+        habitacion=habitacion
+    )
+
+    if form.is_valid():
+        habitacion.restore(user=request.user)
+        return redirect("rooms:habitacion_trashcan")
+
+    return render(request, "backoffice/habitaciones/habitacion_restore.html", {
+        "form": form,
+        "habitacion": habitacion
+    })
 # === RESERVA HABITACION ===
 @require_GET
 def index_reserva_habitacion(request):
