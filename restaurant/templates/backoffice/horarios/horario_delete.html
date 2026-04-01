@@ -1,0 +1,11 @@
+<h1>Eliminar horario</h1>
+
+<p>¿Seguro que deseas desactivar este horario?</p>
+<p>{{ horario }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Confirmar eliminación</button>
+</form>
+
+<a href="{% url 'restaurant:horario_index' %}">Cancelar</a>

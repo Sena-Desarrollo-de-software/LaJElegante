@@ -1,0 +1,17 @@
+<h1>Horarios</h1>
+
+<a href="{% url 'restaurant:horario_create' %}">Crear horario</a>
+
+<ul>
+    {% for horario in horarios %}
+        <li>
+            {{ horario }}
+            <a href="{% url 'restaurant:horario_update' horario.pk %}">Editar</a>
+            <a href="{% url 'restaurant:horario_delete' horario.pk %}">Eliminar</a>
+        </li>
+    {% empty %}
+        <li>No hay horarios registrados.</li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'restaurant:horario_trashcan' %}">Ver papelera</a>
