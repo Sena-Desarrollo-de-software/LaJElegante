@@ -30,7 +30,7 @@ urlpatterns = [
     path("users/", include("users.urls")),
     path("backoffice/", include("backoffice.urls")),
     #Datawizard config
-    path('datawizard/', include('datawizard.urls'))
+    path('datawizard/', include('data_wizard.urls'))
 ]
 # Se recomienda usar solo media cuando estamos en desarrollo, para producción hay que usar otras alternativas
 if settings.DEBUG:
