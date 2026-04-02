@@ -1,0 +1,58 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Papelera de Tipos de Habitación{% endblock %}
+
+{% block form_title %}Papelera{% endblock %}
+{% block form_subtitle %}
+Tipos de habitación eliminados (soft delete)
+{% endblock %}
+
+{% block form_actions %}
+  <a href="{% url 'rooms:tipo_habitacion_index' %}" class="btn btn-outline-primary">
+    Volver al listado
+  </a>
+{% endblock %}
+
+{% block content %}
+
+{% if tipos %}
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Tipo</th>
+        <th>Capacidad</th>
+        <th>Eliminado en</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for tipo in tipos %}
+      <tr>
+        <td>{{ tipo.get_nombre_tipo_display }}</td>
+        <td>{{ tipo.capacidad_maxima }}</td>
+        <td>{{ tipo.deleted_at }}</td>
+
+        <td>
+          {% if perms.rooms.change_tipohabitacion %}
+          <form method="post"
+                action="{% url 'rooms:tipo_habitacion_restore' tipo.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success btn-sm">
+              Restaurar
+            </button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+{% else %}
+  <div class="alert alert-info">
+    No hay tipos de habitación en la papelera.
+  </div>
+{% endif %}
+
+{% endblock %}

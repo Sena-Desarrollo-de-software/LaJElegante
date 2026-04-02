@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Listado de Tipos de Habitación</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 2cm;
+            
+            @top-center {
+                content: "Hotel - Tipos de Habitación";
+                font-size: 12px;
+                font-weight: bold;
+            }
+            
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 10px;
+            }
+            
+            @bottom-left {
+                content: "Generado: {{ fecha_exportacion|date:'d/m/Y H:i' }}";
+                font-size: 10px;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+            padding: 8px;
+            text-align: left;
+        }
+
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .badge {
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .activo { background-color: #28a745; color: white; }
+        .inactivo { background-color: #dc3545; color: white; }
+
+        .summary {
+            margin-top: 20px;
+            text-align: right;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Tipos de Habitación</h1>
+    <p>
+        Generado por: {{ usuario.get_full_name|default:usuario.username }} |
+        {{ fecha_exportacion|date:"d/m/Y H:i:s" }}
+    </p>
+</div>
+
+{% if tipos %}
+<table>
+    <thead>
+        <tr>
+            <th>Tipo</th>
+            <th>Capacidad</th>
+            <th>Estado</th>
+            <th>Creado</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tipo in tipos %}
+        <tr>
+            <td><strong>{{ tipo.get_nombre_tipo_display }}</strong></td>
+            <td>{{ tipo.capacidad_maxima }}</td>
+            <td>
+                {% if tipo.is_active %}
+                    <span class="badge activo">Activo</span>
+                {% else %}
+                    <span class="badge inactivo">Inactivo</span>
+                {% endif %}
+            </td>
+            <td>{{ tipo.created_at|date:"d/m/Y" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="summary">
+    Total de registros: {{ total_registros }}
+</div>
+
+{% else %}
+<p>No hay registros.</p>
+{% endif %}
+
+</body>
+</html>
