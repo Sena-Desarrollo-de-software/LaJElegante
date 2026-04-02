@@ -11,6 +11,8 @@ from .models import Habitacion, TipoHabitacion, ReservaHabitacion
 from .forms import HabitacionCreateForm, HabitacionUpdateForm, HabitacionDeleteForm, HabitacionRestoreForm, TipoHabitacionCreateForm, TipoHabitacionUpdateForm, TipoHabitacionDeleteForm, TipoHabitacionRestoreForm
 from .importers import HabitacionImporter
 from core.utils import ahora
+from django.contrib.contenttypes.models import ContentType
+from finance.models import get_tarifa_vigente
 
 HABITACION_INDEX = "rooms:habitacion_index"
 
@@ -260,6 +262,11 @@ def index_tipo_habitacion(request):
         response['Content-Disposition'] = f'inline; filename={filename}'
         return response
 
+    ct = ContentType.objects.get_for_model(TipoHabitacion)
+    fecha = ahora().date()
+
+    for t in tipos:
+        t.tarifa_vigente = get_tarifa_vigente(ct, t.id, fecha)
     return render(request, "backoffice/tipo_habitacion/tipo_habitacion_index.html", {
         "tipos": tipos
     })
