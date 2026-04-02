@@ -181,11 +181,15 @@ def restore_habitacion(request, pk):
 @login_required
 @permission_required("rooms.add_habitacion", raise_exception=True)
 def import_habitacion(request):
+    tipos = TipoHabitacion.objects.filter(is_active=True)
+    estados = Habitacion.ESTADO_HABITACION_CHOICES  
     context = {
         'title': 'Importar Habitaciones',
         'subtitle': 'Carga masiva desde archivo CSV/Excel',
         'is_staff': request.user.is_staff,
         'datawizard_url': '/admin/sources/filesource/add/' if request.user.is_staff else None,
+        'tipos' : tipos,
+        'estados' : estados
     }
     return render(request, 'backoffice/habitaciones/habitacion_import.html', context)
 

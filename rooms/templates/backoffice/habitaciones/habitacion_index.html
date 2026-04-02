@@ -6,100 +6,129 @@
 {% block form_subtitle %}Listado de habitaciones activas{% endblock %}
 
 {% block form_actions %}
-{% if perms.rooms.add_habitacion %}
-  <a href="{% url 'rooms:habitacion_create' %}" class="btn btn-primary">+ Nueva Habitación</a>
-{% endif %}
-{% if perms.rooms.delete_habitacion %}
-  <a href="{% url 'rooms:habitacion_trashcan' %}" class="btn btn-warning">Papelera</a>
-{% endif %}
+  {% if perms.rooms.add_habitacion %}
+    <a href="{% url 'rooms:habitacion_create' %}" class="btn btn-primary">+ Nueva</a>
+  {% endif %}
+  {% if perms.rooms.delete_habitacion %}
+    <a href="{% url 'rooms:habitacion_trashcan' %}" class="btn btn-outline-warning">Papelera</a>
+  {% endif %}
 {% endblock %}
 
 {% block content %}
-<form method="get" class="row g-3 mb-3">
 
-  <div class="col-md-3">
-    <span>Tipo de habitación</span>
-    <select name="tipo" class="form-select">
-      <option value="">Todos</option>
-      {% for t in tipos %}
-        <option value="{{ t.id }}"
-          {% if filtros.tipo == t.id|stringformat:"s" %}selected{% endif %}>
-          {{ t.get_nombre_tipo_display }}
-        </option>
-      {% endfor %}
-    </select>
+<div class="card mb-3 shadow-sm border-0">
+  <div class="card-body">
+
+    <form method="get" class="row g-2 align-items-end">
+
+      <div class="col-md-3">
+        <span class="form-label small">Tipo</span>
+        <select name="tipo" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          {% for t in tipos %}
+            <option value="{{ t.id }}"
+              {% if filtros.tipo == t.id|stringformat:"s" %}selected{% endif %}>
+              {{ t.get_nombre_tipo_display }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <span class="form-label small">Estado</span>
+        <select name="estado" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          <option value="DISPONIBLE" {% if filtros.estado == "DISPONIBLE" %}selected{% endif %}>Disponible</option>
+          <option value="OCUPADA" {% if filtros.estado == "OCUPADA" %}selected{% endif %}>Ocupada</option>
+          <option value="RESERVADA" {% if filtros.estado == "RESERVADA" %}selected{% endif %}>Reservada</option>
+          <option value="MANTENIMIENTO" {% if filtros.estado == "MANTENIMIENTO" %}selected{% endif %}>Mantenimiento</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <span class="form-label small">Número</span>
+        <input type="number" name="numero" class="form-control form-control-sm"
+               value="{{ filtros.numero }}">
+      </div>
+
+      <div class="col-md-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
+
+        <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-outline-secondary btn-sm">Limpiar</a>
+
+        {% if perms.rooms.view_habitacion %}
+          <a href="?{{ request.GET.urlencode }}&export=pdf" class="btn btn-outline-danger btn-sm">PDF</a>
+          <a href="{% url 'rooms:habitacion_import' %}" class="btn btn-outline-success btn-sm">Importar</a>
+        {% endif %}
+      </div>
+
+    </form>
+
   </div>
+</div>
 
-  <div class="col-md-3">
-    <span>Estado</span>
-    <select name="estado" class="form-select">
-      <option value="">Todos</option>
-      <option value="DISPONIBLE" {% if filtros.estado == "DISPONIBLE" %}selected{% endif %}>Disponible</option>
-      <option value="OCUPADA" {% if filtros.estado == "OCUPADA" %}selected{% endif %}>Ocupada</option>
-      <option value="RESERVADA" {% if filtros.estado == "RESERVADA" %}selected{% endif %}>Reservada</option>
-      <option value="MANTENIMIENTO" {% if filtros.estado == "MANTENIMIENTO" %}selected{% endif %}>Mantenimiento</option>
-    </select>
-  </div>
+<div class="card shadow-sm border-0">
+  <div class="card-body p-0">
 
-  <div class="col-md-2">
-    <span>Número</span>
-    <input type="number" name="numero" class="form-control"
-           value="{{ filtros.numero }}">
-  </div>
+    {% if habitaciones %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
 
-  <div class="col-md-4 d-flex align-items-end gap-2">
-    <button type="submit" class="btn btn-primary">Filtrar</button>
+          <thead class="table-light">
+            <tr>
+              <th>Número</th>
+              <th>Tipo</th>
+              <th class="text-center">Estado</th>
+              <th>Actualizado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
 
-    <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-secondary">Limpiar</a>
-    {% if perms.rooms.view_habitacion %}
-    <a href="?{{ request.GET.urlencode }}&export=pdf" class="btn btn-outline-danger">Exportar PDF</a>
-    <a href="{% url 'rooms:habitacion_import' %}" class="btn btn-outline-success">Importar</a>
+          <tbody>
+            {% for h in habitaciones %}
+            <tr>
+              <td><strong>{{ h.numero_habitacion }}</strong></td>
+
+              <td>{{ h.tipo_habitacion }}</td>
+
+              <td class="text-center">
+                <span class="badge
+                  {% if h.estado == 'DISPONIBLE' %}bg-success
+                  {% elif h.estado == 'OCUPADA' %}bg-danger
+                  {% elif h.estado == 'RESERVADA' %}bg-primary
+                  {% else %}bg-secondary{% endif %}">
+                  {{ h.get_estado_display }}
+                </span>
+              </td>
+
+              <td class="text-muted small">
+                {{ h.updated_at|date:"d/m/Y H:i" }}
+              </td>
+
+              <td class="text-end">
+                {% if perms.rooms.change_habitacion %}
+                  <a href="{% url 'rooms:habitacion_update' h.id %}" 
+                     class="btn btn-sm btn-outline-primary">Editar</a>
+                {% endif %}
+
+                {% if perms.rooms.delete_habitacion %}
+                  <a href="{% url 'rooms:habitacion_delete' h.id %}" 
+                     class="btn btn-sm btn-outline-danger">Eliminar</a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+
+        </table>
+      </div>
+
+    {% else %}
+      <div class="p-4 text-center text-muted">
+        No hay habitaciones registradas
+      </div>
     {% endif %}
+
   </div>
-
-</form>
-{% if habitaciones %}
-  <div class="table-responsive">
-    <table class="table table-hover align-middle">
-      <thead>
-        <tr>
-          <th>Número</th>
-          <th>Tipo</th>
-          <th>Estado</th>
-          <th>Última actualización</th>
-          <th class="text-end">Acciones</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {% for h in habitaciones %}
-        <tr>
-          <td><strong>{{ h.numero_habitacion }}</strong></td>
-          <td>{{ h.tipo_habitacion }}</td>
-          <td>
-            <span class="badge bg-secondary">
-              {{ h.get_estado_display }}
-            </span>
-          </td>
-          <td>{{ h.updated_at }}</td>
-          <td class="text-end">
-            {% if perms.rooms.change_habitacion %}
-            <a href="{% url 'rooms:habitacion_update' h.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
-            {% endif %}
-            {% if perms.rooms.delete_habitacion %}
-            <a href="{% url 'rooms:habitacion_delete' h.id %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-{% else %}
-  <div class="alert alert-info">
-    No hay habitaciones registradas.
-  </div>
-{% endif %}
-
+</div>
 {% endblock %}
