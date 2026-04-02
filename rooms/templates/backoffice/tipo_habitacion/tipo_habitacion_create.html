@@ -1,0 +1,81 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Crear Tipo de Habitación{% endblock %}
+
+{% block form_title %}Nuevo Tipo de Habitación{% endblock %}
+{% block form_subtitle %}Registrar un nuevo tipo{% endblock %}
+
+{% block form_actions %}
+  <a href="{% url 'rooms:tipo_habitacion_index' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Volver
+  </a>
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-5">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              {{ form.nombre_tipo.label }}
+            </label>
+            {{ form.nombre_tipo }}
+
+            {% if form.nombre_tipo.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.nombre_tipo.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              {{ form.descripcion.label }}
+            </label>
+            {{ form.descripcion }}
+
+            {% if form.descripcion.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.descripcion.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              {{ form.capacidad_maxima.label }}
+            </label>
+            {{ form.capacidad_maxima }}
+
+            {% if form.capacidad_maxima.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.capacidad_maxima.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <a href="{% url 'rooms:tipo_habitacion_index' %}" class="btn btn-outline-secondary">
+              Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary">
+              Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger mt-3">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

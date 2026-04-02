@@ -1,0 +1,37 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Restaurar Tipo de Habitación{% endblock %}
+
+{% block form_title %}Restaurar Tipo de Habitación{% endblock %}
+{% block form_subtitle %}
+¿Deseas restaurar el tipo <strong>{{ tipo.get_nombre_tipo_display }}</strong>?
+{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="alert alert-warning">
+        Esta acción restaurará el tipo de habitación y volverá a estar disponible en el sistema.
+    </div>
+
+    {{ form.as_p }}
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-success">
+            Restaurar
+        </button>
+
+        <a href="{% url 'rooms:tipo_habitacion_trashcan' %}" class="btn btn-secondary">
+            Cancelar
+        </a>
+    </div>
+</form>
+
+{% if form.errors %}
+<div class="alert alert-danger mt-3">
+    <strong>Errores:</strong>
+    {{ form.errors }}
+</div>
+{% endif %}
+{% endblock %}

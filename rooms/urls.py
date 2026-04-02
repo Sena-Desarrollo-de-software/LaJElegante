@@ -25,5 +25,6 @@ urlpatterns = [
     path("tipo-habitacion-create/", views.create_tipo_habitacion, name="tipo_habitacion_create"),
     path("tipo-habitacion-update/<int:pk>/", views.update_tipo_habitacion, name="tipo_habitacion_update"),
     path("tipo-habitacion-delete/<int:pk>", views.delete_tipo_habitacion, name="tipo_habitacion_delete"),
-    path('tipo-habitacion-trashcan/<int:pk>', views.trashcan_tipo_habitacion, name='tipo_habitacion_trashcan'),
+    path("tipo-habitacion-trashcan/", views.trashcan_tipo_habitacion, name="tipo_habitacion_trashcan"),
+    path("tipo-habitacion-restore/<int:pk>", views.restore_tipo_habitacion, name="tipo_habitacion_restore"),
 ]

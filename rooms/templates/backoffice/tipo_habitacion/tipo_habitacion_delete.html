@@ -1,0 +1,88 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Eliminar Tipo de Habitación{% endblock %}
+
+{% block form_title %}Eliminar Tipo de Habitación{% endblock %}
+{% block form_subtitle %}Esta acción desactiva el tipo en el sistema{% endblock %}
+
+{% block form_actions %}
+  <a href="{% url 'rooms:tipo_habitacion_index' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Volver
+  </a>
+{% endblock %}
+
+{% block content %}
+
+<div class="alert alert-warning d-flex align-items-center gap-2">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>
+    <strong>¿Eliminar tipo de habitación?</strong><br>
+    Esta acción lo desactivará del sistema.
+  </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-3">
+  <div class="row g-2">
+    
+    <div class="col-6">
+      <small class="text-muted">Tipo</small><br>
+      <strong>{{ tipo.get_nombre_tipo_display }}</strong>
+    </div>
+
+    <div class="col-6">
+      <small class="text-muted">Capacidad</small><br>
+      {{ tipo.capacidad_maxima }} personas
+    </div>
+
+    <div class="col-12">
+      <small class="text-muted">Descripción</small><br>
+      {{ tipo.descripcion|default:"-" }}
+    </div>
+
+    <div class="col-6">
+      <small class="text-muted">Actualizado</small><br>
+      {{ tipo.updated_at|date:"d/m/Y H:i" }}
+    </div>
+
+  </div>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+
+  <div class="mb-3">
+    <span class="form-label fw-semibold">
+      Confirmación
+    </span>
+
+    {{ form.confirm }}
+
+    {% if form.confirm.errors %}
+      <div class="invalid-feedback d-block">
+        {{ form.confirm.errors.0 }}
+      </div>
+    {% endif %}
+
+    <small class="text-muted">
+      Escribe el nombre del tipo ({{ tipo.nombre_tipo }}) para confirmar
+    </small>
+  </div>
+
+  <div class="d-flex justify-content-end gap-2">
+    <a href="{% url 'rooms:tipo_habitacion_index' %}" class="btn btn-secondary">
+      Cancelar
+    </a>
+    <button type="submit" class="btn btn-danger">
+      Eliminar
+    </button>
+  </div>
+</form>
+
+{% if form.errors %}
+<div class="alert alert-danger mt-3">
+    <strong>Errores:</strong>
+    {{ form.errors }}
+</div>
+{% endif %}
+
+{% endblock %}

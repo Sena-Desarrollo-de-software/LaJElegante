@@ -8,7 +8,7 @@ from weasyprint import HTML
 import csv
 from django.http import HttpResponse
 from .models import Habitacion, TipoHabitacion, ReservaHabitacion
-from .forms import HabitacionCreateForm, HabitacionUpdateForm, HabitacionDeleteForm, HabitacionRestoreForm
+from .forms import HabitacionCreateForm, HabitacionUpdateForm, HabitacionDeleteForm, HabitacionRestoreForm, TipoHabitacionCreateForm, TipoHabitacionUpdateForm, TipoHabitacionDeleteForm, TipoHabitacionRestoreForm
 from .importers import HabitacionImporter
 from core.utils import ahora
 
@@ -227,22 +227,131 @@ def trashcan_reserva_habitacion(request):
     return render(request,'backoffice/reserva_habitaciones/reserva_habitacion_trashcan.html')
 
 # === TIPO HABITACION ===
-@require_GET
+TIPO_HABITACION_INDEX = "rooms:tipo_habitacion_index"
+
+def generar_pdf_tipo_habitacion(tipos, request):
+
+    context = {
+        'tipos': tipos,
+        'total_registros': tipos.count(),
+        'usuario': request.user,
+        'fecha_exportacion': ahora(),
+    }
+
+    html_string = render_to_string(
+        'backoffice/tipo_habitacion/tipo_habitacion_pdf.html',
+        context
+    )
+
+    pdf = HTML(string=html_string).write_pdf()
+    return pdf
+
+@login_required
+@permission_required("rooms.view_tipohabitacion", raise_exception=True)
+@require_safe
 def index_tipo_habitacion(request):
-    return render(request,'backoffice/tipo_habitacion/tipo_habitacion_index.html')
+    tipos = TipoHabitacion.objects.all()
 
-@require_POST
+    if request.GET.get('export') == 'pdf':
+        pdf = generar_pdf_tipo_habitacion(tipos, request)
+
+        response = HttpResponse(pdf, content_type='application/pdf')
+        filename = f"tipos_habitacion_{ahora().strftime('%Y%m%d_%H%M%S')}.pdf"
+        response['Content-Disposition'] = f'inline; filename={filename}'
+        return response
+
+    return render(request, "backoffice/tipo_habitacion/tipo_habitacion_index.html", {
+        "tipos": tipos
+    })
+
+@login_required
+@permission_required("rooms.add_tipohabitacion", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@csrf_protect
 def create_tipo_habitacion(request):
-    return render(request,'backoffice/tipo_habitacion/tipo_habitacion_create.html')
+    form = TipoHabitacionCreateForm(request.POST or None)
 
-@require_http_methods(['POST','GET'])
-def update_tipo_habitacion(request):
-    return render(request,'backoffice/tipo_habitacion/tipo_habitacion_update.html')
+    if request.method == "POST" and form.is_valid():
+        tipo = form.save(commit=False)
+        tipo.created_by = request.user
+        tipo.updated_by = request.user
+        tipo.save()
 
-@require_http_methods(['POST','GET'])
-def delete_tipo_habitacion(request):
-    return render(request, 'backoffice/tipo_habitacion/tipo_habitacion_delete.html')
+        return redirect(TIPO_HABITACION_INDEX)
 
-@require_http_methods(['POST','GET'])
+    return render(request, "backoffice/tipo_habitacion/tipo_habitacion_create.html", {
+        "form": form
+    })
+
+@login_required
+@permission_required("rooms.change_tipohabitacion", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@csrf_protect
+def update_tipo_habitacion(request, pk):
+    tipo = get_object_or_404(TipoHabitacion, pk=pk, is_active=True)
+
+    form = TipoHabitacionUpdateForm(request.POST or None, instance=tipo)
+
+    if request.method == "POST" and form.is_valid():
+        tipo = form.save(commit=False)
+        tipo.updated_by = request.user
+        tipo.save()
+
+        return redirect(TIPO_HABITACION_INDEX)
+
+    return render(request, "backoffice/tipo_habitacion/tipo_habitacion_update.html", {
+        "form": form,
+        "tipo": tipo
+    })
+
+@login_required
+@permission_required("rooms.delete_tipohabitacion", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@csrf_protect
+def delete_tipo_habitacion(request, pk):
+    tipo = get_object_or_404(TipoHabitacion, pk=pk, is_active=True)
+
+    form = TipoHabitacionDeleteForm(request.POST or None, tipo=tipo)
+
+    if request.method == "POST" and form.is_valid():
+        tipo.is_active = False
+        tipo.updated_by = request.user
+        tipo.save()
+
+        return redirect(TIPO_HABITACION_INDEX)
+
+    return render(request, "backoffice/tipo_habitacion/tipo_habitacion_delete.html", {
+        "form": form,
+        "tipo": tipo
+    })
+
+@login_required
+@permission_required("rooms.view_tipohabitacion", raise_exception=True)
+@require_safe
 def trashcan_tipo_habitacion(request):
-    return render(request,'backoffice/tipo_habitacion/tipo_habitacion_trashcan.html')
+    tipos = TipoHabitacion.all_objects.filter(is_active=False)
+
+    return render(request, "backoffice/tipo_habitacion/tipo_habitacion_trashcan.html", {
+        "tipos": tipos
+    })
+
+@login_required
+@permission_required("rooms.change_tipohabitacion", raise_exception=True)
+@require_http_methods(['GET', 'POST'])
+def restore_tipo_habitacion(request, pk):
+    tipo = get_object_or_404(
+        TipoHabitacion.all_objects,
+        pk=pk,
+        is_active=False
+    )
+
+    form = TipoHabitacionRestoreForm(request.POST or None, tipo=tipo)
+
+    if request.method == "POST" and form.is_valid():
+        tipo.restore(user=request.user)
+        return redirect("rooms:tipo_habitacion_trashcan")
+
+    return render(request, "backoffice/tipo_habitacion/tipo_habitacion_restore.html", {
+        "form": form,
+        "tipo": tipo
+    })
