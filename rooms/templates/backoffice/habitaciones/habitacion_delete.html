@@ -13,30 +13,64 @@
 
 {% block content %}
 
-<div class="alert alert-warning">
-  <strong>¿Estás seguro que deseas eliminar esta habitación?</strong>
+<div class="alert alert-warning d-flex align-items-center gap-2">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <div>
+    <strong>¿Eliminar habitación?</strong><br>
+    Esta acción la desactivará del sistema.
+  </div>
 </div>
 
-<div class="card mb-4">
-  <div class="card-body">
-    <p><strong>Número:</strong> {{ habitacion.numero_habitacion }}</p>
-    <p><strong>Tipo:</strong> {{ habitacion.tipo_habitacion }}</p>
-    <p><strong>Estado:</strong> {{ habitacion.estado }}</p>
-    <p><strong>Creado:</strong> {{ habitacion.created_at }}</p>
-    <p><strong>Última actualización:</strong> {{ habitacion.updated_at }}</p>
+<div class="card shadow-sm border-0 mb-3">
+<div class="row g-2">
+  <div class="col-6">
+    <small class="text-muted">Número</small><br>
+    <strong>{{ habitacion.numero_habitacion }}</strong>
   </div>
+
+  <div class="col-6">
+    <small class="text-muted">Tipo</small><br>
+    {{ habitacion.tipo_habitacion }}
+  </div>
+
+  <div class="col-6">
+    <small class="text-muted">Estado</small><br>
+    <span class="badge
+      {% if habitacion.estado == 'DISPONIBLE' %}bg-success
+      {% elif habitacion.estado == 'OCUPADA' %}bg-danger
+      {% elif habitacion.estado == 'RESERVADA' %}bg-primary
+      {% else %}bg-secondary{% endif %}">
+      {{ habitacion.get_estado_display }}
+    </span>
+  </div>
+
+  <div class="col-6">
+    <small class="text-muted">Actualizado</small><br>
+    {{ habitacion.updated_at|date:"d/m/Y H:i" }}
+  </div>
+</div>
 </div>
 
 <form method="post">
   {% csrf_token %}
 
-  <div class="form-check mb-3">
-    {{ form.confirm }}
-    <span class="form-check-label">
-      Escriba el numero de la habitación para continuar
-    </span>
-    {{ form.confirm.errors }}
-  </div>
+<div class="mb-3">
+  <span class="form-label fw-semibold">
+    Confirmación
+  </span>
+
+  {{ form.confirm }}
+
+  {% if form.confirm.errors %}
+    <div class="invalid-feedback d-block">
+      {{ form.confirm.errors.0 }}
+    </div>
+  {% endif %}
+
+  <small class="text-muted">
+    Escribe el número de la habitación para confirmar
+  </small>
+</div>
 
   <div class="d-flex justify-content-end gap-2">
     <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-secondary">

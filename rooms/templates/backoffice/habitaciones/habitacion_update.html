@@ -12,40 +12,72 @@
 {% endblock %}
 
 {% block content %}
-<form method="post">
-  {% csrf_token %}
 
-  <div class="mb-3">
-    {{ form.tipo_habitacion.label_tag }}
-    {{ form.tipo_habitacion }}
-    {{ form.tipo_habitacion.errors }}
-  </div>
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-5">
 
-  <div class="mb-3">
-    {{ form.numero_habitacion.label_tag }}
-    {{ form.numero_habitacion }}
-    {{ form.numero_habitacion.errors }}
-  </div>
+    <div class="card shadow-sm border-0">
 
-  <div class="mb-3">
-    {{ form.estado.label_tag }}
-    {{ form.estado }}
-    {{ form.estado.errors }}
-  </div>
+      <div class="card-body">
 
-  <div class="d-flex justify-content-end gap-2">
-    <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-secondary">
-      Cancelar
-    </a>
-    <button type="submit" class="btn btn-primary">
-      Guardar cambios
-    </button>
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <span class="form-label fw-semibold">
+              {{ form.tipo_habitacion.label }}
+            </span>
+            {{ form.tipo_habitacion }}
+
+            {% if form.tipo_habitacion.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.tipo_habitacion.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <span class="form-label fw-semibold">
+              {{ form.numero_habitacion.label }}
+            </span>
+            {{ form.numero_habitacion }}
+
+            {% if form.numero_habitacion.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.numero_habitacion.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <span class="form-label fw-semibold">
+              {{ form.estado.label }}
+            </span>
+            {{ form.estado }}
+
+            {% if form.estado.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.estado.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-outline-secondary">
+              Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-save"></i> Guardar cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger mt-3">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
   </div>
-</form>
-{% if form.errors %}
-<div class="alert alert-danger mt-3">
-    <strong>Errores:</strong>
-    {{ form.errors }}
 </div>
-{% endif %}
 {% endblock %}

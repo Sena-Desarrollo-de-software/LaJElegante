@@ -7,10 +7,10 @@
 
 {% block form_actions %}
 <div class="d-flex gap-2">
-    <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-secondary">
+    <a href="{% url 'rooms:habitacion_index' %}" class="btn btn-outline-secondary">
         <i class="fas fa-arrow-left"></i> Volver
     </a>
-    <a href="{% url 'rooms:habitacion_frame' %}" class="btn btn-info">
+    <a href="{% url 'rooms:habitacion_frame' %}" class="btn btn-outline-info">
         <i class="fas fa-download"></i> Descargar Plantilla
     </a>
 </div>
@@ -107,36 +107,63 @@
 <!-- Información adicional -->
 <div class="row mt-4">
     <div class="col-md-12">
-        <div class="card">
+        <div class="card shadow-sm">
             <div class="card-header">
                 <h5 class="card-title mb-0">
                     <i class="fas fa-info-circle"></i> Información Útil
                 </h5>
             </div>
+
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6">
-                        <h6>📋 Formatos soportados:</h6>
-                        <ul>
-                            <li>CSV (comma separated values)</li>
+                    <div class="col-md-4">
+                        <h6>Formatos soportados:</h6>
+                        <ul class="mb-3">
+                            <li>CSV</li>
                             <li>Excel (.xlsx, .xls)</li>
                         </ul>
                     </div>
-                    <div class="col-md-6">
-                        <h6>✅ Campos:</h6>
-                        <ul>
-                            <li><strong>numero_habitacion</strong> - Obligatorio</li>
-                            <li><strong>tipo_habitacion</strong> - Obligatorio</li>
-                            <li><strong>estado</strong> - Opcional (DISPONIBLE por defecto)</li>
+
+                    <div class="col-md-4">
+                        <h6>Campos:</h6>
+                        <ul class="mb-3">
+                            <li><strong>numero_habitacion</strong> (Obligatorio)</li>
+                            <li><strong>tipo_habitacion</strong> (Obligatorio)</li>
+                            <li><strong>estado</strong> (Opcional)</li>
                         </ul>
                     </div>
+
+                    <div class="col-md-4">
+                        <h6>Valores permitidos:</h6>
+
+                        <small class="text-muted">Tipos:</small>
+                        <ul class="mb-2">
+                            {% for tipo in tipos %}
+                                <li>{{ tipo.get_nombre_tipo_display }}</li>
+                            {% empty %}
+                                <li class="text-muted">No hay tipos registrados</li>
+                            {% endfor %}
+                        </ul>
+
+                        <small class="text-muted">Estados:</small>
+                        <ul>
+                            {% for value, label in estados %}
+                                <li>{{ value }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
                 </div>
+
                 <hr>
-                <div class="alert alert-info">
+
+                <div class="alert alert-info mb-0">
                     <i class="fas fa-lightbulb"></i>
-                    <strong>Consejo:</strong> Descarga la plantilla para ver el formato correcto. 
-                    Los tipos de habitación se importan por su NOMBRE, no por ID.
+                    <strong>Importante:</strong>
+                    Usa los valores EXACTOS mostrados arriba. 
+                    Los tipos de habitación se reconocen por nombre (no por ID).
                 </div>
+
             </div>
         </div>
     </div>
