@@ -109,3 +109,105 @@ class HabitacionImportForm(forms.ModelForm):
         if estado not in dict(Habitacion.ESTADO_HABITACION_CHOICES):
             return 'DISPONIBLE'
         return estado
+    
+class TipoHabitacionCreateForm(forms.ModelForm):
+    class Meta:
+        model = TipoHabitacion
+        fields = ["nombre_tipo", "descripcion", "capacidad_maxima"]
+        widgets = {
+            "nombre_tipo": forms.Select(attrs={
+                "class": "form-select"
+            }),
+            "descripcion": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Descripción opcional..."
+            }),
+            "capacidad_maxima": forms.NumberInput(attrs={
+                "class": "form-control",
+                "min": 1
+            }),
+        }
+
+    def clean_nombre_tipo(self):
+        nombre = self.cleaned_data["nombre_tipo"]
+
+        if TipoHabitacion.objects.filter(nombre_tipo=nombre).exists():
+            raise forms.ValidationError("Ya existe este tipo de habitación.")
+
+        return nombre
+    
+    def clean_capacidad_maxima(self):
+        capacidad = self.cleaned_data["capacidad_maxima"]
+
+        if capacidad <= 0:
+            raise forms.ValidationError("La capacidad debe ser mayor a 0.")
+
+        return capacidad
+
+class TipoHabitacionUpdateForm(TipoHabitacionCreateForm):
+
+    def __init__(self, *args, **kwargs):
+        self.instance = kwargs.get("instance")
+        super().__init__(*args, **kwargs)
+
+    def clean_nombre_tipo(self):
+        nombre = self.cleaned_data["nombre_tipo"]
+
+        qs = TipoHabitacion.objects.filter(nombre_tipo=nombre)
+
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs.exists():
+            raise forms.ValidationError("Ya existe este tipo de habitación.")
+
+        return nombre
+    
+class TipoHabitacionDeleteForm(forms.Form):
+    confirm = forms.CharField(
+        required=True,
+        label="Escribe el nombre del tipo para confirmar"
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.tipo = kwargs.pop("tipo")
+        super().__init__(*args, **kwargs)
+
+    def clean_confirm(self):
+        value = self.cleaned_data["confirm"].strip().upper()
+
+        if self.tipo.nombre_tipo != value:
+            raise forms.ValidationError("El nombre no coincide.")
+
+        return value
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if self.tipo.habitaciones.filter(is_active=True).exists():
+            raise forms.ValidationError(
+                "No puedes eliminar este tipo porque tiene habitaciones activas."
+            )
+
+        return cleaned_data
+
+class TipoHabitacionRestoreForm(forms.Form):
+    confirm = forms.BooleanField(
+        required=True,
+        label="Confirmo que deseo restaurar este tipo de habitación"
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.tipo = kwargs.pop("tipo")
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if self.tipo.habitaciones.filter(is_active=True).exists():
+            raise forms.ValidationError(
+                "No se puede restaurar porque ya existen habitaciones activas con este tipo."
+            )
+
+        return cleaned_data
