@@ -7,9 +7,10 @@ urlpatterns = [
     # === HORARIOS ===
     path('horario/', views.index_horario, name='horario_index'),
     path('horario-create/', views.create_horario, name='horario_create'),
-    path('horario-update/<int:pk>', views.update_horario, name='horario_update'),
+    path('horario-update/<int:pk>/', views.update_horario, name='horario_update'),
     path('horario-delete/<int:pk>', views.delete_horario, name='horario_delete'),
-    path('horario-trashcan/<int:pk>', views.trashcan_horario, name='horario_trashcan'),
+    path('horario-trashcan/', views.trashcan_horario, name='horario_trashcan'),
+    path('horario-restore/<int:pk>', views.restore_horario, name='horario_restore'),
     # === MESAS ===
     path('turno/', views.index_turno, name='turno_index'),
     path('turno-create/', views.create_turno, name='turno_create'),
