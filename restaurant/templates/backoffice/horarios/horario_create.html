@@ -1,0 +1,27 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Crear horario{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1 class="mb-4">Crear horario</h1>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            Guardar
+          </button>
+          <a href="{% url 'restaurant:horario_index' %}" class="btn btn-secondary">
+            Volver
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

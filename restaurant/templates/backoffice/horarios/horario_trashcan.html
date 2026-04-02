@@ -1,0 +1,51 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Papelera de horarios{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Papelera de horarios</h1>
+    <a href="{% url 'restaurant:horario_index' %}" class="btn btn-secondary">
+      Volver
+    </a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      {% if horarios %}
+        <div class="table-responsive">
+          <table class="table table-striped align-middle">
+            <thead>
+              <tr>
+                <th>Franja</th>
+                <th>Hora inicio</th>
+                <th>Hora fin</th>
+                <th>Capacidad máxima</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for horario in horarios %}
+                <tr>
+                  <td>{{ horario.get_turno_display }}</td>
+                  <td>{{ horario.hora_inicio }}</td>
+                  <td>{{ horario.hora_fin }}</td>
+                  <td>{{ horario.capacidad_maxima }}</td>
+                  <td>
+                    <a href="{% url 'restaurant:horario_restore' horario.pk %}" class="btn btn-sm btn-success">
+                      Restaurar
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="mb-0">No hay horarios eliminados.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

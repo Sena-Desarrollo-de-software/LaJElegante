@@ -1,0 +1,31 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Actualizar horario{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1 class="mb-4">Actualizar horario</h1>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <p class="text-muted">
+        Editando: <strong>{{ horario }}</strong>
+      </p>
+
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-warning">
+            Actualizar
+          </button>
+          <a href="{% url 'restaurant:horario_index' %}" class="btn btn-secondary">
+            Volver
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

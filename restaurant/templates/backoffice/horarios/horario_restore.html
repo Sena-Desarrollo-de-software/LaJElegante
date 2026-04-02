@@ -1,0 +1,30 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Restaurar horario{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1 class="mb-4 text-success">Restaurar horario</h1>
+
+  <div class="card border-success shadow-sm">
+    <div class="card-body">
+      <p>Estás a punto de restaurar este horario:</p>
+      <p><strong>{{ horario }}</strong></p>
+
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-success">
+            Confirmar restauración
+          </button>
+          <a href="{% url 'restaurant:horario_trashcan' %}" class="btn btn-secondary">
+            Volver
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
