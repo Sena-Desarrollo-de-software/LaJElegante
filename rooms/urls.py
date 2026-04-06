@@ -16,7 +16,7 @@ urlpatterns = [
     path('habitacion-process/', views.procesar_import_habitacion, name='habitacion_process'),
     # === RESERVA HABITACIÓN ===
     path("reserva-habitacion/", views.index_reserva_habitacion, name="reserva_habitacion_index"),
-    path("reserva-habitacion-create/", views.create_reserva_habitacion, name="reserva_habitacion_create"),
+    path("reserva-habitacion-create/<int:reserva_id>/", views.create_reserva_habitacion, name="reserva_habitacion_create"),
     path("reserva-habitacion-update/<int:pk>/", views.update_reserva_habitacion, name="reserva_habitacion_update"),
     path("reserva-habitacion-delete/<int:pk>", views.delete_reserva_habitacion, name="reserva_habitacion_delete"),
     path('reserva-habitacion-trashcan/<int:pk>', views.trashcan_reserva_habitacion, name='reserva_habitacion_trashcan'),

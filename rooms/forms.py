@@ -1,5 +1,6 @@
 from django import forms
-from .models import Habitacion, TipoHabitacion
+from django.core.exceptions import ValidationError
+from .models import Habitacion, TipoHabitacion, ReservaHabitacion
 
 class HabitacionCreateForm(forms.ModelForm):
     class Meta:
@@ -209,5 +210,70 @@ class TipoHabitacionRestoreForm(forms.Form):
             raise forms.ValidationError(
                 "No se puede restaurar porque ya existen habitaciones activas con este tipo."
             )
+
+        return cleaned_data
+
+class ReservaHabitacionCreateForm(forms.ModelForm):
+
+    class Meta:
+        model = ReservaHabitacion
+        fields = [
+            'habitacion',
+            'fecha_inicio',
+            'fecha_fin',
+            'cantidad_personas',
+            'descuento',
+            'observaciones'
+        ]
+
+        widgets = {
+            "fecha_inicio": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "fecha_fin": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+        }
+
+
+    def __init__(self, *args, **kwargs):
+        fecha_inicio = kwargs.pop('fecha_inicio', None)
+        fecha_fin = kwargs.pop('fecha_fin', None)
+
+        super().__init__(*args, **kwargs)
+
+        habitaciones = Habitacion.objects.filter(
+            is_active=True,
+            estado='DISPONIBLE'
+        ).select_related('tipo_habitacion')
+
+        if fecha_inicio and fecha_fin:
+            disponibles_ids = [
+                h.id for h in habitaciones
+                if h.disponible_en_fechas(fecha_inicio, fecha_fin)
+            ]
+
+            habitaciones = Habitacion.objects.filter(id__in=disponibles_ids)
+
+            if not disponibles_ids:
+                self.fields['habitacion'].help_text = "No hay habitaciones disponibles en esas fechas"
+
+        self.fields['habitacion'].queryset = habitaciones
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        instance = ReservaHabitacion(
+            habitacion=cleaned_data.get("habitacion"),
+            fecha_inicio=cleaned_data.get("fecha_inicio"),
+            fecha_fin=cleaned_data.get("fecha_fin"),
+            cantidad_personas=cleaned_data.get("cantidad_personas"),
+            descuento=cleaned_data.get("descuento"),
+            observaciones=cleaned_data.get("observaciones"),
+        )
+
+        if self.instance.pk:
+            instance.pk = self.instance.pk
+
+        try:
+            instance.clean()
+        except ValidationError as e:
+            self.add_error(None, e)
 
         return cleaned_data

@@ -105,10 +105,32 @@ class ReservaHabitacion(ReservaServicio):
 
     def clean(self):
         """Validaciones básicas antes de guardar"""
-        super().clean()
-        validar_fechas(self.fecha_inicio, self.fecha_fin)
-        validar_capacidad(self.cantidad_personas, self.habitacion.tipo_habitacion.capacidad_maxima)
-        validar_fechas_no_expiradas(self.fecha_inicio)
+        errores = {}
+        try:
+            validar_fechas(self.fecha_inicio, self.fecha_fin)
+        except ValidationError as e:
+            errores["fecha_fin"] = e.messages
+
+        try:
+            validar_fechas_no_expiradas(self.fecha_inicio)
+        except ValidationError as e:
+            errores["fecha_inicio"] = e.messages
+
+        if self.habitacion and self.cantidad_personas:
+            try:
+                validar_capacidad(
+                    self.cantidad_personas,
+                    self.habitacion.tipo_habitacion.capacidad_maxima
+                )
+            except ValidationError as e:
+                errores["cantidad_personas"] = e.messages
+
+        if self.habitacion and self.fecha_inicio and self.fecha_fin and self.hay_conflicto(habitacion=self.habitacion,fecha_inicio=self.fecha_inicio,fecha_fin=self.fecha_fin,exclude_id=self.pk):
+                errores["habitacion"] = ["Ya está reservada en ese rango de fechas"]
+
+        if errores:
+            raise ValidationError(errores)
+
 
     def _validar_reserva_nueva(self):
         """Validaciones exclusivas para nueva reserva"""
@@ -165,3 +187,23 @@ class ReservaHabitacion(ReservaServicio):
 
             self.calcular_precio()
             super().save(*args, **kwargs)
+    
+    @staticmethod
+    def validar_capacidad(habitacion, cantidad_personas):
+        if cantidad_personas > habitacion.tipo_habitacion.capacidad_maxima:
+            raise ValidationError("La cantidad de personas excede la capacidad")
+
+
+    @staticmethod
+    def hay_conflicto(habitacion, fecha_inicio, fecha_fin, exclude_id=None):
+        qs = ReservaHabitacion.objects.filter(
+            habitacion=habitacion,
+            fecha_inicio__lt=fecha_fin,
+            fecha_fin__gt=fecha_inicio,
+            is_active=True
+        )
+
+        if exclude_id:
+            qs = qs.exclude(pk=exclude_id)
+
+        return qs.exists()

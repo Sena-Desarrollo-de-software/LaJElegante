@@ -8,9 +8,10 @@ from weasyprint import HTML
 import csv
 from django.http import HttpResponse
 from .models import Habitacion, TipoHabitacion, ReservaHabitacion
-from .forms import HabitacionCreateForm, HabitacionUpdateForm, HabitacionDeleteForm, HabitacionRestoreForm, TipoHabitacionCreateForm, TipoHabitacionUpdateForm, TipoHabitacionDeleteForm, TipoHabitacionRestoreForm
+from .forms import HabitacionCreateForm, HabitacionUpdateForm, HabitacionDeleteForm, HabitacionRestoreForm, TipoHabitacionCreateForm, TipoHabitacionUpdateForm, TipoHabitacionDeleteForm, TipoHabitacionRestoreForm, ReservaHabitacionCreateForm
 from .importers import HabitacionImporter
 from core.utils import ahora
+from core.models import Reserva
 from django.contrib.contenttypes.models import ContentType
 from finance.models import get_tarifa_vigente
 
@@ -212,9 +213,59 @@ def procesar_import_habitacion(request):
 def index_reserva_habitacion(request):
     return render(request,'backoffice/reserva_habitaciones/reserva_habitacion_index.html')
 
-@require_POST
-def create_reserva_habitacion(request):
-    return render(request,'backoffice/reserva_habitaciones/reserva_habitacion_create.html')
+from django.contrib import messages
+from datetime import datetime
+
+def parse_date(fecha):
+    return datetime.strptime(fecha, "%Y-%m-%d").date() if fecha else None
+
+
+@login_required
+@permission_required("rooms.add_reservahabitacion", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@csrf_protect
+def create_reserva_habitacion(request, reserva_id):
+    reserva = get_object_or_404(Reserva, pk=reserva_id)
+
+    fecha_inicio_raw = request.GET.get("fecha_inicio") or request.POST.get("fecha_inicio")
+    fecha_fin_raw = request.GET.get("fecha_fin") or request.POST.get("fecha_fin")
+
+    fecha_inicio = parse_date(fecha_inicio_raw)
+    fecha_fin = parse_date(fecha_fin_raw)
+
+    form = ReservaHabitacionCreateForm(
+        request.POST or None,
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin
+    )
+
+    if request.method == "POST":
+        if form.is_valid():
+            reserva_habitacion = form.save(commit=False)
+            reserva_habitacion.reserva = reserva
+            reserva_habitacion.created_by = request.user
+            reserva_habitacion.updated_by = request.user
+            reserva_habitacion.save()
+
+            messages.success(
+                request,
+                f"Habitación asignada correctamente del {fecha_inicio} al {fecha_fin}"
+            )
+
+            return redirect("backoffice:reserva_detail", pk=reserva.id)
+
+        else:
+            messages.error(
+                request,
+                "Hubo un error al asignar la habitación. Verifica los datos."
+            )
+
+    return render(request, "backoffice/reserva_habitaciones/reserva_habitacion_create.html", {
+        "form": form,
+        "reserva": reserva,
+        "fecha_inicio": fecha_inicio,
+        "fecha_fin": fecha_fin,
+    })
 
 @require_http_methods(['POST','GET'])
 def update_reserva_habitacion(request):

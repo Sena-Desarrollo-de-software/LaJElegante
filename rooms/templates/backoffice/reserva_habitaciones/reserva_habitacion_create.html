@@ -1,0 +1,168 @@
+{% extends "backoffice/layouts/base_form.html" %}
+{% load l10n %}
+{% load humanize %}
+
+{% block title %}Agregar Habitación a Reserva{% endblock %}
+
+{% block form_title %}Nueva Asignación de Habitación{% endblock %}
+{% block form_subtitle %}
+Registrar una habitación dentro de la reserva
+{% endblock %}
+
+{% block form_actions %}
+  <a href="{% url 'backoffice:reserva_index' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Volver
+  </a>
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+
+    <div class="card shadow-sm border-0 mb-3">
+      <div class="card-body">
+        <form method="get">
+          <div class="row g-2">
+
+            <div class="col-md-5">
+              <label class="form-label fw-semibold">Fecha inicio</label>
+              <input type="date" name="fecha_inicio" class="form-control"
+                     value="{{ fecha_inicio|date:'Y-m-d' }}">
+            </div>
+
+            <div class="col-md-5">
+              <label class="form-label fw-semibold">Fecha fin</label>
+              <input type="date" name="fecha_fin" class="form-control"
+                     value="{{ fecha_fin|date:'Y-m-d' }}">
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-primary w-100">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {% if fecha_inicio and fecha_fin %}
+
+      <div class="alert alert-info">
+        <i class="bi bi-calendar-check"></i>
+        Disponibilidad del 
+        <strong>{{ fecha_inicio|date:"d M Y" }}</strong>
+        al
+        <strong>{{ fecha_fin|date:"d M Y" }}</strong>
+      </div>
+
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">
+                {{ form.habitacion.label }}
+              </label>
+              {{ form.habitacion }}
+
+              {% if form.habitacion.help_text %}
+                <small class="text-muted">{{ form.habitacion.help_text }}</small>
+              {% endif %}
+
+              {% if form.habitacion.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.habitacion.errors.0 }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Fecha inicio</label>
+              <input type="date" class="form-control"
+                     value="{{ fecha_inicio|date:'Y-m-d' }}" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Fecha fin</label>
+              <input type="date" class="form-control"
+                     value="{{ fecha_fin|date:'Y-m-d' }}" readonly>
+            </div>
+
+            <input type="hidden" name="fecha_inicio" value="{{ fecha_inicio|date:'Y-m-d' }}">
+            <input type="hidden" name="fecha_fin" value="{{ fecha_fin|date:'Y-m-d' }}">
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">
+                {{ form.cantidad_personas.label }}
+              </label>
+              {{ form.cantidad_personas }}
+
+              {% if form.cantidad_personas.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.cantidad_personas.errors.0 }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">
+                {{ form.descuento.label }}
+              </label>
+              {{ form.descuento }}
+
+              {% if form.descuento.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.descuento.errors.0 }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">
+                {{ form.observaciones.label }}
+              </label>
+              {{ form.observaciones }}
+
+              {% if form.observaciones.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.observaciones.errors.0 }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-3">
+              <a href="{% url 'backoffice:reserva_index' %}" class="btn btn-outline-secondary">
+                Cancelar
+              </a>
+              <button type="submit" class="btn btn-primary">
+                Guardar
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+    {% else %}
+
+      <div class="alert alert-info text-center">
+        <i class="bi bi-info-circle"></i>
+        Selecciona un rango de fechas para ver habitaciones disponibles
+      </div>
+
+    {% endif %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger mt-3">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}
