@@ -102,28 +102,44 @@ class DashboardQuery:
         ).count()
     
     @staticmethod
-    def ingresos_hoy():
+    def ingresos_reales_hoy():
         hoy = ahora().date()
 
-        reservas = Reserva.objects.filter(
-            fecha_reserva__date=hoy
+        return sum(
+            r.total for r in Reserva.objects.filter(
+                fecha_reserva__date=hoy,
+                estado__in=["CONFIRMADA", "COMPLETADA"]
+            )
         )
 
-        total = 0
 
-        for r in reservas:
-            if r.estado in ["CONFIRMADA", "COMPLETADA"]:
-                total += r.total
-            elif r.estado == "CANCELADA":
-                total += getattr(r, "penalizacion", 0)
+    @staticmethod
+    def penalizaciones_hoy():
+        hoy = ahora().date()
 
-        return total
+        return sum(
+            getattr(r, "penalizacion", 0)
+            for r in Reserva.objects.filter(
+                fecha_reserva__date=hoy,
+                estado="CANCELADA"
+            )
+        )
+
+
+    @staticmethod
+    def ingresos_totales_hoy():
+        return (
+            DashboardQuery.ingresos_reales_hoy() +
+            DashboardQuery.penalizaciones_hoy()
+        )
 
     @staticmethod
     def resumen_general():
         return {
             "reservas_hoy": DashboardQuery.reservas_hoy(),
-            "ingresos_hoy": float(DashboardQuery.ingresos_hoy()),
+            "ingresos_reales": float(DashboardQuery.ingresos_reales_hoy()),
+            "penalizaciones": float(DashboardQuery.penalizaciones_hoy()),
+            "ingresos_totales": float(DashboardQuery.ingresos_totales_hoy()),
             "personas_hotel": DashboardQuery.personas_en_hotel(),
             "checkins": DashboardQuery.checkins_hoy(),
             "checkouts": DashboardQuery.checkouts_hoy(),

@@ -18,8 +18,8 @@ urlpatterns = [
     path("reserva-habitacion/", views.index_reserva_habitacion, name="reserva_habitacion_index"),
     path("reserva-habitacion-create/<int:reserva_id>/", views.create_reserva_habitacion, name="reserva_habitacion_create"),
     path("reserva-habitacion-update/<int:pk>/", views.update_reserva_habitacion, name="reserva_habitacion_update"),
-    path("reserva-habitacion-delete/<int:pk>", views.delete_reserva_habitacion, name="reserva_habitacion_delete"),
-    path('reserva-habitacion-trashcan/<int:pk>', views.trashcan_reserva_habitacion, name='reserva_habitacion_trashcan'),
+    path("reserva-habitacion-cancel/<int:pk>", views.cancel_reserva_habitacion, name="reserva_habitacion_cancel"),
+    path('reserva-habitacion-import/', views.import_reserva_habitacion, name='reserva_habitacion_import'),
     # === TIPO HABITACIÓN
     path("tipo-habitacion/", views.index_tipo_habitacion, name="tipo_habitacion_index"),
     path("tipo-habitacion-create/", views.create_tipo_habitacion, name="tipo_habitacion_create"),
