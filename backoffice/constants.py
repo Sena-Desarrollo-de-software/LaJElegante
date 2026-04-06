@@ -1,32 +1,33 @@
 SIDEBAR_CONFIG = {
     'Administrador': {
-        'dashboard': ['dashboard'],
+        'dashboard': ['dashboard', 'reserva'],
         'finance': ['tarifa', 'impuesto', 'temporada'],
-        'restaurant': ['turno', 'horario', 'reservarestaurante'],
-        'rooms': ['tipohabitacion', 'habitacion', 'reservahabitacion'],
+        'restaurant': ['turno', 'horario', 'reserva_restaurante'],
+        'rooms': ['tipohabitacion', 'habitacion', 'reserva_habitacion'],
         'users': ['usuario', 'group'],
+        'admin_panel': ['admin_panel'],
     },
     'Gerente General': {
-        'dashboard': ['dashboard'],
+        'dashboard': ['dashboard', 'reserva'],
         'finance': ['tarifa', 'impuesto', 'temporada'],
-        'restaurant': ['turno', 'horario', 'reservarestaurante'],
-        'rooms': ['tipohabitacion', 'habitacion', 'reservahabitacion'],
+        'restaurant': ['turno', 'horario', 'reserva_restaurante'],
+        'rooms': ['tipohabitacion', 'habitacion', 'reserva_habitacion'],
     },
     'Gerente de Habitaciones': {
-        'dashboard': ['dashboard'],
+        'dashboard': ['dashboard', 'reserva'],
         'finance': ['tarifa', 'impuesto', 'temporada'],
-        'rooms': ['tipohabitacion', 'habitacion', 'reservahabitacion'],
+        'rooms': ['tipohabitacion', 'habitacion', 'reserva_habitacion'],
     },
     'Gerente de Comidas y Bebidas': {
-        'dashboard': ['dashboard'],
+        'dashboard': ['dashboard', 'reserva'],
         'finance': ['tarifa', 'impuesto', 'temporada'],
-        'restaurant': ['turno', 'horario', 'reservarestaurante'],
+        'restaurant': ['turno', 'horario', 'reserva_restaurante'],
     },
     'Asistente Administrativo': {
-        'dashboard': ['dashboard'],
+        'dashboard': ['dashboard', 'reserva'],
         'finance': ['tarifa', 'impuesto', 'temporada'],
-        'restaurant': ['turno', 'horario', 'reservarestaurante'],
-        'rooms': ['tipohabitacion', 'habitacion', 'reservahabitacion'],
+        'restaurant': ['turno', 'horario', 'reserva_restaurante'],
+        'rooms': ['tipohabitacion', 'habitacion', 'reserva_habitacion'],
     },
 }
 

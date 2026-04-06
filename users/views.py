@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods, require_POST, require_GET
 from django.views.decorators.http import require_GET,require_http_methods
 
+app_name = 'rooms'
 
 # === USUARIO ===
 @require_GET
@@ -44,3 +45,8 @@ def delete_grupo(request):
 @require_http_methods(['POST','GET'])
 def trashcan_grupo(request):
     return render(request,'backoffice/grupos/grupo_trashcan.html')
+
+#Metodo de actualizacion de perfil
+
+def update_usuario_auto(request):
+    return(request,'backoffice/profile/profile_edit.html')
