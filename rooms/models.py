@@ -1,7 +1,7 @@
 from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
-from core.models import BaseAuditModel, ReservaServicio
+from core.models import BaseAuditModel, ReservaServicio, Reserva
 from core.utils import calcular_dias, validar_capacidad, validar_fechas
 from finance.models import get_tarifa_vigente
 from .utils import validar_tiempo_reserva_nueva,validar_tiempo_modificacion_reserva,validar_fechas_no_expiradas
@@ -77,8 +77,12 @@ class Habitacion(BaseAuditModel):
 
         return not reservas.exists()
 
-
-class ReservaHabitacion(ReservaServicio):
+class ReservaHabitacion(ReservaServicio):    
+    reserva = models.ForeignKey(
+        Reserva,
+        on_delete=models.CASCADE,
+        related_name='reserva_habitaciones'
+    )
     habitacion = models.ForeignKey(
         Habitacion,
         on_delete=models.PROTECT,
@@ -105,10 +109,32 @@ class ReservaHabitacion(ReservaServicio):
 
     def clean(self):
         """Validaciones básicas antes de guardar"""
-        super().clean()
-        validar_fechas(self.fecha_inicio, self.fecha_fin)
-        validar_capacidad(self.cantidad_personas, self.habitacion.tipo_habitacion.capacidad_maxima)
-        validar_fechas_no_expiradas(self.fecha_inicio)
+        errores = {}
+        try:
+            validar_fechas(self.fecha_inicio, self.fecha_fin)
+        except ValidationError as e:
+            errores["fecha_fin"] = e.messages
+
+        try:
+            validar_fechas_no_expiradas(self.fecha_inicio)
+        except ValidationError as e:
+            errores["fecha_inicio"] = e.messages
+
+        if self.habitacion and self.cantidad_personas:
+            try:
+                validar_capacidad(
+                    self.cantidad_personas,
+                    self.habitacion.tipo_habitacion.capacidad_maxima
+                )
+            except ValidationError as e:
+                errores["cantidad_personas"] = e.messages
+
+        if self.habitacion and self.fecha_inicio and self.fecha_fin and self.hay_conflicto(habitacion=self.habitacion,fecha_inicio=self.fecha_inicio,fecha_fin=self.fecha_fin,exclude_id=self.pk):
+                errores["habitacion"] = ["Ya está reservada en ese rango de fechas"]
+
+        if errores:
+            raise ValidationError(errores)
+
 
     def _validar_reserva_nueva(self):
         """Validaciones exclusivas para nueva reserva"""
@@ -165,3 +191,23 @@ class ReservaHabitacion(ReservaServicio):
 
             self.calcular_precio()
             super().save(*args, **kwargs)
+    
+    @staticmethod
+    def validar_capacidad(habitacion, cantidad_personas):
+        if cantidad_personas > habitacion.tipo_habitacion.capacidad_maxima:
+            raise ValidationError("La cantidad de personas excede la capacidad")
+
+
+    @staticmethod
+    def hay_conflicto(habitacion, fecha_inicio, fecha_fin, exclude_id=None):
+        qs = ReservaHabitacion.objects.filter(
+            habitacion=habitacion,
+            fecha_inicio__lt=fecha_fin,
+            fecha_fin__gt=fecha_inicio,
+            is_active=True
+        )
+
+        if exclude_id:
+            qs = qs.exclude(pk=exclude_id)
+
+        return qs.exists()

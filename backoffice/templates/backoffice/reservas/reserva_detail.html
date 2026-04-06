@@ -1,0 +1,98 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Detalle de Reserva{% endblock %}
+
+{% block form_title %}Reserva #{{ reserva.id }}{% endblock %}
+{% block form_subtitle %}Gestión de servicios de la reserva{% endblock %}
+
+{% block form_actions %}
+  <a href="{% url 'backoffice:reserva_index' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Volver
+  </a>
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+
+  <div class="col-12 col-lg-4">
+    <div class="card shadow-sm border-0 mb-3">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3">Información</h5>
+
+        <p><strong>Usuario:</strong> {{ reserva.usuario }}</p>
+        <p><strong>Estado:</strong><span class="badge bg-warning">{{ reserva.estado }}</span></p>
+        <p><strong>Fecha:</strong> {{ reserva.fecha_reserva }}</p>
+
+        <hr>
+
+        <h5 class="fw-bold">
+          Total: ${{ reserva.total }}
+        </h5>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Agregar servicios</h6>
+
+        <a href="{% url 'rooms:reserva_habitacion_create' reserva.id %}" class="btn btn-primary w-100 mb-2">
+          <i class="bi bi-door-open"></i> Agregar Habitación
+        </a>
+        <a href="{% url 'rooms:reserva_habitacion_index' %}" class="btn btn-outline-secondary w-100 mb-2"">
+          <i class="bi bi-arrow-left"></i> Reservas de Habitación
+        </a>
+        {# Futuro #}
+        {# <a href="#" class="btn btn-outline-primary w-100 mb-2">+ Restaurante</a> #}
+        {# <a href="#" class="btn btn-outline-primary w-100">+ Spa</a> #}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-8">
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3">Habitaciones</h5>
+
+        {% if reserva.reserva_habitaciones.all %}
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>Habitación</th>
+                  <th>Fechas</th>
+                  <th>Cantidad</th>
+                  <th>Estado</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in reserva.reserva_habitaciones.all %}
+                  <tr>
+                    <td>{{ item.habitacion }}</td>
+                    <td>
+                      {{ item.fecha_inicio }} <br>
+                      <small class="text-muted">a</small><br>
+                      {{ item.fecha_fin }}
+                    </td>
+                    <td>{{ item.cantidad }}</td>
+                    <td>{{ item.estado }}</td>
+                    <td>${{ item.precio_total }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted">No hay habitaciones agregadas.</p>
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

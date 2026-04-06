@@ -16,4 +16,6 @@ urlpatterns = [
     path("grupo-update/<int:pk>/", views.update_grupo, name="grupo_update"),
     path("grupo-delete/<int:pk>", views.delete_grupo, name="grupo_delete"),
     path('grupo-trashcan/<int:pk>', views.trashcan_grupo, name='grupo_trashcan'),
+    # === PERFIL ===
+    path("perfil-update/<int:pk>", views.update_usuario_auto, name="profile_update")
 ]

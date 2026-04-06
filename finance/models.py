@@ -2,6 +2,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from core.models import BaseAuditModel
+from core.constants import SERVICIOS_TARIFABLES
 from django.db import models
 from decimal import Decimal
 
@@ -250,6 +251,25 @@ class Tarifa(BaseAuditModel):
         verbose_name = 'tarifa'
         verbose_name_plural = 'tarifas'
     
+    def get_tipo_servicio_config(self):
+        if not self.servicio_tipo:
+            return None
+
+        key = (self.servicio_tipo.app_label, self.servicio_tipo.model)
+
+        config = SERVICIOS_TARIFABLES.get(key)
+
+        if not config:
+            return None
+
+        nombre = config.get('nombre', '').upper()
+
+        if 'HABITACION' in nombre:
+            return 'HABITACION'
+        elif 'RESTAURANTE' in nombre:
+            return 'RESTAURANTE'
+        return None
+
     def calcular_precio_final(self, es_extranjero=False):
         precio, _ = self._calcular_precios(es_extranjero)
         return precio
@@ -294,7 +314,8 @@ class Tarifa(BaseAuditModel):
             if es_extranjero and not impuesto.aplica_extranjeros:
                 continue
             
-            if impuesto.aplica_a not in ['TODOS', 'HABITACION']:
+            tipo_servicio = self.get_tipo_servicio_config()
+            if impuesto.aplica_a not in ['TODOS', tipo_servicio]:
                 continue
             
             valor_impuesto = precio * (impuesto.porcentaje / 100)

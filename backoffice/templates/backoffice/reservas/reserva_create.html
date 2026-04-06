@@ -1,0 +1,74 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Crear Reserva{% endblock %}
+
+{% block form_title %}Nueva Reserva{% endblock %}
+{% block form_subtitle %}Registrar una nueva reserva{% endblock %}
+
+{% block form_actions %}
+  <a href="{% url 'backoffice:reserva_index' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Volver
+  </a>
+{% endblock %}
+
+{% block content %}
+<input type="hidden" name="next" value="{{ request.GET.next }}">
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-5">
+    
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              {{ form.usuario.label }}
+            </label>
+            {{ form.usuario }}
+
+            {% if form.usuario.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.usuario.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              {{ form.estado.label }}
+            </label>
+            {{ form.estado }}
+
+            {% if form.estado.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.estado.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <a href="{% url 'backoffice:reserva_index' %}" class="btn btn-outline-secondary">
+              Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary">
+              Guardar
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger mt-3">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}
