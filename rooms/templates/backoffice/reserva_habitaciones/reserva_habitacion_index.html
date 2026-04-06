@@ -55,11 +55,8 @@ Listado de habitaciones asignadas a reservas
           Limpiar
         </a>
 
-        <a href="?{{ request.GET.urlencode }}&export=pdf"
-          target="_blank"
-          class="btn btn-outline-danger btn-sm">
-          PDF
-        </a>
+        <a href="?{{ request.GET.urlencode }}&export=pdf" target="_blank" class="btn btn-outline-danger btn-sm">PDF</a>
+        <a href="{% url 'rooms:reserva_habitacion_import' %}" class="btn btn-outline-success btn-sm">Importar</a>
       </div>
 
     </form>
