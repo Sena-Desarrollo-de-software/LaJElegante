@@ -277,3 +277,28 @@ class ReservaHabitacionCreateForm(forms.ModelForm):
             self.add_error(None, e)
 
         return cleaned_data
+    
+
+class ReservaHabitacionUpdateForm(forms.ModelForm):
+
+
+    class Meta:
+        model = ReservaHabitacion
+        fields = [
+            'descuento',
+            'observaciones'
+        ]
+        widgets = {
+            "observaciones": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3
+            }),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if self.instance.pk:
+            if hasattr(self.instance, 'estado') and self.instance.estado != "PENDIENTE":
+                raise ValidationError("Solo se pueden editar reservas en estado PENDIENTE.")
+        return cleaned_data

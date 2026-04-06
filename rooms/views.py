@@ -8,7 +8,7 @@ from weasyprint import HTML
 import csv
 from django.http import HttpResponse
 from .models import Habitacion, TipoHabitacion, ReservaHabitacion
-from .forms import HabitacionCreateForm, HabitacionUpdateForm, HabitacionDeleteForm, HabitacionRestoreForm, TipoHabitacionCreateForm, TipoHabitacionUpdateForm, TipoHabitacionDeleteForm, TipoHabitacionRestoreForm, ReservaHabitacionCreateForm
+from .forms import HabitacionCreateForm, HabitacionUpdateForm, HabitacionDeleteForm, HabitacionRestoreForm, TipoHabitacionCreateForm, TipoHabitacionUpdateForm, TipoHabitacionDeleteForm, TipoHabitacionRestoreForm, ReservaHabitacionCreateForm, ReservaHabitacionUpdateForm
 from .importers import HabitacionImporter
 from core.utils import ahora
 from core.models import Reserva
@@ -295,9 +295,30 @@ def create_reserva_habitacion(request, reserva_id):
         "fecha_fin": fecha_fin,
     })
 
-@require_http_methods(['POST','GET'])
-def update_reserva_habitacion(request):
-    return render(request,'backoffice/reserva_habitaciones/reserva_habitacion_update.html')
+@login_required
+@permission_required("rooms.change_reservahabitacion", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@csrf_protect
+def update_reserva_habitacion(request, pk):
+    reserva_habitacion = get_object_or_404(ReservaHabitacion, pk=pk, is_active=True)
+
+    if request.method == "POST":
+        form = ReservaHabitacionUpdateForm(request.POST, instance=reserva_habitacion)
+        if form.is_valid():
+            reserva_habitacion = form.save(commit=False)
+            reserva_habitacion.updated_by = request.user
+            reserva_habitacion.save()
+            messages.success(request, "Reserva de habitación actualizada correctamente.")
+            return redirect('rooms:reserva_habitacion_index')
+        else:
+            messages.error(request, "Corrige los errores para continuar.")
+    else:
+        form = ReservaHabitacionUpdateForm(instance=reserva_habitacion)
+
+    return render(request, "backoffice/reserva_habitaciones/reserva_habitacion_update.html", {
+        "form": form,
+        "reserva_habitacion": reserva_habitacion
+    })
 
 @require_http_methods(['POST','GET'])
 def delete_reserva_habitacion(request):
