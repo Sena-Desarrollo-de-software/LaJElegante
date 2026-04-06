@@ -439,6 +439,26 @@ def cancel_reserva_habitacion(request, pk):
         "penalizacion": penalizacion,
         "requiere_confirmacion": requiere_confirmacion
     })
+
+@login_required
+@permission_required("rooms.add_reservahabitacion", raise_exception=True)
+def import_reserva_habitacion(request):
+
+    estados = ReservaHabitacion.ESTADO_RESERVA_CHOICES
+
+    context = {
+        'title': 'Importar Reservas de Habitación',
+        'subtitle': 'Carga masiva desde archivo CSV/Excel',
+        'is_staff': request.user.is_staff,
+        'datawizard_url': '/admin/sources/filesource/add/' if request.user.is_staff else None,
+        'estados': estados
+    }
+
+    return render(
+        request,
+        'backoffice/reserva_habitaciones/reserva_habitacion_import.html',
+        context
+    )
 # === TIPO HABITACION ===
 TIPO_HABITACION_INDEX = "rooms:tipo_habitacion_index"
 
