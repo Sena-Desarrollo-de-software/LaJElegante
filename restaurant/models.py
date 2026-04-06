@@ -1,5 +1,5 @@
 from django.db import models, transaction
-from core.models import BaseAuditModel, ReservaServicio
+from core.models import BaseAuditModel, ReservaServicio, Reserva
 from django.core.exceptions import ValidationError
 from core.utils import ahora,dentro_de,combinar_fecha_hora
 from core.constants import TIEMPO_LIMITE_RESTAURANTE_HORAS, CAPACIDAD_MAXIMA_TURNO
@@ -107,6 +107,11 @@ class Turno(BaseAuditModel):
 
 # === RESERVA RESTAURANTE ===
 class ReservaRestaurante(ReservaServicio):
+    reserva = models.ForeignKey(
+        Reserva,
+        on_delete=models.CASCADE,
+        related_name='reserva_restaurantes'
+    )
     turno = models.ForeignKey(
         Turno,
         on_delete=models.PROTECT,

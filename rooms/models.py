@@ -1,7 +1,7 @@
 from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
-from core.models import BaseAuditModel, ReservaServicio
+from core.models import BaseAuditModel, ReservaServicio, Reserva
 from core.utils import calcular_dias, validar_capacidad, validar_fechas
 from finance.models import get_tarifa_vigente
 from .utils import validar_tiempo_reserva_nueva,validar_tiempo_modificacion_reserva,validar_fechas_no_expiradas
@@ -77,8 +77,12 @@ class Habitacion(BaseAuditModel):
 
         return not reservas.exists()
 
-
-class ReservaHabitacion(ReservaServicio):
+class ReservaHabitacion(ReservaServicio):    
+    reserva = models.ForeignKey(
+        Reserva,
+        on_delete=models.CASCADE,
+        related_name='reserva_habitaciones'
+    )
     habitacion = models.ForeignKey(
         Habitacion,
         on_delete=models.PROTECT,

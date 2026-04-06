@@ -4,14 +4,14 @@ SERVICIOS_CONFIG = [
     {
         'app': 'rooms',
         'model': 'ReservaHabitacion',
-        'related_name': 'reservahabitaciones',
+        'related_name': 'reserva_habitaciones',
         'verbose_name': 'Habitaciones',
         'activo': True,
     },
     {
         'app': 'restaurant',
         'model': 'ReservaRestaurante',
-        'related_name': 'reservarestaurantes',
+        'related_name': 'reserva_restaurantes',
         'verbose_name': 'Restaurante',
         'activo': True,
     },

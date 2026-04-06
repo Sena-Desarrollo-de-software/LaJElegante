@@ -197,7 +197,6 @@ class ReservaServicio(BaseAuditModel):
         Reserva,
         on_delete=models.CASCADE,
         #Asociacion de abstraccion que se define en cada clase
-        related_name='%(class)ss'
     )
     
     tarifa_aplicada = models.ForeignKey(
