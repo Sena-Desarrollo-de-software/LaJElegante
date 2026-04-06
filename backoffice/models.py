@@ -100,7 +100,7 @@ class DashboardQuery:
         return Reserva.objects.filter(
             fecha_reserva__date=hoy
         ).count()
-
+    
     @staticmethod
     def ingresos_hoy():
         hoy = ahora().date()
@@ -109,7 +109,15 @@ class DashboardQuery:
             fecha_reserva__date=hoy
         )
 
-        return sum(r.total for r in reservas)
+        total = 0
+
+        for r in reservas:
+            if r.estado in ["CONFIRMADA", "COMPLETADA"]:
+                total += r.total
+            elif r.estado == "CANCELADA":
+                total += getattr(r, "penalizacion", 0)
+
+        return total
 
     @staticmethod
     def resumen_general():
