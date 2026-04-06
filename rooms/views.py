@@ -209,9 +209,37 @@ def procesar_import_habitacion(request):
     return redirect('rooms:habitacion_index')
 
 # === RESERVA HABITACION ===
+@login_required
+@permission_required("rooms.view_reservahabitacion", raise_exception=True)
 @require_GET
 def index_reserva_habitacion(request):
-    return render(request,'backoffice/reserva_habitaciones/reserva_habitacion_index.html')
+
+    reservas = ReservaHabitacion.objects.select_related(
+        "habitacion",
+        "habitacion__tipo_habitacion",
+        "reserva"
+    ).filter(is_active=True)
+
+    fecha_inicio = request.GET.get("fecha_inicio")
+    fecha_fin = request.GET.get("fecha_fin")
+    habitacion_id = request.GET.get("habitacion")
+
+    if fecha_inicio:
+        reservas = reservas.filter(fecha_inicio__gte=fecha_inicio)
+
+    if fecha_fin:
+        reservas = reservas.filter(fecha_fin__lte=fecha_fin)
+
+    if habitacion_id:
+        reservas = reservas.filter(habitacion_id=habitacion_id)
+
+    habitaciones = Habitacion.objects.all()
+
+    return render(request, "backoffice/reserva_habitaciones/reserva_habitacion_index.html", {
+        "reservas": reservas,
+        "habitaciones": habitaciones,
+        "filtros": request.GET
+    })
 
 from django.contrib import messages
 from datetime import datetime

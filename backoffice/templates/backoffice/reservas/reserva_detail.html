@@ -39,7 +39,9 @@
         <a href="{% url 'rooms:reserva_habitacion_create' reserva.id %}" class="btn btn-primary w-100 mb-2">
           <i class="bi bi-door-open"></i> Agregar Habitación
         </a>
-
+        <a href="{% url 'rooms:reserva_habitacion_index' %}" class="btn btn-outline-secondary w-100 mb-2"">
+          <i class="bi bi-arrow-left"></i> Reservas de Habitación
+        </a>
         {# Futuro #}
         {# <a href="#" class="btn btn-outline-primary w-100 mb-2">+ Restaurante</a> #}
         {# <a href="#" class="btn btn-outline-primary w-100">+ Spa</a> #}
@@ -53,7 +55,7 @@
       <div class="card-body">
         <h5 class="fw-bold mb-3">Habitaciones</h5>
 
-        {% if reserva.reservahabitacions.all %}
+        {% if reserva.reserva_habitaciones.all %}
           <div class="table-responsive">
             <table class="table align-middle">
               <thead>
@@ -66,7 +68,7 @@
                 </tr>
               </thead>
               <tbody>
-                {% for item in reserva.reservahabitacions.all %}
+                {% for item in reserva.reserva_habitaciones.all %}
                   <tr>
                     <td>{{ item.habitacion }}</td>
                     <td>

@@ -20,12 +20,13 @@ def dashboard(request):
 @csrf_protect
 def create_reserva(request):
     form = ReservaCreateForm(request.POST or None)
+    next_view = request.GET.get("next") or request.POST.get("next")
 
     if request.method == "POST" and form.is_valid():
         reserva = form.save(user=request.user)
-
+        if next_view == "reserva_habitacion":
+            return redirect("rooms:reserva_habitacion_create", reserva_id=reserva.id)
         return redirect("backoffice:reserva_detail", reserva.id)
-
     return render(request, "backoffice/reservas/reserva_create.html", {
         "form": form
     })
@@ -45,7 +46,6 @@ def detail_reserva(request, pk):
 def index_reserva(request):
     reservas = Reserva.objects.select_related("usuario").all().order_by("-id")
 
-    # 🔎 FILTROS
     usuario = request.GET.get("usuario")
     estado = request.GET.get("estado")
     fecha_inicio = request.GET.get("fecha_inicio")

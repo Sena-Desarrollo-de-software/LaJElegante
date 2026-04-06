@@ -11,7 +11,10 @@ Registrar una habitación dentro de la reserva
 
 {% block form_actions %}
   <a href="{% url 'backoffice:reserva_index' %}" class="btn btn-outline-secondary">
-    <i class="bi bi-arrow-left"></i> Volver
+    <i class="bi bi-arrow-left"></i> Volver a Reserva principal
+  </a>
+  <a href="{% url 'rooms:reserva_habitacion_index' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Volver a Reservas de Habitación    
   </a>
 {% endblock %}
 
