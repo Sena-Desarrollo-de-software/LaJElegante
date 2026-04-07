@@ -334,9 +334,8 @@ def generar_pdf_reservas_restaurante(reservas, filtros, request):
         'turnos': Turno.objects.all(),
     }
     html_string = render_to_string('backoffice/reservas_restaurante/reserva_restaurante_pdf.html', context)
-    pdf = HTML(string=html_string).write_pdf()
+    pdf = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
     return pdf
-
 
 @login_required
 @permission_required("restaurant.view_reservarestaurante", raise_exception=True)
