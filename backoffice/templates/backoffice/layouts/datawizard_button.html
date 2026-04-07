@@ -1,0 +1,41 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}{{ page_title|default:"Importar Datos" }}{% endblock %}
+
+{% block form_title %}{{ form_title|default:"Importar Datos" }}{% endblock %}
+
+{% block form_subtitle %}{{ form_subtitle|default:"Usa Data Wizard para importaciones masivas" }}{% endblock %}
+
+{% block form_actions %}
+<div class="d-flex gap-2">
+    <a href="{{ return_url|default:'backoffice:dashboard' }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+
+{% if is_staff %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-tools"></i> Opción para Administradores
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>Data Wizard:</strong> Importación avanzada con mapeo de columnas.
+                </p>
+                <a href="{{ datawizard_url }}" target="_blank" class="btn btn-outline-primary">
+                    Abrir Data Wizard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

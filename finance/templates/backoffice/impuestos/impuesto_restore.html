@@ -1,23 +1,25 @@
 {% extends "backoffice/layouts/base_form.html" %}
 
-{% block title %}Archivar Impuesto{% endblock %}
+{% block title %}Restaurar Impuesto{% endblock %}
 
-{% block form_title %}Archivar Impuesto{% endblock %}
-{% block form_subtitle %}Esta acción desactiva el impuesto en el sistema{% endblock %}
+{% block form_title %}Restaurar Impuesto{% endblock %}
+{% block form_subtitle %}
+Reincorpora el impuesto "{{ impuesto.nombre }}" al sistema
+{% endblock %}
 
 {% block form_actions %}
-  <a href="{% url 'finance:impuesto_index' %}" class="btn btn-outline-secondary btn-sm">
-    <i class="bi bi-arrow-left"></i> Volver al listado
+  <a href="{% url 'finance:impuesto_trashcan' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left"></i> Volver a la papelera
   </a>
 {% endblock %}
 
 {% block content %}
 
-<div class="alert alert-warning d-flex align-items-center gap-2">
-  <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+<div class="alert alert-success d-flex align-items-center gap-2">
+  <i class="bi bi-arrow-counterclockwise fs-4"></i>
   <div>
-    <strong>¿Archivar impuesto?</strong><br>
-    Esta acción lo desactivará del sistema. Podrás restaurarlo más tarde desde la papelera.
+    <strong>¿Restaurar impuesto?</strong><br>
+    Esta acción reactivará el impuesto y estará disponible nuevamente en el sistema.
   </div>
 </div>
 
@@ -66,7 +68,7 @@
       </div>
 
       <div class="col-12">
-        <small class="text-muted">Actualizado por última vez</small><br>
+        <small class="text-muted">Archivado el</small><br>
         {{ impuesto.updated_at|date:"d/m/Y H:i" }}
       </div>
 
@@ -78,23 +80,25 @@
   {% csrf_token %}
 
   <div class="mb-3">
-    <label for="id_confirm" class="form-label fw-semibold">
-      Confirmación
-    </label>
-    <input type="text" name="confirm" id="id_confirm"
-           class="form-control {% if form.confirm.errors %}is-invalid{% endif %}"
-           placeholder="Escribe el nombre del impuesto para confirmar"
-           required>
-    
-    {% for error in form.confirm.errors %}
-      <div class="invalid-feedback d-block">
-        {{ error }}
-      </div>
-    {% endfor %}
+    <div class="form-check">
+      <input type="checkbox" name="confirm" id="id_confirm"
+             class="form-check-input {% if form.confirm.errors %}is-invalid{% endif %}"
+             {% if form.confirm.value %}checked{% endif %}
+             required>
+      <label for="id_confirm" class="form-check-label fw-semibold">
+        {{ form.confirm.label }}
+      </label>
+      
+      {% for error in form.confirm.errors %}
+        <div class="invalid-feedback d-block">
+          {{ error }}
+        </div>
+      {% endfor %}
 
-    <small class="text-muted">
-      Escribe el nombre <strong>"{{ impuesto.nombre }}"</strong> para confirmar el archivado
-    </small>
+      <small class="text-muted d-block mt-1">
+        Marca esta casilla para confirmar que deseas reincorporar este impuesto.
+      </small>
+    </div>
   </div>
 
   {% if form.non_field_errors %}
@@ -106,11 +110,11 @@
   {% endif %}
 
   <div class="d-flex justify-content-end gap-2 mt-4">
-    <a href="{% url 'finance:impuesto_index' %}" class="btn btn-outline-secondary">
+    <a href="{% url 'finance:impuesto_trashcan' %}" class="btn btn-outline-secondary">
       Cancelar
     </a>
-    <button type="submit" class="btn btn-danger">
-      <i class="bi bi-archive"></i> Archivar Impuesto
+    <button type="submit" class="btn btn-success">
+      <i class="bi bi-arrow-counterclockwise"></i> Restaurar Impuesto
     </button>
   </div>
 </form>

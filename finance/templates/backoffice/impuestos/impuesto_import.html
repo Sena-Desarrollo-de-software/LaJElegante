@@ -1,0 +1,4 @@
+{% url 'finance:impuesto_index' as impuesto_index_url %}
+{% url 'data_wizard:run' 'finance' 'impuesto' as datawizard_url %}
+
+{% include "backoffice/layouts/datawizard_button.html" with page_title="Importar Impuestos" form_title="Importar Impuestos" form_subtitle="Importación masiva de impuestos, tasas y propinas" return_url=impuesto_index_url datawizard_url=datawizard_url %}

@@ -1,0 +1,197 @@
+{% extends "backoffice/layouts/base_form.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Crear Impuesto{% endblock %}
+
+{% block form_title %}Crear Impuesto{% endblock %}
+{% block form_subtitle %}
+Registra un nuevo impuesto, tasa o propina para aplicar en servicios del hotel
+{% endblock %}
+
+{% block form_actions %}
+<a href="{% url 'finance:impuesto_index' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left"></i> Volver al listado
+</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="id_nombre" class="form-label fw-semibold">
+                        Nombre del impuesto <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" name="nombre" id="id_nombre"
+                           class="form-control {% if form.nombre.errors %}is-invalid{% endif %}"
+                           value="{{ form.nombre.value|default:'' }}"
+                           required>
+                    {% for error in form.nombre.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                    <label for="id_tipo" class="form-label fw-semibold">
+                        Tipo <span class="text-danger">*</span>
+                    </label>
+                    <select name="tipo" id="id_tipo"
+                            class="form-select {% if form.tipo.errors %}is-invalid{% endif %}"
+                            required>
+                        <option value="">Seleccione...</option>
+                        <option value="IVA" {% if form.tipo.value == "IVA" %}selected{% endif %}>IVA (19%)</option>
+                        <option value="ICA" {% if form.tipo.value == "ICA" %}selected{% endif %}>ICA</option>
+                        <option value="TIMBRE" {% if form.tipo.value == "TIMBRE" %}selected{% endif %}>Impuesto de Timbre</option>
+                        <option value="PROPINA" {% if form.tipo.value == "PROPINA" %}selected{% endif %}>Propina</option>
+                        <option value="CONSUMO" {% if form.tipo.value == "CONSUMO" %}selected{% endif %}>Impuesto al Consumo</option>
+                    </select>
+                    {% for error in form.tipo.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-4">
+                    <label for="id_porcentaje" class="form-label fw-semibold">
+                        Porcentaje (%) <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" step="0.01" name="porcentaje" id="id_porcentaje"
+                           class="form-control {% if form.porcentaje.errors %}is-invalid{% endif %}"
+                           value="{{ form.porcentaje.value|default:'' }}"
+                           required>
+                    {% for error in form.porcentaje.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-4">
+                    <label for="id_aplica_a" class="form-label fw-semibold">
+                        Aplica a <span class="text-danger">*</span>
+                    </label>
+                    <select name="aplica_a" id="id_aplica_a"
+                            class="form-select {% if form.aplica_a.errors %}is-invalid{% endif %}">
+                        <option value="TODOS" {% if form.aplica_a.value == "TODOS" %}selected{% endif %}>Todos los servicios</option>
+                        <option value="HABITACION" {% if form.aplica_a.value == "HABITACION" %}selected{% endif %}>Solo habitación</option>
+                        <option value="RESTAURANTE" {% if form.aplica_a.value == "RESTAURANTE" %}selected{% endif %}>Solo restaurante</option>
+                        <option value="SERVICIOS" {% if form.aplica_a.value == "SERVICIOS" %}selected{% endif %}>Servicios adicionales</option>
+                    </select>
+                    {% for error in form.aplica_a.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-4">
+                    <label for="id_fecha_vigencia_inicio" class="form-label fw-semibold">
+                        Vigencia desde <span class="text-danger">*</span>
+                    </label>
+                    <input type="date" name="fecha_vigencia_inicio" id="id_fecha_vigencia_inicio"
+                           class="form-control {% if form.fecha_vigencia_inicio.errors %}is-invalid{% endif %}"
+                           value="{{ form.fecha_vigencia_inicio.value|date:'Y-m-d'|default:'' }}"
+                           required>
+                    {% for error in form.fecha_vigencia_inicio.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-4">
+                    <label for="id_fecha_vigencia_fin" class="form-label fw-semibold">
+                        Vigencia hasta
+                    </label>
+                    <input type="date" name="fecha_vigencia_fin" id="id_fecha_vigencia_fin"
+                           class="form-control {% if form.fecha_vigencia_fin.errors %}is-invalid{% endif %}"
+                           value="{{ form.fecha_vigencia_fin.value|date:'Y-m-d'|default:'' }}">
+                    <small class="text-muted">Opcional. Dejar vacío si es vigencia indefinida</small>
+                    {% for error in form.fecha_vigencia_fin.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-check mt-4">
+                        <input type="checkbox" name="es_obligatorio" id="id_es_obligatorio"
+                               class="form-check-input"
+                               {% if form.es_obligatorio.value %}checked{% endif %}>
+                        <label for="id_es_obligatorio" class="form-check-label">
+                            Es obligatorio
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" name="aplica_extranjeros" id="id_aplica_extranjeros"
+                               class="form-check-input"
+                               {% if form.aplica_extranjeros.value %}checked{% endif %}>
+                        <label for="id_aplica_extranjeros" class="form-check-label">
+                            Aplica a extranjeros
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" name="requiere_informacion_adicional" id="id_requiere_informacion_adicional"
+                               class="form-check-input"
+                               {% if form.requiere_informacion_adicional.value %}checked{% endif %}>
+                        <label for="id_requiere_informacion_adicional" class="form-check-label">
+                            Requiere texto informativo
+                        </label>
+                    </div>
+                </div>
+
+                <div class="col-12" id="texto_informativo_container" style="display: none;">
+                    <label for="id_texto_informativo" class="form-label fw-semibold">
+                        Texto informativo
+                    </label>
+                    <textarea name="texto_informativo" id="id_texto_informativo"
+                              class="form-control {% if form.texto_informativo.errors %}is-invalid{% endif %}"
+                              rows="3">{{ form.texto_informativo.value|default:'' }}</textarea>
+                    <small class="text-muted">
+                        Ej: Texto obligatorio para propina según Circular 2 de 2012
+                    </small>
+                    {% for error in form.texto_informativo.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                <a href="{% url 'finance:impuesto_index' %}" class="btn btn-outline-secondary">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Guardar Impuesto
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkbox = document.getElementById('id_requiere_informacion_adicional');
+        const container = document.getElementById('texto_informativo_container');
+        
+        function toggleTextoInformativo() {
+            if (checkbox.checked) {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+        
+        toggleTextoInformativo();
+        checkbox.addEventListener('change', toggleTextoInformativo);
+    });
+</script>
+{% endblock %}
