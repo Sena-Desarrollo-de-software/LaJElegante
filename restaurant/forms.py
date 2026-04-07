@@ -1,6 +1,9 @@
 from django import forms
 from .models import Horario, Turno, ReservaRestaurante
-from core.utils import ahora
+from core.utils import ahora, combinar_fecha_hora
+from users.models import Usuario
+from .constants import TIEMPO_LIMITE_RESTAURANTE_HORAS, CAPACIDAD_MAXIMA_TURNO
+from datetime import timedelta
 
 class HorarioCreateForm(forms.ModelForm):
     class Meta:
@@ -202,4 +205,156 @@ class TurnoRestoreForm(forms.Form):
                 "No se puede reincorporar porque ya hay otro turno activo para esa misma fecha y horario."
             )
 
+        return cleaned_data
+    
+class ReservaRestauranteCreateForm(forms.ModelForm):
+    class Meta:
+        model = ReservaRestaurante
+        fields = ['turno', 'cantidad', 'descuento', 'observaciones']
+        widgets = {
+            'observaciones': forms.Textarea(attrs={'rows': 2}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filtrar turnos activos y con fecha futura
+        self.fields['turno'].queryset = Turno.objects.filter(
+            is_active=True,
+            fecha__gte=ahora().date()
+        ).select_related('horario')
+
+    def clean_turno(self):
+        turno = self.cleaned_data.get('turno')
+        if turno and turno.fecha < ahora().date():
+            raise forms.ValidationError("No se puede reservar en una fecha pasada.")
+        return turno
+
+    def clean(self):
+        cleaned_data = super().clean()
+        turno = cleaned_data.get('turno')
+        cantidad = cleaned_data.get('cantidad')
+
+        if turno and cantidad:
+            # Validar capacidad disponible
+            if not turno.disponible(cantidad):
+                raise forms.ValidationError(
+                    f"No hay suficiente capacidad disponible en el turno seleccionado. "
+                    f"Disponible: {turno.capacidad_disponible}"
+                )
+
+        return cleaned_data
+
+
+class ReservaRestauranteUpdateForm(forms.ModelForm):
+    class Meta:
+        model = ReservaRestaurante
+        fields = ['turno', 'cantidad', 'descuento', 'observaciones']
+        widgets = {
+            'observaciones': forms.Textarea(attrs={'rows': 2}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filtrar turnos activos (incluyendo el actual)
+        qs = Turno.objects.filter(is_active=True).select_related('horario')
+        if self.instance and self.instance.turno:
+            qs = qs | Turno.objects.filter(pk=self.instance.turno.pk)
+        self.fields['turno'].queryset = qs
+
+    def clean_turno(self):
+        turno = self.cleaned_data.get('turno')
+        if turno and turno.fecha < ahora().date():
+            raise forms.ValidationError("No se puede cambiar a un turno en fecha pasada.")
+        return turno
+
+    def clean(self):
+        cleaned_data = super().clean()
+        nuevo_turno = cleaned_data.get('turno')
+        nueva_cantidad = cleaned_data.get('cantidad')
+
+        if not self.instance:
+            return cleaned_data
+
+        # Validar límite de modificación
+        fecha_reserva = combinar_fecha_hora(
+            self.instance.turno.fecha,
+            self.instance.turno.horario.hora_inicio
+        )
+        limite = fecha_reserva - timedelta(hours=TIEMPO_LIMITE_RESTAURANTE_HORAS)
+        if ahora() > limite:
+            raise forms.ValidationError(
+                f"Las reservas solo pueden modificarse hasta "
+                f"{TIEMPO_LIMITE_RESTAURANTE_HORAS} horas antes del servicio."
+            )
+
+        if fecha_reserva < ahora():
+            raise forms.ValidationError("No se puede modificar una reserva que ha expirado.")
+
+        # Si cambia de turno o cantidad, validar disponibilidad del nuevo turno
+        if nuevo_turno and nueva_cantidad:
+            if nuevo_turno.pk != self.instance.turno.pk:
+                if not nuevo_turno.disponible(nueva_cantidad):
+                    raise forms.ValidationError(
+                        f"No hay suficiente capacidad en el turno seleccionado. "
+                        f"Disponible: {nuevo_turno.capacidad_disponible}"
+                    )
+            elif nueva_cantidad != self.instance.cantidad:
+                diferencia = nueva_cantidad - self.instance.cantidad
+                if diferencia > 0 and not self.instance.turno.disponible(diferencia):
+                    raise forms.ValidationError(
+                        f"No hay suficiente capacidad disponible para aumentar la cantidad. "
+                        f"Disponible: {self.instance.turno.capacidad_disponible}"
+                    )
+
+        return cleaned_data
+
+
+class ReservaRestauranteCancelForm(forms.Form):
+    confirm = forms.BooleanField(
+        required=True,
+        label="Confirmo que deseo cancelar esta reserva"
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.reserva = kwargs.pop("reserva")
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.reserva.estado == 'COMPLETADA':
+            raise forms.ValidationError("No se puede cancelar una reserva ya completada.")
+        return cleaned_data
+
+
+class ReservaRestauranteConfirmForm(forms.Form):
+    confirm = forms.BooleanField(
+        required=True,
+        label="Confirmo que deseo marcar esta reserva como confirmada"
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.reserva = kwargs.pop("reserva")
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.reserva.estado != 'PENDIENTE':
+            raise forms.ValidationError("Solo se pueden confirmar reservas en estado PENDIENTE.")
+        return cleaned_data
+
+
+class ReservaRestauranteCompletarForm(forms.Form):
+    confirm = forms.BooleanField(
+        required=True,
+        label="Confirmo que el cliente asistió a la reserva"
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.reserva = kwargs.pop("reserva")
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.reserva.estado not in ['PENDIENTE', 'CONFIRMADA']:
+            raise forms.ValidationError("Solo se pueden completar reservas en estado PENDIENTE o CONFIRMADA.")
         return cleaned_data

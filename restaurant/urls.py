@@ -21,8 +21,9 @@ urlpatterns = [
     path('turno-import/', views.import_turno, name='turno_import'),
     # === RESERVA RESTAURANTE ===
     path('reserva-restaurante/', views.index_reserva_restaurante, name='reserva_restaurante_index'),
-    path('reserva-restaurante-create/', views.create_reserva_restaurante, name='reserva_restaurante_create'),
-    path('reserva-restaurante-update/<int:pk>', views.update_reserva_restaurante, name='reserva_restaurante_update'),
-    path('reserva-restaurante-delete/<int:pk>', views.delete_reserva_restaurante, name='reserva_restaurante_delete'),
-    path('reserva-restaurante-trashcan/<int:pk>', views.trashcan_reserva_restaurante, name='reserva_restaurante_trashcan'),
+    path('reserva-restaurante-create/<int:reserva_id>/', views.create_reserva_restaurante, name='reserva_restaurante_create'),
+    path('reserva-restaurante-update/<int:pk>/', views.update_reserva_restaurante, name='reserva_restaurante_update'),
+    path('reserva-restaurante-cancel/<int:pk>/', views.cancel_reserva_restaurante, name='reserva_restaurante_cancel'),
+    path('reserva-restaurante-confirm/<int:pk>/', views.confirm_reserva_restaurante, name='reserva_restaurante_confirm'),
+    path('reserva-restaurante-complete/<int:pk>/', views.complete_reserva_restaurante, name='reserva_restaurante_complete'),
 ]

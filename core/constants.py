@@ -16,9 +16,6 @@ SERVICIOS_CONFIG = [
         'activo': True,
     },
 ]
-# === RESTAURANTE ===
-TIEMPO_LIMITE_RESTAURANTE_HORAS = 3
-CAPACIDAD_MAXIMA_TURNO = 50
 # === FINANCE ===
 SERVICIOS_TARIFABLES = {
     ('restaurant', 'horario'): {

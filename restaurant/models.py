@@ -2,7 +2,7 @@ from django.db import models, transaction
 from core.models import BaseAuditModel, ReservaServicio, Reserva
 from django.core.exceptions import ValidationError
 from core.utils import ahora,dentro_de,combinar_fecha_hora
-from core.constants import TIEMPO_LIMITE_RESTAURANTE_HORAS, CAPACIDAD_MAXIMA_TURNO
+from .constants import TIEMPO_LIMITE_RESTAURANTE_HORAS, CAPACIDAD_MAXIMA_TURNO
 
 # === HORARIO ===
 class Horario(BaseAuditModel):
