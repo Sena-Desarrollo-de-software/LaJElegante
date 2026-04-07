@@ -1,0 +1,76 @@
+@import url('core.css');
+
+.hero-section {
+    background: linear-gradient(135deg, var(--color2), #5f1e09);
+    padding: 40px 0;
+    margin-bottom: 50px;
+    border-radius: 0 0 30px 30px;
+}
+    
+.category-header {
+    border-left: 5px solid var(--color2);
+    padding-left: 20px;
+    margin-bottom: 30px;
+}
+    
+.product-card {
+    border: none;
+    border-radius: 15px;
+    transition: transform 0.3s ease;
+    overflow: hidden;
+    background: white;
+}
+    
+.product-card:hover {
+    transform: translateY(-5px);
+}
+    
+.product-img {
+    height: 200px;
+    object-fit: cover;
+}
+    
+.hotel-badge {
+    background: var(--color2);
+    font-size: 0.7rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+}
+    
+.price-hotel {
+    color: var(--color2);
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+    
+.price-original {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 0.9rem;
+}
+    
+.promo-banner {
+    background: linear-gradient(135deg, var(--color2), #5f1e09);
+    border-radius: 15px;
+    padding: 30px;
+    margin: 40px 0;
+}
+    
+.btn-hotel {
+    background: var(--color2);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 8px 20px;
+    transition: all 0.3s ease;
+}
+    
+.btn-hotel:hover {
+    background: #5f1e09;
+    transform: scale(1.05);
+    color: white;
+}
