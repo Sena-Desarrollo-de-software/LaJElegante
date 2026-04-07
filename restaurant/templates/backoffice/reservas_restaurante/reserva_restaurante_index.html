@@ -1,0 +1,228 @@
+{% extends "backoffice/layouts/base_form.html" %}
+{% load humanize %}
+
+{% block title %}Reservas de Restaurante{% endblock %}
+
+{% block form_title %}Reservas de Restaurante{% endblock %}
+{% block form_subtitle %}
+Listado de reservas realizadas en el restaurante
+{% endblock %}
+
+{% block form_actions %}
+  <a href="{% url 'backoffice:reserva_create' %}?next=reserva_restaurante"
+     class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-circle"></i> Nueva Reserva
+  </a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Filtros -->
+<div class="card mb-3 border-0 bg-light">
+  <div class="card-body">
+
+    <form method="get" class="row g-2 align-items-end">
+
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Turno</label>
+        <select name="turno" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          {% for turno in turnos %}
+            <option value="{{ turno.id }}"
+              {% if filtros.turno == turno.id|stringformat:"s" %}selected{% endif %}>
+              {{ turno.horario.get_dia_display }} - {{ turno.fecha|date:"d/m/Y" }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Estado</label>
+        <select name="estado" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          <option value="PENDIENTE" {% if filtros.estado == "PENDIENTE" %}selected{% endif %}>Pendiente</option>
+          <option value="CONFIRMADA" {% if filtros.estado == "CONFIRMADA" %}selected{% endif %}>Confirmada</option>
+          <option value="CANCELADA" {% if filtros.estado == "CANCELADA" %}selected{% endif %}>Cancelada</option>
+          <option value="COMPLETADA" {% if filtros.estado == "COMPLETADA" %}selected{% endif %}>Completada</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Fecha desde</label>
+        <input type="date" name="fecha_desde"
+               value="{{ filtros.fecha_desde }}"
+               class="form-control form-control-sm">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Fecha hasta</label>
+        <input type="date" name="fecha_hasta"
+               value="{{ filtros.fecha_hasta }}"
+               class="form-control form-control-sm">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Cliente</label>
+        <input type="text" name="cliente"
+               value="{{ filtros.cliente }}"
+               class="form-control form-control-sm"
+               placeholder="Nombre de usuario">
+      </div>
+
+      <div class="col-md-2">
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary btn-sm">
+            <i class="bi bi-funnel"></i> Filtrar
+          </button>
+
+          <a href="{% url 'restaurant:reserva_restaurante_index' %}"
+             class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-eraser"></i> Limpiar
+          </a>
+
+          <a href="?{{ request.GET.urlencode }}&export=pdf" target="_blank" 
+             class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-file-pdf"></i> PDF
+          </a>
+        </div>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<!-- Tabla de reservas -->
+{% if reservas %}
+<div class="table-responsive">
+  <table class="table table-hover align-middle mb-0">
+
+    <thead class="table-light">
+      <tr>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>Turno</th>
+        <th>Fecha</th>
+        <th>Horario</th>
+        <th>Personas</th>
+        <th>Descuento</th>
+        <th>Estado</th>
+        <th class="text-end">Acciones</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for reserva in reservas %}
+      <tr>
+
+        <td class="fw-semibold">#{{ reserva.id }}</td>
+
+        <td>
+          <strong>{{ reserva.reserva.usuario.get_full_name|default:reserva.reserva.usuario.username }}</strong><br>
+          <small class="text-muted">{{ reserva.reserva.usuario.email }}</small>
+        </td>
+
+        <td>
+          {{ reserva.turno.horario.get_dia_display }}<br>
+          <small class="text-muted">
+            {{ reserva.turno.horario.hora_inicio|time:"H:i" }} - {{ reserva.turno.horario.hora_fin|time:"H:i" }}
+          </small>
+        </td>
+
+        <td>{{ reserva.turno.fecha|date:"d/m/Y" }}</td>
+
+        <td>
+          {% if reserva.turno.horario.tipo == "DESAYUNO" %}
+            <span class="badge bg-info">Desayuno</span>
+          {% elif reserva.turno.horario.tipo == "ALMUERZO" %}
+            <span class="badge bg-warning text-dark">Almuerzo</span>
+          {% elif reserva.turno.horario.tipo == "CENA" %}
+            <span class="badge bg-dark">Cena</span>
+          {% else %}
+            <span class="badge bg-secondary">{{ reserva.turno.horario.tipo }}</span>
+          {% endif %}
+        </td>
+
+        <td class="text-center">{{ reserva.cantidad }} personas</td>
+
+        <td>
+          {% if reserva.descuento > 0 %}
+            <span class="text-success">-{{ reserva.descuento }}%</span>
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+
+        <td>
+          {% if reserva.estado == "PENDIENTE" %}
+            <span class="badge bg-warning text-dark">Pendiente</span>
+          {% elif reserva.estado == "CONFIRMADA" %}
+            <span class="badge bg-primary">Confirmada</span>
+          {% elif reserva.estado == "CANCELADA" %}
+            <span class="badge bg-danger">Cancelada</span>
+          {% elif reserva.estado == "COMPLETADA" %}
+            <span class="badge bg-success">Completada</span>
+          {% else %}
+            <span class="badge bg-secondary">{{ reserva.estado }}</span>
+          {% endif %}
+        </td>
+
+        <td class="text-end">
+          <div class="btn-group btn-group-sm" role="group">
+            {% if reserva.estado == "PENDIENTE" %}
+              <a href="{% url 'restaurant:reserva_restaurante_confirm' reserva.pk %}"
+                 class="btn btn-sm btn-outline-success" title="Confirmar">
+                <i class="bi bi-check-lg"></i>
+              </a>
+
+              <a href="{% url 'restaurant:reserva_restaurante_update' reserva.pk %}"
+                 class="btn btn-sm btn-outline-primary" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </a>
+
+              <a href="{% url 'restaurant:reserva_restaurante_cancel' reserva.pk %}"
+                 class="btn btn-sm btn-outline-danger" title="Cancelar">
+                <i class="bi bi-x-circle"></i>
+              </a>
+            {% elif reserva.estado == "CONFIRMADA" %}
+              <a href="{% url 'restaurant:reserva_restaurante_complete' reserva.pk %}"
+                 class="btn btn-sm btn-outline-success" title="Completar">
+                <i class="bi bi-check2-circle"></i>
+              </a>
+
+              <a href="{% url 'restaurant:reserva_restaurante_cancel' reserva.pk %}"
+                 class="btn btn-sm btn-outline-danger" title="Cancelar">
+                <i class="bi bi-x-circle"></i>
+              </a>
+            {% elif reserva.estado == "COMPLETADA" %}
+              <span class="text-muted small">Finalizada</span>
+            {% else %}
+              <span class="text-muted small">Cancelada</span>
+            {% endif %}
+          </div>
+        </td>
+
+      </tr>
+      {% endfor %}
+    </tbody>
+
+  </table>
+</div>
+
+<!-- Resumen -->
+<div class="row mt-3">
+  <div class="col-md-12 text-end">
+    <small class="text-muted">
+      Total de reservas: {{ reservas|length }}
+    </small>
+  </div>
+</div>
+
+{% else %}
+<div class="text-center py-4 text-muted">
+  <i class="bi bi-calendar-x fs-1"></i>
+  <p class="mt-2">No hay reservas de restaurante registradas</p>
+</div>
+{% endif %}
+
+{% endblock %}

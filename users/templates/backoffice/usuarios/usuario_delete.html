@@ -1,0 +1,113 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Archivar Usuario{% endblock %}
+
+{% block form_title %}Archivar Usuario{% endblock %}
+{% block form_subtitle %}
+Esta acción desactiva el usuario en el sistema
+{% endblock %}
+
+{% block form_actions %}
+<a href="{% url 'users:usuario_index' %}" class="btn btn-outline-secondary btn-sm">
+  <i class="bi bi-arrow-left"></i> Volver al listado
+</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
+      <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+      <div>
+        <strong>¿Archivar usuario?</strong><br>
+        Esta acción desactivará al usuario. Podrás restaurarlo más tarde desde la papelera.
+        <strong>Esta acción no elimina las reservas existentes.</strong>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <small class="text-muted">Usuario</small><br>
+            <strong>{{ usuario.username }}</strong>
+          </div>
+          <div class="col-md-6">
+            <small class="text-muted">Email</small><br>
+            {{ usuario.email }}
+          </div>
+          <div class="col-md-6 mt-2">
+            <small class="text-muted">Nombre completo</small><br>
+            {{ usuario.get_full_name|default:"-" }}
+          </div>
+          <div class="col-md-6 mt-2">
+            <small class="text-muted">Grupos</small><br>
+            {% for grupo in usuario.groups.all %}
+              <span class="badge bg-secondary">{{ grupo.name }}</span>
+            {% empty %}
+              <span class="text-muted">—</span>
+            {% endfor %}
+          </div>
+          <div class="col-md-6 mt-2">
+            <small class="text-muted">Staff</small><br>
+            {% if usuario.is_staff %}
+              <i class="bi bi-check-circle-fill text-success"></i> Sí
+            {% else %}
+              <i class="bi bi-x-circle-fill text-muted"></i> No
+            {% endif %}
+          </div>
+          <div class="col-md-6 mt-2">
+            <small class="text-muted">Fecha registro</small><br>
+            {{ usuario.date_joined|date:"d/m/Y H:i" }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label for="id_confirm" class="form-label fw-semibold">
+          Confirmación
+        </label>
+        <input type="text" name="confirm" id="id_confirm"
+               class="form-control {% if form.confirm.errors %}is-invalid{% endif %}"
+               placeholder="Escribe el nombre de usuario para confirmar"
+               required>
+        
+        {% for error in form.confirm.errors %}
+          <div class="invalid-feedback d-block">
+            {{ error }}
+          </div>
+        {% endfor %}
+
+        <small class="text-muted">
+          Escribe el nombre <strong>{{ usuario.username }}</strong> para confirmar el archivado
+        </small>
+      </div>
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {% for error in form.non_field_errors %}
+            <div>{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <a href="{% url 'users:usuario_index' %}" class="btn btn-outline-secondary">
+          Cancelar
+        </a>
+        <button type="submit" class="btn btn-danger">
+          <i class="bi bi-archive"></i> Archivar Usuario
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}
