@@ -1,3 +1,5 @@
+# Redirección de login para vistas protegidas
+LOGIN_URL = '/hotel/login/'
 """
 Django settings for config project.
 
