@@ -1,0 +1,71 @@
+{% extends "hotel/layouts/base.html" %}
+{% block title %}Detalle de Reserva{% endblock %}
+{% block content %}
+<main class="container my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Detalle de reserva</h1>
+    <a href="{% url 'guests:dashboard' %}" class="btn btn-outline-secondary">Volver</a>
+  </div>
+
+  {% if messages %}
+  <div class="mb-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <section class="card shadow-sm border-0 rounded-4 mb-3">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4"><small class="text-muted">Estado</small><div class="fw-semibold">{{ reserva.get_estado_display }}</div></div>
+        <div class="col-md-4"><small class="text-muted">Fecha de reserva</small><div class="fw-semibold">{{ reserva.fecha_reserva|date:'d/m/Y H:i' }}</div></div>
+        <div class="col-md-4"><small class="text-muted">Total</small><div class="fw-semibold">${{ reserva.total|floatformat:0 }}</div></div>
+      </div>
+    </div>
+  </section>
+
+  {% if tiene_habitaciones and not tiene_restaurantes %}
+  <section class="card shadow-sm border-0 rounded-4 mb-3">
+    <div class="card-header bg-white"><h2 class="h6 mb-0">Servicios de habitación</h2></div>
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead><tr><th>Habitación</th><th>Fechas</th><th>Personas</th><th>Estado</th></tr></thead>
+        <tbody>
+          {% for item in habitaciones %}
+          <tr>
+            <td>{{ item.habitacion.numero_habitacion }}</td>
+            <td>{{ item.fecha_inicio }} - {{ item.fecha_fin }}</td>
+            <td>{{ item.cantidad_personas }}</td>
+            <td>{{ item.get_estado_display }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% elif tiene_restaurantes and not tiene_habitaciones %}
+  <section class="card shadow-sm border-0 rounded-4 mb-3">
+    <div class="card-header bg-white"><h2 class="h6 mb-0">Servicios de restaurante</h2></div>
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead><tr><th>Turno</th><th>Cantidad</th><th>Estado</th></tr></thead>
+        <tbody>
+          {% for item in restaurantes %}
+          <tr>
+            <td>{{ item.turno }}</td>
+            <td>{{ item.cantidad }}</td>
+            <td>{{ item.get_estado_display }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% else %}
+  <section class="card shadow-sm border-0 rounded-4 mb-3">
+    <div class="card-body text-muted">Esta reserva no tiene servicios asociados.</div>
+  </section>
+  {% endif %}
+</main>
+{% endblock %}

@@ -11,6 +11,9 @@ urlpatterns = [
     path('reservas/habitaciones/crear/', views.reserva_habitacion_create, name='reserva_habitacion_create'),
     path('reservas/habitaciones/<int:pk>/editar/', views.reserva_habitacion_update, name='reserva_habitacion_update'),
     path('reservas/habitaciones/<int:pk>/cancelar/', views.reserva_habitacion_cancel, name='reserva_habitacion_cancel'),
+    path('reservas/<int:pk>/', views.reserva_detail, name='reserva_detail'),
+    path('reservas/<int:pk>/editar/', views.reserva_edit, name='reserva_edit'),
+    path('reservas/<int:pk>/cancelar/', views.reserva_cancel, name='reserva_cancel'),
 
     path('reservas/restaurante/', views.reserva_restaurante_list, name='reserva_restaurante_list'),
     path('reservas/restaurante/crear/', views.reserva_restaurante_create, name='reserva_restaurante_create'),

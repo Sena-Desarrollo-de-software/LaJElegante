@@ -72,7 +72,7 @@ class Turno(BaseAuditModel):
     
     @property
     def capacidad_disponible(self):
-        return self.horario.capacidad_maxima - self.quorum
+        return self.capacidad_efectiva - self.quorum
 
     @property
     def capacidad_efectiva(self):
@@ -92,8 +92,15 @@ class Turno(BaseAuditModel):
     def cancelar(self, personas):
         if personas <= 0:
             return
-        self.quorum -= personas
-        self.save()
+        self.quorum = max(0, self.quorum - personas)
+        self.save(update_fields=['quorum', 'updated_at'])
+
+    def recalcular_quorum(self):
+        total = sum(
+            self.reservas.filter(estado__in=['PENDIENTE', 'CONFIRMADA']).values_list('cantidad', flat=True)
+        )
+        self.quorum = total
+        self.save(update_fields=['quorum', 'updated_at'])
     
     def ajustar(self, personas_anteriores, personas_nuevas):
         diferencia = personas_nuevas - personas_anteriores
@@ -154,9 +161,12 @@ class ReservaRestaurante(ReservaServicio):
 
     def cancelar(self):
         with transaction.atomic():
+            if self.estado == 'CANCELADA':
+                return
+
+            type(self).objects.filter(pk=self.pk).update(estado='CANCELADA')
             self.estado = 'CANCELADA'
-            self.save()
-            self.turno.cancelar(self.cantidad)
+            self.turno.recalcular_quorum()
 
     def confirmar(self):
         with transaction.atomic():
