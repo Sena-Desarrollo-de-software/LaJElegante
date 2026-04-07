@@ -31,14 +31,14 @@ def _cancelar_reserva_completa(reserva):
     errores = []
     turnos_afectados_ids = set()
 
-    for reserva_habitacion in reserva.reserva_habitaciones.all():
+    for reserva_habitacion in reserva.reserva_habitaciones.filter(is_active=True):
         if reserva_habitacion.estado != 'CANCELADA':
             try:
                 reserva_habitacion.cancelar()
             except ValidationError as exc:
                 errores.extend(exc.messages if hasattr(exc, 'messages') else [str(exc)])
 
-    for reserva_restaurante in reserva.reserva_restaurantes.select_related('turno').all():
+    for reserva_restaurante in reserva.reserva_restaurantes.select_related('turno').filter(is_active=True):
         if reserva_restaurante.turno_id:
             turnos_afectados_ids.add(reserva_restaurante.turno_id)
         if reserva_restaurante.estado != 'CANCELADA':
@@ -111,7 +111,7 @@ def perfil(request):
 @login_required
 def reserva_habitacion_list(request):
     _validar_cliente(request.user)
-    reservas = ReservaHabitacion.objects.filter(reserva__usuario=request.user).select_related('habitacion', 'reserva').order_by('-id')
+    reservas = ReservaHabitacion.objects.filter(reserva__usuario=request.user, is_active=True).select_related('habitacion', 'reserva').order_by('-id')
     return render(request, 'guests/reserva_habitacion_list.html', {'reservas': reservas})
 
 
@@ -213,8 +213,8 @@ def reserva_cancel(request, pk):
 def reserva_detail(request, pk):
     _validar_cliente(request.user)
     reserva = get_object_or_404(Reserva, pk=pk, usuario=request.user)
-    habitaciones = reserva.reserva_habitaciones.select_related('habitacion').all()
-    restaurantes = reserva.reserva_restaurantes.select_related('turno', 'turno__horario').all()
+    habitaciones = reserva.reserva_habitaciones.select_related('habitacion').filter(is_active=True)
+    restaurantes = reserva.reserva_restaurantes.select_related('turno', 'turno__horario').filter(is_active=True)
     tiene_habitaciones = habitaciones.exists()
     tiene_restaurantes = restaurantes.exists()
     return render(
@@ -254,7 +254,7 @@ def reserva_edit(request, pk):
 @login_required
 def reserva_restaurante_list(request):
     _validar_cliente(request.user)
-    reservas = ReservaRestaurante.objects.filter(reserva__usuario=request.user).select_related('turno', 'turno__horario', 'reserva').order_by('-id')
+    reservas = ReservaRestaurante.objects.filter(reserva__usuario=request.user, is_active=True).select_related('turno', 'turno__horario', 'reserva').order_by('-id')
     return render(request, 'guests/reserva_restaurante_list.html', {'reservas': reservas})
 
 

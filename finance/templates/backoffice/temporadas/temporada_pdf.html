@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Listado de Temporadas</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 2cm;
+
+            @top-center {
+                content: "Hotel - Temporadas";
+                font-size: 12px;
+                font-weight: bold;
+            }
+
+            @bottom-right {
+                content: "Pagina " counter(page) " de " counter(pages);
+                font-size: 10px;
+            }
+
+            @bottom-left {
+                content: "Generado: {{ fecha_exportacion|date:'d/m/Y H:i' }}";
+                font-size: 10px;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .filtros {
+            background-color: #f5f5f5;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-size: 11px;
+        }
+
+        td {
+            border: 1px solid #ddd;
+            padding: 6px 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .badge {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .badge-activa { background-color: #28a745; color: white; }
+        .badge-archivada { background-color: #6c757d; color: white; }
+
+        .summary {
+            margin-top: 20px;
+            text-align: right;
+            font-weight: bold;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Listado de Temporadas</h1>
+    <p>
+        Generado por: {{ usuario.get_full_name|default:usuario.username }} |
+        {{ fecha_exportacion|date:"d/m/Y H:i:s" }}
+    </p>
+</div>
+
+{% if filtros.nombre or filtros.fecha_desde or filtros.fecha_hasta or filtros.registro %}
+<div class="filtros">
+    <strong>Filtros aplicados:</strong>
+    {% if filtros.nombre == "ALTA" %} | Nombre: Alta {% endif %}
+    {% if filtros.nombre == "MEDIA" %} | Nombre: Media {% endif %}
+    {% if filtros.nombre == "BAJA" %} | Nombre: Baja {% endif %}
+    {% if filtros.fecha_desde %} | Desde: {{ filtros.fecha_desde }} {% endif %}
+    {% if filtros.fecha_hasta %} | Hasta: {{ filtros.fecha_hasta }} {% endif %}
+    {% if filtros.registro == "activo" %} | Registro: Activo {% endif %}
+    {% if filtros.registro == "archivado" %} | Registro: Archivado {% endif %}
+</div>
+{% endif %}
+
+{% if temporadas %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Fecha inicio</th>
+            <th>Fecha fin</th>
+            <th>Ajuste</th>
+            <th>Modificador</th>
+            <th>Registro</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for temporada in temporadas %}
+        <tr>
+            <td><strong>#{{ temporada.id }}</strong></td>
+            <td>{{ temporada.get_nombre_display }}</td>
+            <td>{{ temporada.fecha_inicio|date:'d/m/Y' }}</td>
+            <td>{{ temporada.fecha_fin|date:'d/m/Y' }}</td>
+            <td>{{ temporada.get_signo_porcentaje }}</td>
+            <td>{{ temporada.modificador_precio }}</td>
+            <td>
+                {% if temporada.is_active %}
+                    <span class="badge badge-activa">Activa</span>
+                {% else %}
+                    <span class="badge badge-archivada">Archivada</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="summary">
+    Total de registros: {{ total_registros }}
+</div>
+{% else %}
+<p style="text-align: center;">No hay temporadas que coincidan con los filtros seleccionados.</p>
+{% endif %}
+
+</body>
+</html>
