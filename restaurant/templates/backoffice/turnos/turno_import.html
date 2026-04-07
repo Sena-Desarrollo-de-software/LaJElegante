@@ -1,0 +1,4 @@
+{% url 'restaurant:turno_index' as turno_index_url %}
+{% url 'data_wizard:run' 'restaurant' 'turno' as datawizard_url %}
+
+{% include "backoffice/layouts/datawizard_button.html" with page_title="Importar Turnos" form_title="Importar Turnos" form_subtitle="Importación masiva de turnos del restaurante" return_url=turno_index_url datawizard_url=datawizard_url %}
