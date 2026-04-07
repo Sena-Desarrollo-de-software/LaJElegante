@@ -1,0 +1,182 @@
+{% extends "backoffice/layouts/base_form.html" %}
+{% load humanize l10n %}
+
+{% block title %}Impuestos{% endblock %}
+
+{% block form_title %}Impuestos{% endblock %}
+{% block form_subtitle %}
+Gestión de impuestos, tasas y propinas aplicables a servicios del hotel
+{% endblock %}
+
+{% block form_actions %}
+  {% if perms.finance.add_impuesto %}
+    <a href="{% url 'finance:impuesto_create' %}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-circle"></i> Nuevo Impuesto
+    </a>
+  {% endif %}
+
+  {% if perms.finance.delete_impuesto %}
+    <a href="{% url 'finance:impuesto_trashcan' %}" class="btn btn-outline-warning btn-sm">
+      <i class="bi bi-trash"></i> Papelera
+    </a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="card mb-4 border-0 bg-light">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small fw-semibold">Nombre</label>
+                <input type="text" name="nombre" class="form-control form-control-sm" 
+                       placeholder="Buscar por nombre..." value="{{ filtros.nombre|default:'' }}">
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Tipo</label>
+                <select name="tipo" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                    <option value="IVA" {% if filtros.tipo == "IVA" %}selected{% endif %}>IVA (19%)</option>
+                    <option value="ICA" {% if filtros.tipo == "ICA" %}selected{% endif %}>ICA</option>
+                    <option value="TIMBRE" {% if filtros.tipo == "TIMBRE" %}selected{% endif %}>Impuesto de Timbre</option>
+                    <option value="PROPINA" {% if filtros.tipo == "PROPINA" %}selected{% endif %}>Propina</option>
+                    <option value="CONSUMO" {% if filtros.tipo == "CONSUMO" %}selected{% endif %}>Impuesto al Consumo</option>
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Estado</label>
+                <select name="estado" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                    <option value="activo" {% if filtros.estado == "activo" %}selected{% endif %}>Activo</option>
+                    <option value="archivado" {% if filtros.estado == "archivado" %}selected{% endif %}>Archivado</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                    <a href="{% url 'finance:impuesto_index' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-eraser"></i> Limpiar
+                    </a>
+                    {% if perms.finance.view_impuesto %}
+                    <a href="?{{ request.GET.urlencode }}&export=pdf" target="_blank" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-file-pdf"></i> PDF
+                    </a>
+                    <a href="{% url 'finance:impuesto_import' %}" class="btn btn-outline-success btn-sm">Importar</a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+
+        {% if impuestos %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>%</th>
+                            <th>Aplica a</th>
+                            <th>Vigencia</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for impuesto in impuestos %}
+                        <tr>
+                            <td class="fw-semibold">{{ impuesto.nombre }}</td>
+                            <td>
+                                {% if impuesto.tipo == "PROPINA" %}
+                                    <span class="badge bg-success">{{ impuesto.get_tipo_display }}</span>
+                                {% elif impuesto.tipo == "IVA" %}
+                                    <span class="badge bg-info">{{ impuesto.get_tipo_display }}</span>
+                                {% elif impuesto.tipo == "ICA" %}
+                                    <span class="badge bg-warning text-dark">{{ impuesto.get_tipo_display }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ impuesto.get_tipo_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ impuesto.porcentaje }}%</td>
+                            <td class="small">
+                                {% if impuesto.aplica_a == "TODOS" %}
+                                    Todos los servicios
+                                {% elif impuesto.aplica_a == "HABITACION" %}
+                                    Solo habitación
+                                {% elif impuesto.aplica_a == "RESTAURANTE" %}
+                                    Solo restaurante
+                                {% elif impuesto.aplica_a == "SERVICIOS" %}
+                                    Servicios adicionales
+                                {% else %}
+                                    {{ impuesto.aplica_a }}
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">
+                                {{ impuesto.fecha_vigencia_inicio|date:"d/m/Y" }}
+                                {% if impuesto.fecha_vigencia_fin %}
+                                    <br>hasta {{ impuesto.fecha_vigencia_fin|date:"d/m/Y" }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if impuesto.is_active %}
+                                    <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Archivado</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    {% if perms.finance.change_impuesto %}
+                                        <a href="{% url 'finance:impuesto_update' impuesto.pk %}" 
+                                           class="btn btn-outline-primary" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    {% endif %}
+                                    
+                                    {% if impuesto.is_active %}
+                                        {% if perms.finance.delete_impuesto %}
+                                            <a href="{% url 'finance:impuesto_delete' impuesto.pk %}" 
+                                               class="btn btn-outline-danger" title="Archivar">
+                                                <i class="bi bi-archive"></i>
+                                            </a>
+                                        {% endif %}
+                                    {% else %}
+                                        {% if perms.finance.can_restore_impuesto %}
+                                            <a href="{% url 'finance:impuesto_restore' impuesto.pk %}" 
+                                               class="btn btn-outline-success" title="Restaurar">
+                                                <i class="bi bi-arrow-counterclockwise"></i>
+                                            </a>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="p-4 text-center text-muted">
+                <i class="bi bi-receipt fs-1"></i>
+                <p class="mt-2">No hay impuestos registrados</p>
+                {% if perms.finance.add_impuesto %}
+                    <a href="{% url 'finance:impuesto_create' %}" class="btn btn-sm btn-primary">
+                        Crear el primer impuesto
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

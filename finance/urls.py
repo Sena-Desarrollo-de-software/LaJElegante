@@ -9,7 +9,9 @@ urlpatterns = [
     path("impuesto-create/", views.create_impuesto, name="impuesto_create"),
     path("impuesto-update/<int:pk>/", views.update_impuesto, name="impuesto_update"),
     path("impuesto-delete/<int:pk>", views.delete_impuesto, name="impuesto_delete"),
-    path('impuesto-trashcan/<int:pk>', views.trashcan_impuesto, name='impuesto_trashcan'),
+    path('impuesto-trashcan/', views.trashcan_impuesto, name='impuesto_trashcan'),
+    path('impuesto-restore/<int:pk>', views.restore_impuesto, name='impuesto_restore'),
+    path('impuesto-import/', views.import_impuesto, name='impuesto_import'),
     # === TARIFA ===
     path("tarifa/", views.index_tarifa, name="tarifa_index"),
     path("tarifa-create/", views.create_tarifa, name="tarifa_create"),
