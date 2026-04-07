@@ -1,4 +1,5 @@
 {% extends "backoffice/layouts/base_form.html" %}
+{% load humanize l10n %}
 
 {% block title %}Tarifas{% endblock %}
 {% block form_title %}Tarifas{% endblock %}
@@ -10,32 +11,117 @@
 {% endblock %}
 
 {% block content %}
-<div class="table-responsive">
-	<table class="table table-hover align-middle mb-0">
-		<thead class="table-light">
-			<tr>
-				<th>ID</th><th>Servicio</th><th>Temporada</th><th>Estado</th><th>Precio base</th><th>Precio final</th><th class="text-end">Acciones</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for tarifa in tarifas %}
-			<tr>
-				<td>#{{ tarifa.id }}</td>
-				<td>{{ tarifa.servicio|default:'Sin servicio' }}</td>
-				<td>{{ tarifa.temporada }}</td>
-				<td>{{ tarifa.get_estado_display }}</td>
-				<td>${{ tarifa.precio_base|floatformat:0 }}</td>
-				<td>${{ tarifa.calcular_precio_final|floatformat:0 }}</td>
-				<td class="text-end">
-					<a href="{% url 'finance:tarifa_detail' tarifa.pk %}" class="btn btn-sm btn-outline-info">Detalle</a>
-					<a href="{% url 'finance:tarifa_update' tarifa.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-					<a href="{% url 'finance:tarifa_delete' tarifa.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
-				</td>
-			</tr>
-			{% empty %}
-			<tr><td colspan="7" class="text-center text-muted py-4">No hay tarifas registradas.</td></tr>
-			{% endfor %}
-		</tbody>
-	</table>
+<div class="card mb-4 border-0 bg-light">
+	<div class="card-body">
+		<form method="get" class="row g-2 align-items-end">
+			<div class="col-md-3">
+				<label class="form-label small fw-semibold">Tipo de servicio</label>
+				<select name="tipo_servicio" class="form-select form-select-sm">
+					<option value="">Todos</option>
+					<option value="rooms" {% if filtros.tipo_servicio == 'rooms' %}selected{% endif %}>Habitación</option>
+					<option value="restaurant" {% if filtros.tipo_servicio == 'restaurant' %}selected{% endif %}>Restaurante</option>
+				</select>
+			</div>
+
+			<div class="col-md-3">
+				<label class="form-label small fw-semibold">Temporada</label>
+				<select name="temporada" class="form-select form-select-sm">
+					<option value="">Todas</option>
+					{% for temporada in temporadas %}
+						<option value="{{ temporada.id }}" {% if filtros.temporada == temporada.id|stringformat:'s' %}selected{% endif %}>{{ temporada }}</option>
+					{% endfor %}
+				</select>
+			</div>
+
+			<div class="col-md-2">
+				<label class="form-label small fw-semibold">Estado comercial</label>
+				<select name="estado" class="form-select form-select-sm">
+					<option value="">Todos</option>
+					<option value="VIGENTE" {% if filtros.estado == 'VIGENTE' %}selected{% endif %}>Vigente</option>
+					<option value="INACTIVA" {% if filtros.estado == 'INACTIVA' %}selected{% endif %}>Inactiva</option>
+				</select>
+			</div>
+
+			<div class="col-md-2">
+				<label class="form-label small fw-semibold">Estado de registro</label>
+				<select name="registro" class="form-select form-select-sm">
+					<option value="">Todos</option>
+					<option value="activo" {% if filtros.registro == 'activo' %}selected{% endif %}>Activo</option>
+					<option value="archivado" {% if filtros.registro == 'archivado' %}selected{% endif %}>Archivado</option>
+				</select>
+			</div>
+
+			<div class="col-md-2">
+				<div class="d-flex gap-2">
+					<button type="submit" class="btn btn-primary btn-sm">
+						<i class="bi bi-funnel"></i> Filtrar
+					</button>
+					<a href="{% url 'finance:tarifa_index' %}" class="btn btn-outline-secondary btn-sm">
+						<i class="bi bi-eraser"></i> Limpiar
+					</a>
+					<a href="?{{ request.GET.urlencode }}&export=pdf" target="_blank" class="btn btn-outline-danger btn-sm">
+						<i class="bi bi-file-pdf"></i> PDF
+					</a>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div class="card shadow-sm border-0">
+	<div class="card-body p-0">
+		{% if tarifas %}
+		<div class="table-responsive">
+			<table class="table table-hover align-middle mb-0">
+				<thead class="table-light">
+					<tr>
+						<th>ID</th>
+						<th>Servicio</th>
+						<th>Temporada</th>
+						<th>Estado</th>
+						<th>Precio base</th>
+						<th>Precio final</th>
+						<th class="text-end">Acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for tarifa in tarifas %}
+					<tr>
+						<td class="fw-semibold">#{{ tarifa.id }}</td>
+						<td>{{ tarifa.servicio|default:'Sin servicio' }}</td>
+						<td>{{ tarifa.temporada }}</td>
+						<td>
+							{% if tarifa.is_active %}
+								<span class="badge bg-success">{{ tarifa.get_estado_display }}</span>
+							{% else %}
+								<span class="badge bg-secondary">Archivada</span>
+							{% endif %}
+						</td>
+						<td>${{ tarifa.precio_base|floatformat:0|intcomma }}</td>
+						<td>${{ tarifa.calcular_precio_final|floatformat:0|intcomma }}</td>
+						<td class="text-end">
+							<div class="btn-group btn-group-sm" role="group">
+								<a href="{% url 'finance:tarifa_detail' tarifa.pk %}" class="btn btn-outline-info" title="Detalle">
+									<i class="bi bi-eye"></i>
+								</a>
+								{% if tarifa.is_active %}
+									<a href="{% url 'finance:tarifa_update' tarifa.pk %}" class="btn btn-outline-primary" title="Editar">
+										<i class="bi bi-pencil"></i>
+									</a>
+									<a href="{% url 'finance:tarifa_delete' tarifa.pk %}" class="btn btn-outline-danger" title="Archivar">
+										<i class="bi bi-archive"></i>
+									</a>
+								{% endif %}
+							</div>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		{% else %}
+		<div class="p-4 text-center text-muted">No hay tarifas que coincidan con los filtros.</div>
+		{% endif %}
+	</div>
 </div>
 {% endblock %}

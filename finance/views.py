@@ -19,6 +19,8 @@ from .forms import (
 )
 
 IMPUESTO_INDEX = "finance:impuesto_index"
+TARIFA_INDEX = "finance:tarifa_index"
+TEMPORADA_INDEX = "finance:temporada_index"
 
 # === IMPUESTO ===
 def filtrar_impuestos(request, queryset=None):
@@ -182,12 +184,65 @@ def import_impuesto(request):
         context
     )
 # === TARIFA ===
+def filtrar_tarifas(request, queryset=None):
+    if queryset is None:
+        queryset = Tarifa.all_objects.select_related('temporada', 'servicio_tipo').prefetch_related('impuestos')
+
+    tipo_servicio = request.GET.get("tipo_servicio")
+    temporada_id = request.GET.get("temporada")
+    estado = request.GET.get("estado")
+    registro = request.GET.get("registro")
+
+    if tipo_servicio:
+        queryset = queryset.filter(servicio_tipo__app_label=tipo_servicio)
+
+    if temporada_id:
+        queryset = queryset.filter(temporada_id=temporada_id)
+
+    if estado:
+        queryset = queryset.filter(estado=estado)
+
+
+    # Por defecto solo mostrar activas, salvo que se pida 'archivado'
+    if registro == "archivado":
+        queryset = queryset.filter(is_active=False)
+    else:
+        queryset = queryset.filter(is_active=True)
+
+    return queryset.order_by('-id')
+
+
+def generar_pdf_tarifas(tarifas, filtros, request):
+    context = {
+        'tarifas': tarifas,
+        'filtros': filtros,
+        'total_registros': tarifas.count(),
+        'usuario': request.user,
+        'fecha_exportacion': ahora(),
+    }
+    html_string = render_to_string('backoffice/tarifas/tarifa_pdf.html', context)
+    pdf = HTML(string=html_string).write_pdf()
+    return pdf
+
+
 @login_required
 @permission_required("finance.view_tarifa", raise_exception=True)
 @require_GET
 def index_tarifa(request):
-    tarifas = Tarifa.objects.select_related('temporada', 'servicio_tipo').order_by('-id')
-    return render(request, 'backoffice/tarifas/tarifa_index.html', {'tarifas': tarifas})
+    tarifas = filtrar_tarifas(request)
+
+    if request.GET.get('export') == 'pdf':
+        pdf = generar_pdf_tarifas(tarifas, request.GET, request)
+        response = HttpResponse(pdf, content_type='application/pdf')
+        filename = f"tarifas_{ahora().strftime('%Y%m%d_%H%M%S')}.pdf"
+        response['Content-Disposition'] = f'inline; filename={filename}'
+        return response
+
+    return render(request, 'backoffice/tarifas/tarifa_index.html', {
+        'tarifas': tarifas,
+        'temporadas': Temporada.objects.filter(is_active=True).order_by('fecha_inicio', 'id'),
+        'filtros': request.GET,
+    })
 
 
 @login_required
@@ -223,7 +278,7 @@ def create_tarifa(request):
         form.save_m2m()
         # Recalcular con la relación M2M ya persistida para mantener consistencia.
         tarifa.save()
-        return redirect("finance:tarifa_index")
+        return redirect(TARIFA_INDEX)
 
     return render(
         request,
@@ -257,7 +312,7 @@ def update_tarifa(request, pk):
         form.save_m2m()
         # En edición, el cálculo correcto depende de los impuestos ya actualizados.
         tarifa.save()
-        return redirect("finance:tarifa_index")
+        return redirect(TARIFA_INDEX)
 
     return render(
         request,
@@ -281,7 +336,7 @@ def delete_tarifa(request, pk):
 
     if request.method == "POST" and form.is_valid():
         tarifa.soft_delete(user=request.user)
-        return redirect("finance:tarifa_index")
+        return redirect(TARIFA_INDEX)
 
     return render(request, 'backoffice/tarifas/tarifa_delete.html', {'form': form, 'tarifa': tarifa})
 
@@ -294,12 +349,64 @@ def trashcan_tarifa(request):
     return render(request, 'backoffice/tarifas/tarifa_trashcan.html', {'tarifas': tarifas})
 
 # === TEMPORADA ===
+def filtrar_temporadas(request, queryset=None):
+    if queryset is None:
+        queryset = Temporada.all_objects.all()
+
+    nombre = request.GET.get("nombre")
+    registro = request.GET.get("registro")
+    fecha_desde = request.GET.get("fecha_desde")
+    fecha_hasta = request.GET.get("fecha_hasta")
+
+    if nombre:
+        queryset = queryset.filter(nombre=nombre)
+
+    if fecha_desde:
+        queryset = queryset.filter(fecha_inicio__gte=fecha_desde)
+
+    if fecha_hasta:
+        queryset = queryset.filter(fecha_fin__lte=fecha_hasta)
+
+
+    # Por defecto solo mostrar activas, salvo que se pida 'archivado'
+    if registro == "archivado":
+        queryset = queryset.filter(is_active=False)
+    else:
+        queryset = queryset.filter(is_active=True)
+
+    return queryset.order_by('-fecha_inicio', '-id')
+
+
+def generar_pdf_temporadas(temporadas, filtros, request):
+    context = {
+        'temporadas': temporadas,
+        'filtros': filtros,
+        'total_registros': temporadas.count(),
+        'usuario': request.user,
+        'fecha_exportacion': ahora(),
+    }
+    html_string = render_to_string('backoffice/temporadas/temporada_pdf.html', context)
+    pdf = HTML(string=html_string).write_pdf()
+    return pdf
+
+
 @login_required
 @permission_required("finance.view_temporada", raise_exception=True)
 @require_GET
 def index_temporada(request):
-    temporadas = Temporada.objects.order_by('-fecha_inicio', '-id')
-    return render(request, 'backoffice/temporadas/temporada_index.html', {'temporadas': temporadas})
+    temporadas = filtrar_temporadas(request)
+
+    if request.GET.get('export') == 'pdf':
+        pdf = generar_pdf_temporadas(temporadas, request.GET, request)
+        response = HttpResponse(pdf, content_type='application/pdf')
+        filename = f"temporadas_{ahora().strftime('%Y%m%d_%H%M%S')}.pdf"
+        response['Content-Disposition'] = f'inline; filename={filename}'
+        return response
+
+    return render(request, 'backoffice/temporadas/temporada_index.html', {
+        'temporadas': temporadas,
+        'filtros': request.GET,
+    })
 
 
 @login_required
@@ -314,7 +421,7 @@ def create_temporada(request):
         temporada.created_by = request.user
         temporada.updated_by = request.user
         temporada.save()
-        return redirect("finance:temporada_index")
+        return redirect(TEMPORADA_INDEX)
 
     return render(request, 'backoffice/temporadas/temporada_create.html', {'form': form})
 
@@ -331,7 +438,7 @@ def update_temporada(request, pk):
         temporada = form.save(commit=False)
         temporada.updated_by = request.user
         temporada.save()
-        return redirect("finance:temporada_index")
+        return redirect(TEMPORADA_INDEX)
 
     return render(request, 'backoffice/temporadas/temporada_update.html', {'form': form, 'temporada': temporada})
 
@@ -346,7 +453,7 @@ def delete_temporada(request, pk):
 
     if request.method == "POST" and form.is_valid():
         temporada.soft_delete(user=request.user)
-        return redirect("finance:temporada_index")
+        return redirect(TEMPORADA_INDEX)
 
     return render(request, 'backoffice/temporadas/temporada_delete.html', {'form': form, 'temporada': temporada})
 
