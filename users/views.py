@@ -65,20 +65,31 @@ def update_usuario_auto(request, pk):
         return redirect_after_profile_update(request.user)
 
     user = request.user
+    
     if request.method == 'POST':
-        profile_form = ProfileUpdateForm(request.POST, instance=user)
-        password_form = ChangePasswordForm(user, request.POST)
-
-        if 'update_profile' in request.POST and profile_form.is_valid():
-            profile_form.save()
-            messages.success(request, "Perfil actualizado correctamente.")
-            return redirect_after_profile_update(user)
-
-        elif 'change_password' in request.POST and password_form.is_valid():
-            password_form.save()
-            messages.success(request, "Contraseña actualizada correctamente.")
-            return redirect_after_profile_update(user)
-
+        profile_form = None
+        password_form = None
+        form_valid = False
+        
+        if 'update_profile' in request.POST:
+            profile_form = ProfileUpdateForm(request.POST, instance=user)
+            if profile_form.is_valid():
+                profile_form.save()
+                messages.success(request, "Perfil actualizado correctamente.")
+                form_valid = True
+            password_form = ChangePasswordForm(user)
+            
+        elif 'change_password' in request.POST:
+            password_form = ChangePasswordForm(user, request.POST)
+            if password_form.is_valid():
+                password_form.save()
+                messages.success(request, "Contraseña actualizada correctamente.")
+                form_valid = True
+            profile_form = ProfileUpdateForm(instance=user)
+        
+        if form_valid:
+            return redirect_after_profile_update(request.user)
+            
     else:
         profile_form = ProfileUpdateForm(instance=user)
         password_form = ChangePasswordForm(user)

@@ -12,13 +12,13 @@
 <form method="post">
     {% csrf_token %}
     {{ form|crispy }}
-    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+    <button type="submit" name="update_profile" class="btn btn-primary">Guardar cambios</button>
 </form>
 
 <hr>
 
 <p>
-    ¿Quieres cambiar tu contraseña? 
+    ¿Olvidaste tu contraseña? 
     <a href="{% url 'users:profile_update_email' %}" class="btn btn-sm btn-outline-warning">
     <i class="bi bi-key"></i> Cambiar contraseña por correo
     </a>

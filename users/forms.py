@@ -94,6 +94,8 @@ class ChangePasswordForm(forms.Form):
         pw1 = cleaned.get('new_password1')
         pw2 = cleaned.get('new_password2')
 
+        if not pw1 and not pw2:
+            return cleaned
         if pw1 and pw2 and pw1 != pw2:
             raise forms.ValidationError("Las contraseñas nuevas no coinciden.")
 
