@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', RedirectView.as_view(url='/hotel/lobby/', permanent=False)),
     path("hotel/", include("core.urls")),
+    path("guests/", include("guests.urls")),
     path("finance/", include("finance.urls")),
     path("restaurant/", include("restaurant.urls")),
     path("rooms/", include("rooms.urls")),

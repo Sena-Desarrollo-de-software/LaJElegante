@@ -5,16 +5,31 @@
 {% endcomment %}
 
 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-    {% include "hotel/components/nav/nav_item.html" with url_name="signup" icono="register" texto="Registrarse" %}
     {% include "hotel/components/nav/nav_item.html" with url_name="promociones" icono="discount" texto="Promociones" %}
-    
-    {% if show_login|default:True %}
+
+    {% if request.user.is_authenticated %}
     <li class="nav-item">
-        <a class="nav-link d-flex flex-column align-items-center" href="{% url 'login' %}">
-            <img src="{% static 'img/icons/login.webp' %}" alt="Login" style="width:50px; height:50px;">
-            <span class="mt-1">Login</span>
+        <a class="nav-link d-flex flex-column align-items-center" href="{% url 'mi_panel' %}">
+            <i class="bi bi-person-circle fs-3"></i>
+            <span class="mt-1">Mi panel</span>
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link d-flex flex-column align-items-center" href="{% url 'logout' %}">
+            <i class="bi bi-box-arrow-right fs-3"></i>
+            <span class="mt-1">Salir</span>
+        </a>
+    </li>
+    {% else %}
+    {% include "hotel/components/nav/nav_item.html" with url_name="signup" icono="register" texto="Registrarse" %}
+        {% if show_login|default:True %}
+        <li class="nav-item">
+            <a class="nav-link d-flex flex-column align-items-center" href="{% url 'login' %}">
+                <img src="{% static 'img/icons/login.webp' %}" alt="Login" style="width:50px; height:50px;">
+                <span class="mt-1">Login</span>
+            </a>
+        </li>
+        {% endif %}
     {% endif %}
     
     {% include "hotel/components/nav/nav_selector.html" %}

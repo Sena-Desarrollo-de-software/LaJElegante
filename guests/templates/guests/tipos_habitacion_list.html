@@ -1,0 +1,25 @@
+{% extends "hotel/layouts/base.html" %}
+{% block title %}Tipos de Habitación{% endblock %}
+{% block content %}
+<main class="container my-4">
+  <h1 class="h4 text-white mb-3">Tipos de Habitación (solo lectura)</h1>
+  <div class="card shadow-sm border-0 rounded-4">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead><tr><th>Tipo</th><th>Descripción</th><th>Capacidad</th></tr></thead>
+        <tbody>
+          {% for t in tipos %}
+          <tr>
+            <td>{{ t.get_nombre_tipo_display }}</td>
+            <td>{{ t.descripcion|default:'-' }}</td>
+            <td>{{ t.capacidad_maxima }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-center py-4 text-muted">No hay tipos disponibles.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+{% endblock %}

@@ -5,5 +5,5 @@
 {% endcomment %}
 
 <div class="mt-auto pb-3">
-    <a href="{{ boton.url }}" class="btn btn-reserva btn-lg px-5">{{ boton.texto }}</a>
+    <a href="{% url 'guests:reserva_restaurante_create' %}" class="btn btn-reserva btn-lg px-5">{{ boton.texto }}</a>
 </div>

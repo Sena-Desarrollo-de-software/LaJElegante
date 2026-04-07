@@ -14,7 +14,7 @@
     </div>
     
     <div class="mt-auto pb-3 z-2">
-        <a href="#" class="btn btn-reserva btn-lg px-5">{{ special.btn_texto }}</a>
+        <a href="{% url 'guests:reserva_habitacion_create' %}" class="btn btn-reserva btn-lg px-5">{{ special.btn_texto }}</a>
     </div>
 
     <div class="overlay d-flex flex-column justify-content-center align-items-center text-center">

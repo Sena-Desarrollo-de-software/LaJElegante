@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path("lobby/", views.lobby, name="lobby"),
+    path("mi-panel/", views.mi_panel, name="mi_panel"),
     path("habitaciones/", views.habitaciones, name="habitaciones"),
     path("restaurante/", views.restaurante, name="restaurante"),
     path("tyc/", views.tyc, name="tyc"),

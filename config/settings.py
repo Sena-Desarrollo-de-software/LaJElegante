@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'rooms',
     'users',
     'backoffice',
+    'guests',
 ]
 
 MIDDLEWARE = [
@@ -78,6 +79,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.nav_promos_context',
                 #Context processors personalizados
                 'backoffice.context_processors.sidebar_context',
                 'backoffice.context_processors.shortcut_action_context',
@@ -172,3 +174,5 @@ DATA_WIZARD = {
     'BACKEND': 'data_wizard.backends.threading',
     'PERMISSION': 'rest_framework.permissions.IsAdminUser',
 }
+
+LOGIN_URL = '/hotel/login/'
