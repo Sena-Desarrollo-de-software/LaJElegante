@@ -7,8 +7,16 @@ from django.template.loader import render_to_string
 from django.http import HttpResponse
 from weasyprint import HTML
 from core.utils import ahora
-from .models import Impuesto
-from .forms import ImpuestoCreateForm, ImpuestoUpdateForm, ImpuestoDeleteForm, ImpuestoRestoreForm
+from .models import Impuesto, Tarifa, Temporada
+from .forms import (
+    ImpuestoCreateForm,
+    ImpuestoUpdateForm,
+    ImpuestoDeleteForm,
+    ImpuestoRestoreForm,
+    TarifaForm,
+    TemporadaForm,
+    SoftDeleteConfirmForm,
+)
 
 IMPUESTO_INDEX = "finance:impuesto_index"
 
@@ -174,43 +182,178 @@ def import_impuesto(request):
         context
     )
 # === TARIFA ===
+@login_required
+@permission_required("finance.view_tarifa", raise_exception=True)
 @require_GET
 def index_tarifa(request):
-    return render(request,'backoffice/tarifas/tarifa_index.html')
+    tarifas = Tarifa.objects.select_related('temporada', 'servicio_tipo').order_by('-id')
+    return render(request, 'backoffice/tarifas/tarifa_index.html', {'tarifas': tarifas})
 
-@require_POST
+
+@login_required
+@permission_required("finance.view_tarifa", raise_exception=True)
+@require_GET
+def detail_tarifa(request, pk):
+    tarifa = get_object_or_404(
+        Tarifa.all_objects.select_related('temporada', 'servicio_tipo', 'created_by', 'updated_by').prefetch_related('impuestos'),
+        pk=pk,
+    )
+    return render(request, 'backoffice/tarifas/tarifa_detail.html', {'tarifa': tarifa})
+
+
+@login_required
+@permission_required("finance.add_tarifa", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@csrf_protect
 def create_tarifa(request):
-    return render(request,'backoffice/tarifas/tarifa_create.html')
+    form = TarifaForm(request.POST or None)
+    impuestos_disponibles = Impuesto.objects.filter(is_active=True).order_by('tipo', 'nombre')
 
-@require_http_methods(['POST','GET'])
-def update_tarifa(request):
-    return render(request,'backoffice/tarifas/tarifa_update.html')
+    if request.method == "POST":
+        impuestos_seleccionados = [int(pk) for pk in request.POST.getlist('impuestos') if pk.isdigit()]
+    else:
+        impuestos_seleccionados = []
 
-@require_http_methods(['POST','GET'])
-def delete_tarifa(request):
-    return render(request, 'backoffice/tarifas/tarifa_delete.html')
+    if request.method == "POST" and form.is_valid():
+        tarifa = form.save(commit=False)
+        tarifa.created_by = request.user
+        tarifa.updated_by = request.user
+        impuestos_ids = list(form.cleaned_data.get('impuestos', []).values_list('id', flat=True))
+        tarifa.save(impuestos_ids=impuestos_ids)
+        form.save_m2m()
+        # Recalcular con la relación M2M ya persistida para mantener consistencia.
+        tarifa.save()
+        return redirect("finance:tarifa_index")
 
-@require_http_methods(['POST','GET'])
+    return render(
+        request,
+        'backoffice/tarifas/tarifa_create.html',
+        {
+            'form': form,
+            'impuestos_disponibles': impuestos_disponibles,
+            'impuestos_seleccionados': impuestos_seleccionados,
+        },
+    )
+
+
+@login_required
+@permission_required("finance.change_tarifa", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@csrf_protect
+def update_tarifa(request, pk):
+    tarifa = get_object_or_404(Tarifa.objects.select_related('temporada'), pk=pk, is_active=True)
+    form = TarifaForm(request.POST or None, instance=tarifa)
+    impuestos_disponibles = Impuesto.objects.filter(is_active=True).order_by('tipo', 'nombre')
+
+    if request.method == "POST":
+        impuestos_seleccionados = [int(pk) for pk in request.POST.getlist('impuestos') if pk.isdigit()]
+    else:
+        impuestos_seleccionados = list(tarifa.impuestos.values_list('id', flat=True))
+
+    if request.method == "POST" and form.is_valid():
+        tarifa = form.save(commit=False)
+        tarifa.updated_by = request.user
+        tarifa.save()
+        form.save_m2m()
+        # En edición, el cálculo correcto depende de los impuestos ya actualizados.
+        tarifa.save()
+        return redirect("finance:tarifa_index")
+
+    return render(
+        request,
+        'backoffice/tarifas/tarifa_update.html',
+        {
+            'form': form,
+            'tarifa': tarifa,
+            'impuestos_disponibles': impuestos_disponibles,
+            'impuestos_seleccionados': impuestos_seleccionados,
+        },
+    )
+
+
+@login_required
+@permission_required("finance.delete_tarifa", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@csrf_protect
+def delete_tarifa(request, pk):
+    tarifa = get_object_or_404(Tarifa.objects, pk=pk, is_active=True)
+    form = SoftDeleteConfirmForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        tarifa.soft_delete(user=request.user)
+        return redirect("finance:tarifa_index")
+
+    return render(request, 'backoffice/tarifas/tarifa_delete.html', {'form': form, 'tarifa': tarifa})
+
+
+@login_required
+@permission_required("finance.view_tarifa", raise_exception=True)
+@require_GET
 def trashcan_tarifa(request):
-    return render(request,'backoffice/tarifas/tarifa_trashcan.html')
+    tarifas = Tarifa.all_objects.filter(is_active=False).select_related('temporada', 'servicio_tipo').order_by('-id')
+    return render(request, 'backoffice/tarifas/tarifa_trashcan.html', {'tarifas': tarifas})
 
 # === TEMPORADA ===
+@login_required
+@permission_required("finance.view_temporada", raise_exception=True)
 @require_GET
 def index_temporada(request):
-    return render(request,'backoffice/temporadas/temporada_index.html')
+    temporadas = Temporada.objects.order_by('-fecha_inicio', '-id')
+    return render(request, 'backoffice/temporadas/temporada_index.html', {'temporadas': temporadas})
 
-@require_POST
+
+@login_required
+@permission_required("finance.add_temporada", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@csrf_protect
 def create_temporada(request):
-    return render(request,'backoffice/temporada/temporada_create.html')
+    form = TemporadaForm(request.POST or None)
 
-@require_http_methods(['POST','GET'])
-def update_temporada(request):
-    return render(request,'backoffice/temporadas/temporada_update.html')
+    if request.method == "POST" and form.is_valid():
+        temporada = form.save(commit=False)
+        temporada.created_by = request.user
+        temporada.updated_by = request.user
+        temporada.save()
+        return redirect("finance:temporada_index")
 
-@require_http_methods(['POST','GET'])
-def delete_temporada(request):
-    return render(request, 'backoffice/temporadas/temporada_delete.html')
+    return render(request, 'backoffice/temporadas/temporada_create.html', {'form': form})
 
-@require_http_methods(['POST','GET'])
+
+@login_required
+@permission_required("finance.change_temporada", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@csrf_protect
+def update_temporada(request, pk):
+    temporada = get_object_or_404(Temporada.objects, pk=pk, is_active=True)
+    form = TemporadaForm(request.POST or None, instance=temporada)
+
+    if request.method == "POST" and form.is_valid():
+        temporada = form.save(commit=False)
+        temporada.updated_by = request.user
+        temporada.save()
+        return redirect("finance:temporada_index")
+
+    return render(request, 'backoffice/temporadas/temporada_update.html', {'form': form, 'temporada': temporada})
+
+
+@login_required
+@permission_required("finance.delete_temporada", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@csrf_protect
+def delete_temporada(request, pk):
+    temporada = get_object_or_404(Temporada.objects, pk=pk, is_active=True)
+    form = SoftDeleteConfirmForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        temporada.soft_delete(user=request.user)
+        return redirect("finance:temporada_index")
+
+    return render(request, 'backoffice/temporadas/temporada_delete.html', {'form': form, 'temporada': temporada})
+
+
+@login_required
+@permission_required("finance.view_temporada", raise_exception=True)
+@require_GET
 def trashcan_temporada(request):
-    return render(request,'backoffice/temporadas/temporada_trashcan.html')
+    temporadas = Temporada.all_objects.filter(is_active=False).order_by('-fecha_inicio', '-id')
+    return render(request, 'backoffice/temporadas/temporada_trashcan.html', {'temporadas': temporadas})

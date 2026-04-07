@@ -1,0 +1,45 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Detalle Tarifa{% endblock %}
+{% block form_title %}Detalle de Tarifa{% endblock %}
+{% block form_subtitle %}Información completa de la tarifa #{{ tarifa.id }}{% endblock %}
+
+{% block form_actions %}
+  <a href="{% url 'finance:tarifa_index' %}" class="btn btn-outline-secondary btn-sm">Volver</a>
+  {% if tarifa.is_active %}
+    <a href="{% url 'finance:tarifa_update' tarifa.pk %}" class="btn btn-outline-primary btn-sm">Editar</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+  <div class="col-md-4"><small class="text-muted">ID</small><div class="fw-semibold">#{{ tarifa.id }}</div></div>
+  <div class="col-md-4"><small class="text-muted">Estado lógico</small><div class="fw-semibold">{% if tarifa.is_active %}Activa{% else %}Archivada{% endif %}</div></div>
+  <div class="col-md-4"><small class="text-muted">Estado comercial</small><div class="fw-semibold">{{ tarifa.get_estado_display }}</div></div>
+
+  <div class="col-md-6"><small class="text-muted">Servicio</small><div class="fw-semibold">{{ tarifa.servicio|default:'Sin servicio' }}</div></div>
+  <div class="col-md-6"><small class="text-muted">Tipo de servicio</small><div class="fw-semibold">{{ tarifa.servicio_tipo|default:'N/A' }}</div></div>
+
+  <div class="col-md-6"><small class="text-muted">Temporada</small><div class="fw-semibold">{{ tarifa.temporada }}</div></div>
+  <div class="col-md-3"><small class="text-muted">Precio base</small><div class="fw-semibold">${{ tarifa.precio_base|floatformat:2 }}</div></div>
+  <div class="col-md-3"><small class="text-muted">Precio final</small><div class="fw-semibold">${{ tarifa.calcular_precio_final|floatformat:2 }}</div></div>
+
+  <div class="col-12">
+    <small class="text-muted d-block mb-1">Impuestos aplicados</small>
+    {% if tarifa.impuestos.all %}
+      <ul class="mb-0">
+        {% for impuesto in tarifa.impuestos.all %}
+          <li>{{ impuesto.nombre }} ({{ impuesto.porcentaje }}%)</li>
+        {% empty %}
+          <li class="text-muted">Sin impuestos asociados</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+
+  <div class="col-md-3"><small class="text-muted">Creado</small><div class="fw-semibold">{{ tarifa.created_at|date:'d/m/Y H:i' }}</div></div>
+  <div class="col-md-3"><small class="text-muted">Actualizado</small><div class="fw-semibold">{{ tarifa.updated_at|date:'d/m/Y H:i' }}</div></div>
+  <div class="col-md-3"><small class="text-muted">Creado por</small><div class="fw-semibold">{{ tarifa.created_by|default:'Sistema' }}</div></div>
+  <div class="col-md-3"><small class="text-muted">Actualizado por</small><div class="fw-semibold">{{ tarifa.updated_by|default:'Sistema' }}</div></div>
+</div>
+{% endblock %}
