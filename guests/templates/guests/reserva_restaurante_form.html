@@ -1,0 +1,19 @@
+{% extends "hotel/layouts/base.html" %}
+{% block title %}Reserva de Restaurante{% endblock %}
+{% block content %}
+<main class="container my-4">
+  <div class="card shadow-sm border-0 rounded-4 mx-auto" style="max-width: 760px;">
+    <div class="card-body p-4">
+      <h1 class="h4 mb-3">{% if modo == 'editar' %}Editar{% else %}Nueva{% endif %} Reserva de Restaurante</h1>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="d-flex gap-2">
+          <button class="btn btn-dark" type="submit">Guardar</button>
+          <a href="{% url 'guests:reserva_restaurante_list' %}" class="btn btn-outline-secondary">Volver</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+{% endblock %}

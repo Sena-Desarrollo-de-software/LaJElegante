@@ -336,7 +336,7 @@ def import_grupo(request):
 #Metodo de actualizacion de perfil
 def redirect_after_profile_update(user):
     if user.groups.filter(name='Clientes').exists():
-        return redirect('guest:profile_update', pk=user.id)
+        return redirect('guests:dashboard')
     else:
         return redirect('users:profile_update', pk=user.id)
 

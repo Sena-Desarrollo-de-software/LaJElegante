@@ -8,6 +8,7 @@ def reservar_habitacion(request):
 from django.shortcuts import render,redirect
 from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 from django.views.generic.edit import CreateView
 from django.views.decorators.http import require_GET,require_http_methods
 from .models import Promocion
@@ -145,6 +146,12 @@ def promociones(request):
     ).order_by('orden_navbar')
     return render(request, "hotel/promociones.html",{"promociones_nav" : promociones_nav_lp,'promos' : PROMOCIONES_NAV})
 
+@login_required
+def mi_panel(request):
+    if request.user.groups.filter(name__in=['Cliente', 'Clientes']).exists():
+        return redirect('guests:dashboard')
+    return redirect('backoffice:dashboard')
+
 class LoginUsuario(LoginView):
     template_name = 'hotel/login.html'
     redirect_authenticated_user = True
@@ -156,8 +163,8 @@ class LoginUsuario(LoginView):
     
     def get_success_url(self):
         user = self.request.user
-        if user.groups.filter(name='Cliente').exists():
-            return reverse_lazy('clientes:home')
+        if user.groups.filter(name__in=['Cliente', 'Clientes']).exists():
+            return reverse_lazy('guests:dashboard')
         return reverse_lazy('backoffice:dashboard')
 
 class RegistroUsuario(CreateView):
@@ -170,6 +177,9 @@ class RegistroUsuario(CreateView):
         return context
     
     def get_success_url(self):
+        user = self.request.user
+        if user.groups.filter(name__in=['Cliente', 'Clientes']).exists():
+            return reverse_lazy('guests:dashboard')
         return reverse_lazy('backoffice:dashboard')
 
     def form_valid(self, form):
@@ -184,6 +194,10 @@ class RegistroUsuario(CreateView):
         
 class LogoutUsuario(LogoutView):
     next_page = 'login'
+    http_method_names = ['get', 'post', 'options']
+
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'hotel/password_reset.html'

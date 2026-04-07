@@ -1,0 +1,25 @@
+{% extends "hotel/layouts/base.html" %}
+{% block title %}Turnos{% endblock %}
+{% block content %}
+<main class="container my-4">
+  <h1 class="h4 text-white mb-3">Turnos (solo lectura)</h1>
+  <div class="card shadow-sm border-0 rounded-4">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead><tr><th>Fecha</th><th>Horario</th><th>Cupo disponible</th></tr></thead>
+        <tbody>
+          {% for t in turnos %}
+          <tr>
+            <td>{{ t.fecha }}</td>
+            <td>{{ t.horario }}</td>
+            <td>{{ t.capacidad_disponible }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-center py-4 text-muted">No hay turnos disponibles.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+{% endblock %}

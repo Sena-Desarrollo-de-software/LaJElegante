@@ -15,7 +15,7 @@ def dashboard(request):
     return render(request,'backoffice/dashboard.html', {'dashboard' : querys})
 
 @login_required
-@permission_required("core.create_reserva", raise_exception=True)
+@permission_required("core.add_reserva", raise_exception=True)
 @require_http_methods(["GET", "POST"])
 @csrf_protect
 def create_reserva(request):

@@ -1,0 +1,61 @@
+{% extends "hotel/layouts/base.html" %}
+
+{% block title %}Panel Cliente - Hotel LJE{% endblock %}
+
+{% block content %}
+<main class="container my-4">
+  <section class="rounded-4 p-4 p-md-5 mb-4 bg-dark bg-gradient text-white border border-light-subtle">
+    <h1 class="h3 mb-1">Mi Panel de Cliente</h1>
+    <p class="mb-0 text-white-50">Gestiona tus reservas y consulta información del hotel.</p>
+  </section>
+
+  {% if messages %}
+  <div class="mb-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <section class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="card shadow-sm border-0 rounded-4 text-center p-3"><small class="text-muted">Total</small><div class="h3 mb-0">{{ stats.total }}</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card shadow-sm border-0 rounded-4 text-center p-3"><small class="text-muted">Pendientes</small><div class="h3 mb-0 text-warning">{{ stats.pendiente }}</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card shadow-sm border-0 rounded-4 text-center p-3"><small class="text-muted">Confirmadas</small><div class="h3 mb-0 text-success">{{ stats.confirmada }}</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card shadow-sm border-0 rounded-4 text-center p-3"><small class="text-muted">Canceladas</small><div class="h3 mb-0 text-secondary">{{ stats.cancelada }}</div></div></div>
+  </section>
+
+  <section class="row g-3 mb-4">
+    <div class="col-md-4"><a class="d-block text-decoration-none" href="{% url 'guests:reserva_habitacion_create' %}"><div class="card shadow-sm border-0 rounded-4 p-3"><h2 class="h6 mb-1 text-dark"><i class="bi bi-door-open me-2"></i>Nueva reserva habitación</h2><p class="small text-muted mb-0">Crea y gestiona tus reservas de habitación.</p></div></a></div>
+    <div class="col-md-4"><a class="d-block text-decoration-none" href="{% url 'guests:reserva_restaurante_create' %}"><div class="card shadow-sm border-0 rounded-4 p-3"><h2 class="h6 mb-1 text-dark"><i class="bi bi-cup-hot me-2"></i>Nueva reserva restaurante</h2><p class="small text-muted mb-0">Agenda tus reservas de restaurante.</p></div></a></div>
+    <div class="col-md-4"><a class="d-block text-decoration-none" href="{% url 'guests:perfil' %}"><div class="card shadow-sm border-0 rounded-4 p-3"><h2 class="h6 mb-1 text-dark"><i class="bi bi-person-gear me-2"></i>Mi perfil</h2><p class="small text-muted mb-0">Actualiza tus datos y contraseña.</p></div></a></div>
+  </section>
+
+  <section class="row g-3 mb-4">
+    <div class="col-md-6"><a class="d-block text-decoration-none" href="{% url 'guests:tarifas_list' %}"><div class="card shadow-sm border-0 rounded-4 p-3"><h2 class="h6 mb-1 text-dark">Tarifas</h2><p class="small text-muted mb-0">Consulta de solo lectura.</p></div></a></div>
+    <div class="col-md-6"><a class="d-block text-decoration-none" href="{% url 'guests:tipos_habitacion_list' %}"><div class="card shadow-sm border-0 rounded-4 p-3"><h2 class="h6 mb-1 text-dark">Tipos de habitación</h2><p class="small text-muted mb-0">Consulta de solo lectura.</p></div></a></div>
+    <div class="col-md-6"><a class="d-block text-decoration-none" href="{% url 'guests:horarios_list' %}"><div class="card shadow-sm border-0 rounded-4 p-3"><h2 class="h6 mb-1 text-dark">Horarios</h2><p class="small text-muted mb-0">Consulta de solo lectura.</p></div></a></div>
+    <div class="col-md-6"><a class="d-block text-decoration-none" href="{% url 'guests:turnos_list' %}"><div class="card shadow-sm border-0 rounded-4 p-3"><h2 class="h6 mb-1 text-dark">Turnos</h2><p class="small text-muted mb-0">Consulta de solo lectura.</p></div></a></div>
+  </section>
+
+  <section class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-white"><h2 class="h6 mb-0">Últimas reservas</h2></div>
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead><tr><th>ID</th><th>Estado</th><th>Fecha</th><th>Total</th></tr></thead>
+        <tbody>
+          {% for reserva in reservas %}
+          <tr>
+            <td>#{{ reserva.id }}</td>
+            <td>{{ reserva.get_estado_display }}</td>
+            <td>{{ reserva.fecha_reserva|date:'d/m/Y H:i' }}</td>
+            <td>${{ reserva.total|floatformat:0 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center text-muted py-4">Aún no tienes reservas.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+{% endblock %}

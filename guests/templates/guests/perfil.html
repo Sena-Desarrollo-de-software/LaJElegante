@@ -1,0 +1,54 @@
+{% extends "hotel/layouts/base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Mi Perfil - Hotel LJE{% endblock %}
+
+{% block content %}
+<main class="container my-4">
+  <section class="rounded-4 p-4 p-md-5 mb-4 bg-dark bg-gradient text-white border border-light-subtle">
+    <h1 class="h3 mb-1">Mi Perfil</h1>
+    <p class="mb-0 text-white-50">Actualiza tus datos personales y la seguridad de tu cuenta.</p>
+  </section>
+
+  {% if messages %}
+  <div class="mb-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="row g-4">
+    <div class="col-12 col-lg-6">
+      <div class="card h-100 shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">Información de cuenta</h2>
+          <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" name="update_profile" class="btn btn-dark">Guardar cambios</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card h-100 shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">Seguridad</h2>
+          <form method="post" class="mb-3">
+            {% csrf_token %}
+            {{ password_form|crispy }}
+            <button type="submit" name="change_password" class="btn btn-warning">Actualizar contraseña</button>
+          </form>
+
+          <a href="{% url 'users:profile_update_email' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-key me-1"></i>Cambiar contraseña por correo
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
