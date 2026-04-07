@@ -2,9 +2,12 @@ from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 from core.models import BaseAuditModel, ReservaServicio, Reserva
+from .constants import PORCENTAJE_PENALIZACION, HORA_CHECKIN, HORA_CHECKOUT, TIEMPO_LIMITE_HABITACION_HORAS
 from core.utils import calcular_dias, validar_capacidad, validar_fechas
 from finance.models import get_tarifa_vigente
 from .utils import validar_tiempo_reserva_nueva,validar_tiempo_modificacion_reserva,validar_fechas_no_expiradas
+from core.utils import ahora, dentro_de, combinar_fecha_hora
+from datetime import time
 
 class TipoHabitacion(BaseAuditModel):
     NOMBRE_TIPO_CHOICES = [
@@ -178,6 +181,58 @@ class ReservaHabitacion(ReservaServicio):
         self.tarifa_aplicada = tarifa
         self.precio_unitario = tarifa.precio_final  # precio por noche
         self.precio_total = (self.precio_unitario * self.cantidad_noches) - self.descuento
+
+    def _get_fecha_inicio_datetime(self):
+        return combinar_fecha_hora(
+            self.fecha_inicio,
+            time(HORA_CHECKIN, 0)
+        )
+
+    def _get_fecha_limite_cancelacion(self):
+        return self._get_fecha_inicio_datetime() - dentro_de(TIEMPO_LIMITE_HABITACION_HORAS)
+
+    def _calcular_penalizacion(self):
+        fecha_actual = ahora()
+        fecha_limite = self._get_fecha_limite_cancelacion()
+
+        if fecha_actual > fecha_limite:
+            return self.precio_total * PORCENTAJE_PENALIZACION
+
+        return 0
+
+    def puede_cancelar(self):
+        if self.estado == "COMPLETADA":
+            return False, "No se puede cancelar una reserva ya completada"
+
+        if self.estado == "CANCELADA":
+            return False, "La reserva ya está cancelada"
+
+        return True, None
+
+
+    def cancelar(self):
+        puede, error = self.puede_cancelar()
+
+        if not puede:
+            raise ValidationError(error)
+
+        penalizacion = self._calcular_penalizacion()
+
+        self.estado = "CANCELADA"
+        self.penalizacion = penalizacion
+        self.save()
+
+        for detalle in self.reservahabitacion_set.all():
+            detalle.estado = "CANCELADA"
+            detalle.save()
+            habitacion = detalle.habitacion
+            habitacion.estado = "DISPONIBLE"
+            habitacion.save()
+        return penalizacion
+
+
+    def calcular_penalizacion_preview(self):
+        return self._calcular_penalizacion()
 
     def save(self, *args, **kwargs):
         with transaction.atomic():

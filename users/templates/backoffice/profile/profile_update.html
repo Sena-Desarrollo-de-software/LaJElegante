@@ -1,0 +1,32 @@
+{% extends "backoffice/layouts/base_form.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Actualizar perfil{% endblock %}
+
+{% block form_title %}Actualización de perfil{% endblock %}
+{% block form_subtitle %}Modificar los datos de tu propio usuario{% endblock %}
+
+{% block content %}
+<h3>Editar perfil</h3>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" name="update_profile" class="btn btn-primary">Guardar cambios</button>
+</form>
+
+<hr>
+
+<p>
+    ¿Olvidaste tu contraseña? 
+    <a href="{% url 'users:profile_update_email' %}" class="btn btn-sm btn-outline-warning">
+    <i class="bi bi-key"></i> Cambiar contraseña por correo
+    </a>
+</p>
+<h3>Cambiar contraseña</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ password_form|crispy }}
+    <button type="submit" name="change_password" class="btn btn-warning">Actualizar contraseña</button>
+</form>
+{% endblock %}

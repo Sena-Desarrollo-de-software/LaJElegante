@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'data_wizard',
     'data_wizard.sources',
     'rest_framework',
+    'crispy_forms',
+    'crispy_bootstrap5',
     # Hotel apps
     'core',
     'finance',
@@ -148,6 +150,9 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 AUTH_USER_MODEL = 'users.Usuario'
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = ["bootstrap5"]
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('EMAIL_HOST')

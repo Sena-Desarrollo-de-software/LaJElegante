@@ -8,12 +8,15 @@ from weasyprint import HTML
 import csv
 from django.http import HttpResponse
 from .models import Habitacion, TipoHabitacion, ReservaHabitacion
-from .forms import HabitacionCreateForm, HabitacionUpdateForm, HabitacionDeleteForm, HabitacionRestoreForm, TipoHabitacionCreateForm, TipoHabitacionUpdateForm, TipoHabitacionDeleteForm, TipoHabitacionRestoreForm, ReservaHabitacionCreateForm
+from .forms import HabitacionCreateForm, HabitacionUpdateForm, HabitacionDeleteForm, HabitacionRestoreForm, TipoHabitacionCreateForm, TipoHabitacionUpdateForm, TipoHabitacionDeleteForm, TipoHabitacionRestoreForm, ReservaHabitacionCreateForm, ReservaHabitacionUpdateForm
 from .importers import HabitacionImporter
 from core.utils import ahora
 from core.models import Reserva
 from django.contrib.contenttypes.models import ContentType
 from finance.models import get_tarifa_vigente
+from django.core.exceptions import ValidationError
+from django.contrib import messages
+from datetime import datetime
 
 HABITACION_INDEX = "rooms:habitacion_index"
 
@@ -49,7 +52,10 @@ def generar_pdf_habitaciones(habitaciones, filtros, request):
     }
 
     html_string = render_to_string('backoffice/habitaciones/habitacion_pdf.html', context)
-    pdf = HTML(string=html_string).write_pdf()
+    pdf = HTML(
+        string=html_string,
+        base_url=request.build_absolute_uri()
+    ).write_pdf()
 
     return pdf
 
@@ -209,40 +215,110 @@ def procesar_import_habitacion(request):
     return redirect('rooms:habitacion_index')
 
 # === RESERVA HABITACION ===
+def filtrar_reservas_habitacion(request):
+    qs = ReservaHabitacion.objects.select_related(
+        "reserva",
+        "habitacion",
+        "reserva__usuario"
+    )
+
+    if request.GET.get("habitacion"):
+        qs = qs.filter(habitacion_id=request.GET.get("habitacion"))
+
+    if request.GET.get("fecha_inicio"):
+        qs = qs.filter(fecha_inicio__gte=request.GET.get("fecha_inicio"))
+
+    if request.GET.get("fecha_fin"):
+        qs = qs.filter(fecha_fin__lte=request.GET.get("fecha_fin"))
+
+    if request.GET.get("estado"):
+        qs = qs.filter(estado=request.GET.get("estado"))
+
+    return qs
+
+def generar_pdf_reserva_habitacion(reservas, filtros, request):
+    total_registros = reservas.count()
+
+    total_ingresos = 0
+    total_penalizaciones = 0
+
+    for r in reservas:
+        if r.reserva.estado in ["CONFIRMADA", "COMPLETADA"]:
+            total_ingresos += r.reserva.total
+        elif r.reserva.estado == "CANCELADA":
+            penalizacion = getattr(r.reserva, "penalizacion", 0)
+            total_penalizaciones += penalizacion
+
+    context = {
+        'reservas': reservas,
+        'filtros': filtros,
+
+        'total_registros': total_registros,
+        'total_ingresos': total_ingresos,
+        'total_penalizaciones': total_penalizaciones,
+
+        'usuario': request.user,
+        'fecha_exportacion': ahora(),
+    }
+
+    html_string = render_to_string(
+        'backoffice/reserva_habitaciones/reserva_habitacion_pdf.html',
+        context
+    )
+
+    pdf = HTML(
+        string=html_string,
+        base_url=request.build_absolute_uri()
+    ).write_pdf()
+
+    return pdf
+
+@login_required
+@permission_required("rooms.add_reservahabitacion", raise_exception=True)
+def descargar_plantilla_reservas_habitacion(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="plantilla_reservas_habitacion.csv"'
+
+    writer = csv.writer(response)
+
+    writer.writerow([
+        'usuario',
+        'habitacion',
+        'fecha_inicio',
+        'fecha_fin',
+        'estado',
+    ])
+
+    return response
+
 @login_required
 @permission_required("rooms.view_reservahabitacion", raise_exception=True)
 @require_GET
 def index_reserva_habitacion(request):
 
-    reservas = ReservaHabitacion.objects.select_related(
-        "habitacion",
-        "habitacion__tipo_habitacion",
-        "reserva"
-    ).filter(is_active=True)
-
-    fecha_inicio = request.GET.get("fecha_inicio")
-    fecha_fin = request.GET.get("fecha_fin")
-    habitacion_id = request.GET.get("habitacion")
-
-    if fecha_inicio:
-        reservas = reservas.filter(fecha_inicio__gte=fecha_inicio)
-
-    if fecha_fin:
-        reservas = reservas.filter(fecha_fin__lte=fecha_fin)
-
-    if habitacion_id:
-        reservas = reservas.filter(habitacion_id=habitacion_id)
-
+    reservas = filtrar_reservas_habitacion(request)
     habitaciones = Habitacion.objects.all()
+
+    if request.GET.get('export') == 'pdf':
+        pdf = generar_pdf_reserva_habitacion(
+            reservas,
+            request.GET,
+            request
+        )
+
+        response = HttpResponse(pdf, content_type='application/pdf')
+
+        filename = f"reservas_habitacion_{ahora().strftime('%Y%m%d_%H%M%S')}.pdf"
+
+        response['Content-Disposition'] = f'inline; filename={filename}'
+
+        return response
 
     return render(request, "backoffice/reserva_habitaciones/reserva_habitacion_index.html", {
         "reservas": reservas,
         "habitaciones": habitaciones,
         "filtros": request.GET
     })
-
-from django.contrib import messages
-from datetime import datetime
 
 def parse_date(fecha):
     return datetime.strptime(fecha, "%Y-%m-%d").date() if fecha else None
@@ -295,18 +371,94 @@ def create_reserva_habitacion(request, reserva_id):
         "fecha_fin": fecha_fin,
     })
 
-@require_http_methods(['POST','GET'])
-def update_reserva_habitacion(request):
-    return render(request,'backoffice/reserva_habitaciones/reserva_habitacion_update.html')
+@login_required
+@permission_required("rooms.change_reservahabitacion", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@csrf_protect
+def update_reserva_habitacion(request, pk):
+    reserva_habitacion = get_object_or_404(ReservaHabitacion, pk=pk, is_active=True)
 
-@require_http_methods(['POST','GET'])
-def delete_reserva_habitacion(request):
-    return render(request, 'backoffice/reserva_habitaciones/reserva_habitacion_delete.html')
+    if request.method == "POST":
+        form = ReservaHabitacionUpdateForm(request.POST, instance=reserva_habitacion)
+        if form.is_valid():
+            reserva_habitacion = form.save(commit=False)
+            reserva_habitacion.updated_by = request.user
+            reserva_habitacion.save()
+            messages.success(request, "Reserva de habitación actualizada correctamente.")
+            return redirect('rooms:reserva_habitacion_index')
+        else:
+            messages.error(request, "Corrige los errores para continuar.")
+    else:
+        form = ReservaHabitacionUpdateForm(instance=reserva_habitacion)
 
-@require_http_methods(['POST','GET'])
-def trashcan_reserva_habitacion(request):
-    return render(request,'backoffice/reserva_habitaciones/reserva_habitacion_trashcan.html')
+    return render(request, "backoffice/reserva_habitaciones/reserva_habitacion_update.html", {
+        "form": form,
+        "reserva_habitacion": reserva_habitacion
+    })
 
+@login_required
+@permission_required("rooms.change_reservahabitacion", raise_exception=True)
+@require_http_methods(["GET", "POST"])
+@csrf_protect
+def cancel_reserva_habitacion(request, pk):
+    reserva = get_object_or_404(ReservaHabitacion, pk=pk)
+
+    puede, error = reserva.puede_cancelar()
+    if not puede:
+        messages.error(request, error)
+        return redirect("rooms:reserva_habitacion_index")
+
+    penalizacion = reserva.calcular_penalizacion_preview()
+    requiere_confirmacion = penalizacion > 0
+
+    if request.method == "POST":
+
+        if requiere_confirmacion and not request.POST.get("acepta_penalizacion"):
+            messages.error(request, "Debes aceptar la penalización para continuar")
+            return redirect(request.path)
+
+        try:
+            penalizacion_real = reserva.cancelar()
+
+            if penalizacion_real > 0:
+                messages.warning(
+                    request,
+                    f"Reserva cancelada con penalización de ${penalizacion_real}"
+                )
+            else:
+                messages.success(request, "Reserva cancelada exitosamente")
+
+            return redirect("rooms:reserva_habitacion_index")
+
+        except ValidationError as e:
+            messages.error(request, str(e))
+            return redirect(request.path)
+
+    return render(request, "backoffice/reserva_habitaciones/reserva_habitacion_cancel.html", {
+        "reserva": reserva,
+        "penalizacion": penalizacion,
+        "requiere_confirmacion": requiere_confirmacion
+    })
+
+@login_required
+@permission_required("rooms.add_reservahabitacion", raise_exception=True)
+def import_reserva_habitacion(request):
+
+    estados = ReservaHabitacion.ESTADO_RESERVA_CHOICES
+
+    context = {
+        'title': 'Importar Reservas de Habitación',
+        'subtitle': 'Carga masiva desde archivo CSV/Excel',
+        'is_staff': request.user.is_staff,
+        'datawizard_url': '/admin/sources/filesource/add/' if request.user.is_staff else None,
+        'estados': estados
+    }
+
+    return render(
+        request,
+        'backoffice/reserva_habitaciones/reserva_habitacion_import.html',
+        context
+    )
 # === TIPO HABITACION ===
 TIPO_HABITACION_INDEX = "rooms:tipo_habitacion_index"
 

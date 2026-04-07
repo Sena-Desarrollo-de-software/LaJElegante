@@ -1,6 +1,6 @@
 from datetime import time
 from core.utils import combinar_fecha_hora, validar_anticipacion, validar_modificacion, validar_no_expirado
-from core.constants import TIEMPO_LIMITE_HABITACION_HORAS
+from .constants import TIEMPO_LIMITE_HABITACION_HORAS
 
 def obtener_fecha_checkin(fecha_inicio):
     """Obtiene la fecha y hora exacta de check-in (3:00 PM)"""

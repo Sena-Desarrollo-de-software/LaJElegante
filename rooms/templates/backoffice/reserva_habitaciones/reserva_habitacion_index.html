@@ -9,17 +9,12 @@ Listado de habitaciones asignadas a reservas
 {% endblock %}
 
 {% block form_actions %}
-  <a href="{% url 'rooms:reserva_habitacion_index' %}" class="btn btn-outline-secondary btn-sm">
-    Limpiar
-  </a>
   <a href="{% url 'backoffice:reserva_create' %}?next=reserva_habitacion"
      class="btn btn-primary btn-sm">+ Nueva
   </a>
 {% endblock %}
 
 {% block content %}
-
-<!-- 🔍 FILTROS -->
 <div class="card mb-3 border-0 bg-light">
   <div class="card-body">
 
@@ -60,10 +55,8 @@ Listado de habitaciones asignadas a reservas
           Limpiar
         </a>
 
-        <a href="?{{ request.GET.urlencode }}&export=pdf"
-           class="btn btn-outline-danger btn-sm">
-          PDF
-        </a>
+        <a href="?{{ request.GET.urlencode }}&export=pdf" target="_blank" class="btn btn-outline-danger btn-sm">PDF</a>
+        <a href="{% url 'rooms:reserva_habitacion_import' %}" class="btn btn-outline-success btn-sm">Importar</a>
       </div>
 
     </form>
@@ -71,7 +64,6 @@ Listado de habitaciones asignadas a reservas
   </div>
 </div>
 
-<!-- 📊 TABLA -->
 {% if reservas %}
   <div class="table-responsive">
     <table class="table table-hover align-middle mb-0">
@@ -93,7 +85,6 @@ Listado de habitaciones asignadas a reservas
         {% for r in reservas %}
         <tr>
 
-          <!-- HABITACION -->
           <td>
             <strong>Hab {{ r.habitacion.numero_habitacion }}</strong><br>
             <small class="text-muted">
@@ -101,49 +92,52 @@ Listado de habitaciones asignadas a reservas
             </small>
           </td>
 
-          <!-- RESERVA -->
           <td>
             <a href="{% url 'backoffice:reserva_detail' r.reserva.id %}">
               #{{ r.reserva.id }}
             </a>
           </td>
 
-          <!-- FECHAS -->
           <td class="small text-muted">
             {{ r.fecha_inicio|date:"d M Y" }}<br>
             {{ r.fecha_fin|date:"d M Y" }}
           </td>
 
-          <!-- NOCHES -->
           <td>{{ r.cantidad_noches }}</td>
 
-          <!-- PERSONAS -->
           <td>{{ r.cantidad_personas }}</td>
 
-          <!-- TOTAL -->
           <td>
             <strong>${{ r.precio_total|intcomma }}</strong>
           </td>
 
-          <!-- ESTADO -->
           <td>
-            {% if r.is_active %}
-              <span class="badge bg-success">Activa</span>
+            {% if r.estado == "PENDIENTE" %}
+              <span class="badge bg-warning text-dark">Pendiente</span>
+
+            {% elif r.estado == "CONFIRMADA" %}
+              <span class="badge bg-primary">Confirmada</span>
+
+            {% elif r.estado == "CANCELADA" %}
+              <span class="badge bg-danger">Cancelada</span>
+
+            {% elif r.estado == "COMPLETADA" %}
+              <span class="badge bg-success">Completada</span>
+
             {% else %}
-              <span class="badge bg-secondary">Inactiva</span>
+              <span class="badge bg-secondary">Desconocido</span>
             {% endif %}
           </td>
 
-          <!-- ACCIONES -->
           <td class="text-end">
             <a href="{% url 'rooms:reserva_habitacion_update' r.id %}"
                class="btn btn-sm btn-outline-primary">
               <i class="bi bi-pencil"></i>
             </a>
 
-            <a href="{% url 'rooms:reserva_habitacion_delete' r.id %}"
-               class="btn btn-sm btn-outline-danger">
-              <i class="bi bi-trash"></i>
+            <a href="{% url 'rooms:reserva_habitacion_cancel' r.id %}"
+              class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-x-circle"></i>
             </a>
           </td>
 

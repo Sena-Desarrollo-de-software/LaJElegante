@@ -148,11 +148,23 @@ DASHBOARD_WIDGETS = {
         'icon': 'bi-calendar-check',
         'color': 'primary',
     },
-    'INGRESOS_HOY': {
-        'label': 'Ingresos hoy',
-        'method': 'ingresos_hoy',
+    'INGRESOS_REALES': {
+        'label': 'Ingresos reales',
+        'method': 'ingresos_reales_hoy',
         'icon': 'bi-cash-stack',
         'color': 'success',
+    },
+    'PENALIZACIONES': {
+        'label': 'Penalizaciones',
+        'method': 'penalizaciones_hoy',
+        'icon': 'bi-exclamation-triangle',
+        'color': 'warning',
+    },
+    'INGRESOS_TOTALES': {
+        'label': 'Ingresos totales',
+        'method': 'ingresos_totales_hoy',
+        'icon': 'bi-graph-up',
+        'color': 'primary',
     },
     'PERSONAS_HOTEL': {
         'label': 'Personas alojadas',
@@ -184,7 +196,9 @@ ROLE_WIDGET_KEYS = {
 
     'Administrador': [
         'RESERVAS_HOY',
-        'INGRESOS_HOY',
+        'INGRESOS_REALES',
+        'PENALIZACIONES',
+        'INGRESOS_TOTALES',
         'PERSONAS_HOTEL',
         'CHECKINS_HOY',
         'CHECKOUTS_HOY',
@@ -193,7 +207,9 @@ ROLE_WIDGET_KEYS = {
 
     'Gerente General': [
         'RESERVAS_HOY',
-        'INGRESOS_HOY',
+        'INGRESOS_REALES',
+        'PENALIZACIONES',
+        'INGRESOS_TOTALES',
         'PERSONAS_HOTEL',
         'RESTAURANTE_TURNO',
     ],
