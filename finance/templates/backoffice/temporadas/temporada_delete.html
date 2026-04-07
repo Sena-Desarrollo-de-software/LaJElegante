@@ -1,0 +1,15 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Eliminar Temporada{% endblock %}
+{% block form_title %}Eliminar Temporada{% endblock %}
+{% block form_subtitle %}Temporada #{{ temporada.id }}{% endblock %}
+{% block form_actions %}<a href="{% url 'finance:temporada_index' %}" class="btn btn-outline-secondary btn-sm">Cancelar</a>{% endblock %}
+
+{% block content %}
+<p>Vas a mover esta temporada a la papelera.</p>
+<form method="post">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<button type="submit" class="btn btn-danger">Confirmar eliminación</button>
+</form>
+{% endblock %}

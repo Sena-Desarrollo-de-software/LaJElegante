@@ -1,0 +1,15 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Eliminar Tarifa{% endblock %}
+{% block form_title %}Eliminar Tarifa{% endblock %}
+{% block form_subtitle %}Tarifa #{{ tarifa.id }}{% endblock %}
+{% block form_actions %}<a href="{% url 'finance:tarifa_index' %}" class="btn btn-outline-secondary btn-sm">Cancelar</a>{% endblock %}
+
+{% block content %}
+<p>Vas a mover esta tarifa a la papelera.</p>
+<form method="post">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<button type="submit" class="btn btn-danger">Confirmar eliminación</button>
+</form>
+{% endblock %}
