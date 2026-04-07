@@ -1,0 +1,219 @@
+{% load humanize l10n %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Listado de Reservas de Restaurante</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 2cm;
+            
+            @top-center {
+                content: "Hotel - Reservas de Restaurante";
+                font-size: 12px;
+                font-weight: bold;
+            }
+            
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 10px;
+            }
+            
+            @bottom-left {
+                content: "Generado: {{ fecha_exportacion|date:'d/m/Y H:i' }}";
+                font-size: 10px;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .filtros {
+            background-color: #f5f5f5;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 9px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-size: 10px;
+        }
+
+        td {
+            border: 1px solid #ddd;
+            padding: 6px 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .badge {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 8px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .badge-pendiente {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .badge-confirmada {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .badge-cancelada {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .badge-completada {
+            background-color: #198754;
+            color: white;
+        }
+
+        .badge-desayuno {
+            background-color: #0dcaf0;
+            color: #333;
+        }
+
+        .badge-almuerzo {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .badge-cena {
+            background-color: #212529;
+            color: white;
+        }
+
+        .text-success {
+            color: #198754;
+        }
+
+        .text-muted {
+            color: #6c757d;
+        }
+
+        .summary {
+            margin-top: 20px;
+            text-align: right;
+            font-weight: bold;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Reservas de Restaurante</h1>
+    <p>
+        Generado por: {{ usuario.get_full_name|default:usuario.username }} |
+        {{ fecha_exportacion|date:"d/m/Y H:i:s" }}
+    </p>
+</div>
+
+{% if filtros.turno or filtros.estado or filtros.fecha_desde or filtros.fecha_hasta or filtros.cliente %}
+<div class="filtros">
+    <strong>Filtros aplicados:</strong>
+    {% if filtros.turno %} | Turno ID: {{ filtros.turno }} {% endif %}
+    {% if filtros.estado %} | Estado: {{ filtros.estado }} {% endif %}
+    {% if filtros.fecha_desde %} | Fecha desde: {{ filtros.fecha_desde }} {% endif %}
+    {% if filtros.fecha_hasta %} | Fecha hasta: {{ filtros.fecha_hasta }} {% endif %}
+    {% if filtros.cliente %} | Cliente: {{ filtros.cliente }} {% endif %}
+</div>
+{% endif %}
+
+{% if reservas %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Turno</th>
+            <th>Fecha</th>
+            <th>Horario</th>
+            <th>Personas</th>
+            <th>Total</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reserva in reservas %}
+        <tr>
+            <td style="text-align: center;">{{ reserva.id }}</td>
+            <td>
+                <strong>{{ reserva.reserva.usuario.get_full_name|default:reserva.reserva.usuario.username }}</strong><br>
+                <small>{{ reserva.reserva.usuario.email }}</small>
+            </td>
+            <td>{{ reserva.turno.horario.get_dia_display }}</td>
+            <td style="text-align: center;">{{ reserva.turno.fecha|date:"d/m/Y" }}</td>
+            <td style="text-align: center;">
+                {{ reserva.turno.horario.hora_inicio|time:"H:i" }} - {{ reserva.turno.horario.hora_fin|time:"H:i" }}
+            </td>
+            <td style="text-align: center;">{{ reserva.cantidad }}</td>
+            <td style="text-align: right;">
+                <strong>${{ reserva.precio_total|intcomma }}</strong>
+                {% if reserva.descuento > 0 %}
+                    <br><small class="text-success">-{{ reserva.descuento }}%</small>
+                {% endif %}
+            </td>
+            <td style="text-align: center;">
+                {% if reserva.estado == "PENDIENTE" %}
+                    <span class="badge badge-pendiente">Pendiente</span>
+                {% elif reserva.estado == "CONFIRMADA" %}
+                    <span class="badge badge-confirmada">Confirmada</span>
+                {% elif reserva.estado == "CANCELADA" %}
+                    <span class="badge badge-cancelada">Cancelada</span>
+                {% elif reserva.estado == "COMPLETADA" %}
+                    <span class="badge badge-completada">Completada</span>
+                {% else %}
+                    <span class="badge">{{ reserva.estado }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="summary">
+    Total de reservas: {{ total_registros }}
+</div>
+
+{% else %}
+<p style="text-align: center;">No hay reservas de restaurante que coincidan con los filtros seleccionados.</p>
+{% endif %}
+
+</body>
+</html>

@@ -14,7 +14,13 @@ from .forms import (
     PerfilUpdateForm, GrupoCreateForm, GrupoUpdateForm, GrupoDeleteForm, GrupoRestoreForm,
     ProfileUpdateForm, ChangePasswordForm
 )
+from .forms import ProfileUpdateForm, ChangePasswordForm
+from django.contrib import messages
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib import messages
+from django.conf import settings
 
+app_name = 'rooms'
 USUARIO_INDEX = "users:usuario_index"
 GRUPO_INDEX = "users:grupo_index"
 
