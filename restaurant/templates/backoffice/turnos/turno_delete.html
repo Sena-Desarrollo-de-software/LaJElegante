@@ -1,0 +1,137 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Archivar Turno{% endblock %}
+
+{% block form_title %}Archivar Turno{% endblock %}
+{% block form_subtitle %}
+Esta acción desactiva el turno del {{ turno.fecha|date:"d/m/Y" }} - {{ turno.horario.get_dia_display }} ({{ turno.horario.hora_inicio|time:"H:i" }} a {{ turno.horario.hora_fin|time:"H:i" }})
+{% endblock %}
+
+{% block form_actions %}
+<a href="{% url 'restaurant:turno_index' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left"></i> Volver al listado
+</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="alert alert-warning d-flex align-items-center gap-2">
+    <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+    <div>
+        <strong>¿Archivar turno?</strong><br>
+        Esta acción lo desactivará del sistema. Podrás restaurarlo más tarde desde la papelera.
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            
+            <div class="col-md-4">
+                <small class="text-muted">ID del Turno</small><br>
+                <strong class="fs-4">#{{ turno.id }}</strong>
+            </div>
+
+            <div class="col-md-4">
+                <small class="text-muted">Horario</small><br>
+                <strong>{{ turno.horario.get_dia_display }}</strong><br>
+                <small class="text-muted">
+                    {{ turno.horario.hora_inicio|time:"H:i" }} - {{ turno.horario.hora_fin|time:"H:i" }}
+                </small>
+            </div>
+
+            <div class="col-md-4">
+                <small class="text-muted">Fecha</small><br>
+                <strong>{{ turno.fecha|date:"d/m/Y" }}</strong><br>
+                <small class="text-muted">
+                    {% if turno.fecha|date:"l" == "Monday" %}Lunes
+                    {% elif turno.fecha|date:"l" == "Tuesday" %}Martes
+                    {% elif turno.fecha|date:"l" == "Wednesday" %}Miércoles
+                    {% elif turno.fecha|date:"l" == "Thursday" %}Jueves
+                    {% elif turno.fecha|date:"l" == "Friday" %}Viernes
+                    {% elif turno.fecha|date:"l" == "Saturday" %}Sábado
+                    {% else %}Domingo
+                    {% endif %}
+                </small>
+            </div>
+
+            <div class="col-md-4">
+                <small class="text-muted">Capacidad</small><br>
+                {{ turno.capacidad_maxima }} personas
+            </div>
+
+            <div class="col-md-4">
+                <small class="text-muted">Reservas activas</small><br>
+                <strong class="{% if turno.reservas.filter.estado_in_pendiente_confirmada %}text-danger{% endif %}">
+                    {{ turno.reservas.filter.estado_in_pendiente_confirmada.count }}
+                </strong>
+                {% if turno.reservas.filter.estado_in_pendiente_confirmada.count > 0 %}
+                    <span class="badge bg-danger">No se puede archivar</span>
+                {% endif %}
+            </div>
+
+            <div class="col-md-4">
+                <small class="text-muted">Última actualización</small><br>
+                {{ turno.updated_at|date:"d/m/Y H:i" }}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Advertencia si hay reservas activas -->
+{% if turno.reservas.filter.estado_in_pendiente_confirmada %}
+<div class="alert alert-danger mb-4 d-flex align-items-center gap-2">
+    <i class="bi bi-x-octagon-fill fs-4"></i>
+    <div>
+        <strong>No se puede archivar este turno</strong><br>
+        Este turno tiene {{ turno.reservas.filter.estado_in_pendiente_confirmada.count }} reserva(s) activa(s).
+        Debes esperar a que se completen o cancelarlas antes de archivar el turno.
+    </div>
+</div>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label for="id_confirm" class="form-label fw-semibold">
+            Confirmación
+        </label>
+        <input type="text" name="confirm" id="id_confirm"
+               class="form-control {% if form.confirm.errors %}is-invalid{% endif %}"
+               placeholder="Escribe el ID del turno para confirmar"
+               {% if turno.reservas.filter.estado_in_pendiente_confirmada %}disabled{% endif %}
+               required>
+        
+        {% for error in form.confirm.errors %}
+            <div class="invalid-feedback d-block">
+                {{ error }}
+            </div>
+        {% endfor %}
+
+        <small class="text-muted">
+            Escribe el ID <strong class="text-danger">{{ turno.id }}</strong> para confirmar el archivado
+        </small>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="d-flex justify-content-end gap-2 mt-4">
+        <a href="{% url 'restaurant:turno_index' %}" class="btn btn-outline-secondary">
+            Cancelar
+        </a>
+        <button type="submit" class="btn btn-danger" 
+                {% if turno.reservas.filter.estado_in_pendiente_confirmada %}disabled{% endif %}>
+            <i class="bi bi-archive"></i> Archivar Turno
+        </button>
+    </div>
+</form>
+
+{% endblock %}

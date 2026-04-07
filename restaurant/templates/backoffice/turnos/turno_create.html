@@ -1,0 +1,101 @@
+{% extends "backoffice/layouts/base_form.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Crear Turno{% endblock %}
+
+{% block form_title %}Crear Turno{% endblock %}
+{% block form_subtitle %}
+Registra un nuevo turno para el restaurante
+{% endblock %}
+
+{% block form_actions %}
+<a href="{% url 'restaurant:turno_index' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left"></i> Volver al listado
+</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="row g-3">
+                <!-- Horario -->
+                <div class="col-md-6">
+                    <label for="id_horario" class="form-label fw-semibold">
+                        Horario <span class="text-danger">*</span>
+                    </label>
+                    <select name="horario" id="id_horario"
+                            class="form-select {% if form.horario.errors %}is-invalid{% endif %}"
+                            required>
+                        <option value="">Seleccione un horario...</option>
+                        {% for horario in form.fields.horario.queryset %}
+                            <option value="{{ horario.id }}" {% if form.horario.value|stringformat:"s" == horario.id|stringformat:"s" %}selected{% endif %}>
+                                {{ horario.get_dia_display }} - {{ horario.hora_inicio|time:"H:i" }} a {{ horario.hora_fin|time:"H:i" }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.horario.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                    <small class="text-muted">Selecciona el horario disponible</small>
+                </div>
+
+                <!-- Fecha -->
+                <div class="col-md-6">
+                    <label for="id_fecha" class="form-label fw-semibold">
+                        Fecha <span class="text-danger">*</span>
+                    </label>
+                    <input type="date" name="fecha" id="id_fecha"
+                           class="form-control {% if form.fecha.errors %}is-invalid{% endif %}"
+                           value="{{ form.fecha.value|date:'Y-m-d'|default:'' }}"
+                           required>
+                    {% for error in form.fecha.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                    <small class="text-muted">No se puede crear turnos en fechas pasadas</small>
+                </div>
+
+                <!-- Capacidad Máxima -->
+                <div class="col-md-6">
+                    <label for="id_capacidad_maxima" class="form-label fw-semibold">
+                        Capacidad Máxima <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" name="capacidad_maxima" id="id_capacidad_maxima"
+                           class="form-control {% if form.capacidad_maxima.errors %}is-invalid{% endif %}"
+                           value="{{ form.capacidad_maxima.value|default:'' }}"
+                           min="1"
+                           required>
+                    {% for error in form.capacidad_maxima.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                    <small class="text-muted">Número máximo de personas por turno</small>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                <a href="{% url 'restaurant:turno_index' %}" class="btn btn-outline-secondary">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Guardar Turno
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
