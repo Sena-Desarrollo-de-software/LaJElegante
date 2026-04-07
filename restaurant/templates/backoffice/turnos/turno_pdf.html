@@ -153,16 +153,18 @@
                 <small class="text-muted">{{ turno.horario.hora_inicio|time:"H:i" }} - {{ turno.horario.hora_fin|time:"H:i" }}</small>
             </td>
             <td style="text-align: center;">{{ turno.fecha|date:"d/m/Y" }}</td>
-            <td>
-                {% if turno.fecha|date:"l" == "Monday" %}Lunes
-                {% elif turno.fecha|date:"l" == "Tuesday" %}Martes
-                {% elif turno.fecha|date:"l" == "Wednesday" %}Miércoles
-                {% elif turno.fecha|date:"l" == "Thursday" %}Jueves
-                {% elif turno.fecha|date:"l" == "Friday" %}Viernes
-                {% elif turno.fecha|date:"l" == "Saturday" %}Sábado
-                {% else %}Domingo
-                {% endif %}
-            </td>
+                            <td class="small">
+                                {% with dia=turno.fecha|date:"w" %}
+                                    {% if dia == "1" %}Lunes
+                                    {% elif dia == "2" %}Martes
+                                    {% elif dia == "3" %}Miércoles
+                                    {% elif dia == "4" %}Jueves
+                                    {% elif dia == "5" %}Viernes
+                                    {% elif dia == "6" %}Sábado
+                                    {% elif dia == "0" %}Domingo
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
             <td style="text-align: center;">{{ turno.capacidad_maxima }}</td>
             <td style="text-align: center;">{{ turno.reservas.count }}</td>
             <td>
