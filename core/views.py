@@ -9,6 +9,11 @@ from .forms import RegistroForm
 from users.models import Group
 from django.urls import reverse_lazy
 from django.conf import settings
+import requests
+from django.views.decorators.cache import cache_page
+from django.http import JsonResponse
+from django.core.cache import cache
+import random
 
 AHORA = timezone.now()
 
@@ -198,3 +203,79 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'hotel/password_reset_complete.html'
+
+import requests
+from django.shortcuts import render
+from django.views.decorators.cache import cache_page
+import random
+
+@cache_page(60 * 15)
+def tienda_hotel(request):
+    categorias_config = {
+        'beauty': {
+            'nombre': '💆‍♀️ Spa & Bienestar',
+            'descripcion': 'Productos de nuestros tratamientos de spa',
+            'icono': 'bi-flower2',
+            'limit': 4
+        },
+        'fragrances': {
+            'nombre': '👃 Perfumes Exclusivos',
+            'descripcion': 'Fragancias que ambientan nuestro hotel',
+            'icono': 'bi-gem',
+            'limit': 4
+        },
+        'home-decoration': {
+            'nombre': '🛋️ Decoración Hotelera',
+            'descripcion': 'Piezas únicas de nuestras habitaciones',
+            'icono': 'bi-house-heart',
+            'limit': 4
+        },
+        'groceries': {
+            'nombre': '🍷 Delicias Gourmet',
+            'descripcion': 'Productos de nuestro restaurante',
+            'icono': 'bi-cup-straw',
+            'limit': 4
+        }
+    }
+    
+    productos_por_categoria = {}
+    todas_categorias = []
+    
+    for categoria, config in categorias_config.items():
+        try:
+            url = f"https://dummyjson.com/products/category/{categoria}?limit={config['limit']}"
+            response = requests.get(url, timeout=5)
+            data = response.json()
+            
+            productos = []
+            for producto in data.get('products', []):
+                producto_hotel = {
+                    'id': producto['id'],
+                    'nombre': f"{producto['title']} - Hotel LJE",
+                    'descripcion': f"Exclusivo Hotel LJE. {producto['description'][:100]}...",
+                    'precio_hotel': round(producto['price'] * 1.3, 2),
+                    'precio_original': producto['price'],
+                    'descuento': producto['discountPercentage'],
+                    'imagen': producto['thumbnail'],
+                    'disponible': producto['availabilityStatus'] == 'In Stock',
+                }
+                productos.append(producto_hotel)
+                todas_categorias.append(producto_hotel)
+            
+            productos_por_categoria[categoria] = {
+                'config': config,
+                'productos': productos
+            }
+        except:
+            productos_por_categoria[categoria] = {
+                'config': config,
+                'productos': []
+            }
+    
+    promociones = random.sample(todas_categorias, min(3, len(todas_categorias))) if todas_categorias else []
+    
+    return render(request, 'hotel/tienda_souvenirs.html', {
+        'productos_por_categoria': productos_por_categoria,
+        'promociones': promociones,
+        'fecha_actualizacion': timezone.now()
+    })

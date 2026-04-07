@@ -1,0 +1,102 @@
+{# templates/hotel/pages/tienda_hotel.html #}
+{% extends "hotel/layouts/base.html" %}
+{% load static %}
+
+{% block title %}Tienda Exclusiva - Hotel LJE{% endblock %}
+
+{% block styles %}
+  <link href="{% static 'css/core/tienda.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center">
+    <div class="container">
+        <h1 class="text-light fw-bold mb-3">🏨 Tienda Exclusiva Hotel LJE</h1>
+        <p class="text-light lead mb-0">Llévate un pedazo de la experiencia LJE a tu hogar</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    {% if promociones %}
+    <div class="promo-banner text-center">
+        <h3 class="text-light"><i class="bi bi-stars"></i> Promociones Especiales</h3>
+        <p class="text-light">Lleva la experiencia LJE a casa con estos productos destacados</p>
+        <div class="row mt-4">
+            {% for promo in promociones %}
+            <div class="col-md-4 mb-3">
+                <div class="bg-white rounded p-3">
+                    <small class="text-muted">🔥 OFERTA ESPECIAL</small>
+                    <h6 class="mt-2 text-dark">{{ promo.nombre|truncatechars:40 }}</h6>
+                    <span class="price-hotel">${{ promo.precio_hotel }} USD</span>
+                    <span class="price-original ms-2">${{ promo.precio_original }} USD</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% for categoria_key, categoria_data in productos_por_categoria.items %}
+        {% if categoria_data.productos %}
+        <div class="mb-5">
+            <div class="category-header">
+                <h2 class="text-light"><i class="bi {{ categoria_data.config.icono }}"></i> {{ categoria_data.config.nombre }}</h2>
+                <p class="text-light opacity-75">{{ categoria_data.config.descripcion }}</p>
+            </div>
+            
+            <div class="row g-4">
+                {% for producto in categoria_data.productos %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card h-100 shadow-sm">
+                        <div class="position-relative">
+                            <img src="{{ producto.imagen }}" class="card-img-top product-img" alt="{{ producto.nombre }}">
+                            <span class="hotel-badge text-light">
+                                <i class="bi bi-building"></i> Hotel LJE
+                            </span>
+                            {% if producto.descuento > 0 %}
+                            <span class="badge bg-danger position-absolute top-0 start-0 m-2">
+                                -{{ producto.descuento|floatformat:0 }}%
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="card-body">
+                            <h6 class="card-title">{{ producto.nombre|truncatechars:50 }}</h6>
+                            <p class="card-text small text-muted">{{ producto.descripcion|truncatechars:80 }}</p>
+                            
+                            <div class="mb-2">
+                                <span class="price-hotel">${{ producto.precio_hotel }} USD</span>
+                                <span class="price-original ms-2">${{ producto.precio_original }} USD</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {% if producto.disponible %}
+                                    <span class="badge bg-success">Disponible</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Bajo stock</span>
+                                {% endif %}
+                            </div>
+                            
+                            <button class="btn btn-hotel w-100" onclick="alert('📦 {{ producto.nombre|escapejs }}\n\nPrecio: ${{ producto.precio_hotel }} USD\n📍 Disponible en recepción\n🎁 15% descuento para huéspedes')">
+                                <i class="bi bi-info-circle"></i> Consultar en Recepción
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+    
+    <div class="text-center mt-5 pt-4 border-top border-light">
+        <p class="text-light">
+            <i class="bi bi-shop"></i> Disponible en tienda física del lobby<br>
+            <i class="bi bi-clock"></i> Horario: 9:00 AM - 9:00 PM
+        </p>
+        <small class="text-light opacity-75">
+            Última actualización: {{ fecha_actualizacion|date:"d/m/Y H:i" }}
+        </small>
+    </div>
+</div>
+{% endblock %}
