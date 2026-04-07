@@ -1,0 +1,92 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Archivar Grupo{% endblock %}
+
+{% block form_title %}Archivar Grupo{% endblock %}
+{% block form_subtitle %}
+Esta acción desactiva el grupo en el sistema
+{% endblock %}
+
+{% block form_actions %}
+<a href="{% url 'users:grupo_index' %}" class="btn btn-outline-secondary btn-sm">
+  <i class="bi bi-arrow-left"></i> Volver al listado
+</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
+      <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+      <div>
+        <strong>¿Archivar grupo?</strong><br>
+        Esta acción desactivará el grupo. Podrás restaurarlo más tarde desde la papelera.
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <small class="text-muted">Nombre</small><br>
+            <strong>{{ grupo.name }}</strong>
+          </div>
+          <div class="col-md-6">
+            <small class="text-muted">Usuarios asignados</small><br>
+            {{ grupo.user_set.count }}
+          </div>
+          <div class="col-md-6 mt-2">
+            <small class="text-muted">Permisos</small><br>
+            {{ grupo.permissions.count }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label for="id_confirm" class="form-label fw-semibold">
+          Confirmación
+        </label>
+        <input type="text" name="confirm" id="id_confirm"
+               class="form-control {% if form.confirm.errors %}is-invalid{% endif %}"
+               placeholder="Escribe el nombre del grupo para confirmar"
+               required>
+        
+        {% for error in form.confirm.errors %}
+          <div class="invalid-feedback d-block">
+            {{ error }}
+          </div>
+        {% endfor %}
+
+        <small class="text-muted">
+          Escribe el nombre <strong>{{ grupo.name }}</strong> para confirmar el archivado
+        </small>
+      </div>
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {% for error in form.non_field_errors %}
+            <div>{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <a href="{% url 'users:grupo_index' %}" class="btn btn-outline-secondary">
+          Cancelar
+        </a>
+        <button type="submit" class="btn btn-danger">
+          <i class="bi bi-archive"></i> Archivar Grupo
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

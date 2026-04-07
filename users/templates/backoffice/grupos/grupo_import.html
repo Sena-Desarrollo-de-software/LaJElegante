@@ -1,0 +1,54 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Importar Grupos{% endblock %}
+
+{% block form_title %}Importar Grupos{% endblock %}
+{% block form_subtitle %}Carga masiva de grupos desde archivo CSV/Excel{% endblock %}
+
+{% block form_actions %}
+<div class="d-flex gap-2">
+    <a href="{% url 'users:grupo_index' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+
+{% if is_staff %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-tools"></i> Opción para Administradores
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>Data Wizard:</strong> Importación avanzada con mapeo de columnas.
+                </p>
+                <a href="{{ datawizard_url }}" target="_blank" class="btn btn-outline-primary">
+                    <i class="bi bi-box-arrow-up-right"></i> Abrir Data Wizard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info mt-3">
+    <i class="bi bi-info-circle"></i>
+    <strong>Formato esperado:</strong>
+    <ul class="mb-0 mt-2">
+        <li><strong>name</strong> - Nombre del grupo (requerido, único)</li>
+    </ul>
+</div>
+
+{% else %}
+<div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle"></i>
+    No tienes permisos de administrador para realizar importaciones masivas.
+</div>
+{% endif %}
+
+{% endblock %}

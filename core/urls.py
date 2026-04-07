@@ -1,5 +1,7 @@
+
 from django.urls import path
 from . import views
+from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
     path("lobby/", views.lobby, name="lobby"),
@@ -17,4 +19,7 @@ urlpatterns = [
     path("auth/recuperar/enviado/", views.CustomPasswordResetDoneView.as_view(), name='password_reset_done'),
     path("auth/recuperar/<uidb64>/<token>/", views.CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path("auth/recuperar/completo/", views.CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),    
+
+    # Reserva protegida
+    path("reservar/", login_required(views.reservar_habitacion), name="reservar_habitacion"),
 ]

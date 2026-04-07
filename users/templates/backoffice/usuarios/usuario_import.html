@@ -1,0 +1,4 @@
+{% url 'users:usuario_index' as usuario_index_url %}
+{% url 'data_wizard:run' 'users' 'usuario' as datawizard_url %}
+
+{% include "backoffice/layouts/datawizard_button.html" with page_title="Importar Usuarios" form_title="Importar Usuarios" form_subtitle="Importación masiva de usuarios del sistema" return_url=usuario_index_url datawizard_url=datawizard_url %}

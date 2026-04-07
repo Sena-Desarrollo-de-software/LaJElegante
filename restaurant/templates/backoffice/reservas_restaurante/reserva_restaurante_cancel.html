@@ -1,0 +1,134 @@
+{% extends "backoffice/layouts/base_form.html" %}
+{% load humanize l10n %}
+
+{% block title %}Cancelar Reserva de Restaurante{% endblock %}
+
+{% block form_title %}Cancelar Reserva{% endblock %}
+{% block form_subtitle %}
+Reserva del {{ reserva.turno.fecha|date:"d/m/Y" }} - {{ reserva.turno.horario.get_dia_display }}
+{% endblock %}
+
+{% block form_actions %}
+  <a href="{% url 'restaurant:reserva_restaurante_index' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left"></i> Volver al listado
+  </a>
+  <a href="{% url 'backoffice:reserva_detail' reserva.reserva.id %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left"></i> Ver Reserva Principal
+  </a>
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+
+    <!-- Alerta de advertencia -->
+    <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+      <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+      <div>
+        <strong>¿Cancelar reserva?</strong><br>
+        Esta acción cancelará la reserva y liberará la capacidad del turno.
+        <strong>Esta acción no se puede deshacer.</strong>
+      </div>
+    </div>
+
+    <!-- Información de la reserva -->
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <small class="text-muted">Reserva Principal</small><br>
+            <strong>#{{ reserva.reserva.id }}</strong>
+          </div>
+          <div class="col-md-6">
+            <small class="text-muted">Cliente</small><br>
+            <strong>{{ reserva.reserva.usuario.get_full_name|default:reserva.reserva.usuario.username }}</strong>
+          </div>
+          <div class="col-md-6 mt-2">
+            <small class="text-muted">Turno</small><br>
+            <strong>{{ reserva.turno.horario.get_dia_display }}</strong><br>
+            <small>{{ reserva.turno.fecha|date:"d/m/Y" }}</small>
+          </div>
+          <div class="col-md-6 mt-2">
+            <small class="text-muted">Horario</small><br>
+            {{ reserva.turno.horario.hora_inicio|time:"H:i" }} - {{ reserva.turno.horario.hora_fin|time:"H:i" }}
+          </div>
+          <div class="col-md-6 mt-2">
+            <small class="text-muted">Personas</small><br>
+            {{ reserva.cantidad }} personas
+          </div>
+          <div class="col-md-6 mt-2">
+            <small class="text-muted">Total</small><br>
+            <strong>${{ reserva.precio_total|intcomma }}</strong>
+            {% if reserva.descuento > 0 %}
+              <small class="text-success">({{ reserva.descuento }}% descuento)</small>
+            {% endif %}
+          </div>
+          <div class="col-12 mt-2">
+            <small class="text-muted">Estado actual</small><br>
+            {% if reserva.estado == "PENDIENTE" %}
+              <span class="badge bg-warning text-dark">Pendiente</span>
+            {% elif reserva.estado == "CONFIRMADA" %}
+              <span class="badge bg-primary">Confirmada</span>
+            {% elif reserva.estado == "COMPLETADA" %}
+              <span class="badge bg-success">Completada</span>
+            {% else %}
+              <span class="badge bg-secondary">{{ reserva.estado }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario de confirmación -->
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+              {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="mb-3">
+            <div class="form-check">
+              <input type="checkbox" name="confirm" id="id_confirm"
+                     class="form-check-input {% if form.confirm.errors %}is-invalid{% endif %}"
+                     required>
+              <label for="id_confirm" class="form-check-label fw-semibold">
+                {{ form.confirm.label }}
+              </label>
+              
+              {% for error in form.confirm.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ error }}
+                </div>
+              {% endfor %}
+
+              <small class="text-muted d-block mt-1">
+                Marca esta casilla para confirmar que deseas cancelar esta reserva.
+              </small>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <a href="{% url 'restaurant:reserva_restaurante_index' %}" class="btn btn-outline-secondary">
+              Cancelar
+            </a>
+            <button type="submit" class="btn btn-danger">
+              <i class="bi bi-x-circle"></i> Cancelar Reserva
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

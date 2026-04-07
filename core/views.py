@@ -1,3 +1,10 @@
+# Vista protegida para reservar habitación
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+
+@login_required
+def reservar_habitacion(request):
+    return HttpResponse('<h1>Reserva de habitación: solo usuarios autenticados pueden ver esto.</h1>')
 from django.shortcuts import render,redirect
 from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib.auth import login

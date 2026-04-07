@@ -1,0 +1,155 @@
+{% extends "backoffice/layouts/base_form.html" %}
+{% load l10n %}
+{% load humanize %}
+
+{% block title %}Agregar Reserva de Restaurante{% endblock %}
+
+{% block form_title %}Nueva Reserva de Restaurante{% endblock %}
+{% block form_subtitle %}
+Registrar una reserva de restaurante dentro de la reserva principal #{{ reserva.id }}
+{% endblock %}
+
+{% block form_actions %}
+  <a href="{% url 'backoffice:reserva_detail' reserva.id %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Volver a Reserva principal
+  </a>
+  <a href="{% url 'restaurant:reserva_restaurante_index' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Volver a Reservas de Restaurante
+  </a>
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+
+    <!-- Información de la reserva padre -->
+    <div class="card shadow-sm border-0 mb-3 bg-light">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <small class="text-muted">Cliente</small><br>
+            <strong>{{ reserva.usuario.get_full_name|default:reserva.usuario.username }}</strong>
+          </div>
+          <div class="col-md-6">
+            <small class="text-muted">Email</small><br>
+            {{ reserva.usuario.email }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          <!-- Turno -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              {{ form.turno.label }} <span class="text-danger">*</span>
+            </label>
+            <select name="turno" id="id_turno" 
+                    class="form-select {% if form.turno.errors %}is-invalid{% endif %}"
+                    required>
+              <option value="">Seleccione un turno...</option>
+              {% for turno in form.fields.turno.queryset %}
+                <option value="{{ turno.id }}" 
+                        {% if form.turno.value|stringformat:"s" == turno.id|stringformat:"s" %}selected{% endif %}>
+                  {{ turno.horario.get_dia_display }} - 
+                  {{ turno.fecha|date:"d/m/Y" }} - 
+                  {{ turno.horario.hora_inicio|time:"H:i" }} a {{ turno.horario.hora_fin|time:"H:i" }} 
+                  (Disponible: {{ turno.capacidad_disponible }} personas)
+                </option>
+              {% endfor %}
+            </select>
+
+            {% if form.turno.help_text %}
+              <small class="text-muted">{{ form.turno.help_text }}</small>
+            {% endif %}
+
+            {% for error in form.turno.errors %}
+              <div class="invalid-feedback d-block">
+                {{ error }}
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Cantidad de personas -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              {{ form.cantidad.label }} <span class="text-danger">*</span>
+            </label>
+            <input type="number" name="cantidad" id="id_cantidad"
+                   class="form-control {% if form.cantidad.errors %}is-invalid{% endif %}"
+                   value="{{ form.cantidad.value|default:'' }}"
+                   min="1"
+                   required>
+            
+            {% for error in form.cantidad.errors %}
+              <div class="invalid-feedback d-block">
+                {{ error }}
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Descuento -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              {{ form.descuento.label }}
+            </label>
+            <input type="number" name="descuento" id="id_descuento"
+                   class="form-control {% if form.descuento.errors %}is-invalid{% endif %}"
+                   value="{{ form.descuento.value|default:'0' }}"
+                   min="0" max="100"
+                   step="0.01">
+            
+            <small class="text-muted">Porcentaje de descuento a aplicar (0-100)</small>
+            
+            {% for error in form.descuento.errors %}
+              <div class="invalid-feedback d-block">
+                {{ error }}
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Observaciones -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">
+              {{ form.observaciones.label }}
+            </label>
+            {{ form.observaciones }}
+            
+            {% for error in form.observaciones.errors %}
+              <div class="invalid-feedback d-block">
+                {{ error }}
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Botones -->
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <a href="{% url 'backoffice:reserva_detail' reserva.id %}" class="btn btn-outline-secondary">
+              Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-save"></i> Guardar Reserva
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger mt-3">
+        {% for error in form.non_field_errors %}
+          <div>{{ error }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

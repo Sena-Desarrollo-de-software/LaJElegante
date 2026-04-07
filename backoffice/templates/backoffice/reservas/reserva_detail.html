@@ -1,5 +1,5 @@
 {% extends "backoffice/layouts/base_form.html" %}
-
+{% load humanize l10n %}
 {% block title %}Detalle de Reserva{% endblock %}
 
 {% block form_title %}Reserva #{{ reserva.id }}{% endblock %}
@@ -15,19 +15,33 @@
 
 <div class="row">
 
+  <!-- Columna izquierda: Información y botones -->
   <div class="col-12 col-lg-4">
     <div class="card shadow-sm border-0 mb-3">
       <div class="card-body">
         <h5 class="fw-bold mb-3">Información</h5>
 
-        <p><strong>Usuario:</strong> {{ reserva.usuario }}</p>
-        <p><strong>Estado:</strong><span class="badge bg-warning">{{ reserva.estado }}</span></p>
-        <p><strong>Fecha:</strong> {{ reserva.fecha_reserva }}</p>
+        <p><strong>Usuario:</strong> {{ reserva.usuario.get_full_name|default:reserva.usuario.username }}</p>
+        <p><strong>Email:</strong> {{ reserva.usuario.email }}</p>
+        <p><strong>Estado:</strong> 
+          {% if reserva.estado == "PENDIENTE" %}
+            <span class="badge bg-warning text-dark">Pendiente</span>
+          {% elif reserva.estado == "CONFIRMADA" %}
+            <span class="badge bg-primary">Confirmada</span>
+          {% elif reserva.estado == "CANCELADA" %}
+            <span class="badge bg-danger">Cancelada</span>
+          {% elif reserva.estado == "COMPLETADA" %}
+            <span class="badge bg-success">Completada</span>
+          {% else %}
+            <span class="badge bg-secondary">{{ reserva.estado }}</span>
+          {% endif %}
+        </p>
+        <p><strong>Fecha reserva:</strong> {{ reserva.fecha_reserva|date:"d/m/Y H:i" }}</p>
 
         <hr>
 
         <h5 class="fw-bold">
-          Total: ${{ reserva.total }}
+          Total: ${{ reserva.total|intcomma }}
         </h5>
       </div>
     </div>
@@ -39,57 +53,200 @@
         <a href="{% url 'rooms:reserva_habitacion_create' reserva.id %}" class="btn btn-primary w-100 mb-2">
           <i class="bi bi-door-open"></i> Agregar Habitación
         </a>
-        <a href="{% url 'rooms:reserva_habitacion_index' %}" class="btn btn-outline-secondary w-100 mb-2"">
-          <i class="bi bi-arrow-left"></i> Reservas de Habitación
+
+        <a href="{% url 'restaurant:reserva_restaurante_create' reserva.id %}" class="btn btn-success w-100 mb-2">
+          <i class="bi bi-egg-fried"></i> Agregar Reserva Restaurante
         </a>
-        {# Futuro #}
-        {# <a href="#" class="btn btn-outline-primary w-100 mb-2">+ Restaurante</a> #}
-        {# <a href="#" class="btn btn-outline-primary w-100">+ Spa</a> #}
+
+        <hr>
+
+        <a href="{% url 'rooms:reserva_habitacion_index' %}" class="btn btn-outline-secondary w-100 mb-2">
+          <i class="bi bi-door-open"></i> Ver Reservas de Habitación
+        </a>
+
+        <a href="{% url 'restaurant:reserva_restaurante_index' %}" class="btn btn-outline-success w-100">
+          <i class="bi bi-egg-fried"></i> Ver Reservas de Restaurante
+        </a>
       </div>
     </div>
   </div>
 
+  <!-- Columna derecha: Servicios -->
   <div class="col-12 col-lg-8">
 
-    <div class="card shadow-sm border-0">
+    <!-- Sección: Habitaciones -->
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-white border-0 pt-3">
+        <h5 class="fw-bold mb-0">
+          <i class="bi bi-door-open text-primary"></i> Habitaciones
+        </h5>
+      </div>
       <div class="card-body">
-        <h5 class="fw-bold mb-3">Habitaciones</h5>
 
         {% if reserva.reserva_habitaciones.all %}
           <div class="table-responsive">
-            <table class="table align-middle">
-              <thead>
+            <table class="table align-middle table-hover">
+              <thead class="table-light">
                 <tr>
                   <th>Habitación</th>
                   <th>Fechas</th>
-                  <th>Cantidad</th>
+                  <th>Personas</th>
                   <th>Estado</th>
                   <th>Total</th>
+                  <th class="text-end">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {% for item in reserva.reserva_habitaciones.all %}
-                  <tr>
-                    <td>{{ item.habitacion }}</td>
-                    <td>
-                      {{ item.fecha_inicio }} <br>
-                      <small class="text-muted">a</small><br>
-                      {{ item.fecha_fin }}
-                    </td>
-                    <td>{{ item.cantidad }}</td>
-                    <td>{{ item.estado }}</td>
-                    <td>${{ item.precio_total }}</td>
-                  </tr>
+                <tr>
+                  <td>
+                    <strong>Hab {{ item.habitacion.numero_habitacion }}</strong><br>
+                    <small class="text-muted">{{ item.habitacion.tipo_habitacion.nombre }}</small>
+                  </td>
+                  <td class="small">
+                    {{ item.fecha_inicio|date:"d/m/Y" }}<br>
+                    <i class="bi bi-arrow-right"></i><br>
+                    {{ item.fecha_fin|date:"d/m/Y" }}
+                  </td>
+                  <td class="text-center">{{ item.cantidad_personas }}</td>
+                  <td>
+                    {% if item.estado == "PENDIENTE" %}
+                      <span class="badge bg-warning text-dark">Pendiente</span>
+                    {% elif item.estado == "CONFIRMADA" %}
+                      <span class="badge bg-primary">Confirmada</span>
+                    {% elif item.estado == "CANCELADA" %}
+                      <span class="badge bg-danger">Cancelada</span>
+                    {% elif item.estado == "COMPLETADA" %}
+                      <span class="badge bg-success">Completada</span>
+                    {% else %}
+                      <span class="badge bg-secondary">{{ item.estado }}</span>
+                    {% endif %}
+                  </td>
+                  <td><strong>${{ item.precio_total|intcomma }}</strong></td>
+                  <td class="text-end">
+                    <div class="btn-group btn-group-sm">
+                      <a href="{% url 'rooms:reserva_habitacion_update' item.id %}" 
+                         class="btn btn-outline-primary" title="Editar">
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                      <a href="{% url 'rooms:reserva_habitacion_cancel' item.id %}" 
+                         class="btn btn-outline-danger" title="Cancelar">
+                        <i class="bi bi-x-circle"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
                 {% endfor %}
               </tbody>
             </table>
           </div>
         {% else %}
-          <p class="text-muted">No hay habitaciones agregadas.</p>
+          <p class="text-muted text-center py-3">
+            <i class="bi bi-door-closed"></i> No hay habitaciones agregadas.
+          </p>
         {% endif %}
 
       </div>
     </div>
+
+<!-- Sección: Reservas de Restaurante -->
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-white border-0 pt-3">
+    <h5 class="fw-bold mb-0">
+      <i class="bi bi-egg-fried text-success"></i> Reservas de Restaurante
+    </h5>
+  </div>
+  <div class="card-body">
+
+    {% if reserva.reserva_restaurantes.all %}
+      <div class="table-responsive">
+        <table class="table align-middle table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Turno</th>
+              <th>Fecha</th>
+              <th>Horario</th>
+              <th>Personas</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in reserva.reserva_restaurantes.all %}
+            <tr>
+              <td>
+                <strong>{{ item.turno.horario.get_dia_display }}</strong>
+              </td>
+              <td>{{ item.turno.fecha|date:"d/m/Y" }}</td>
+              <td class="small">
+                {{ item.turno.horario.hora_inicio|time:"H:i" }} - {{ item.turno.horario.hora_fin|time:"H:i" }}
+              </td>
+              <td class="text-center">{{ item.cantidad }} personas</td>
+              
+              <!-- Total con descuento aplicado (ya incluido en precio_total) -->
+              <td>
+                <strong>${{ item.precio_total|intcomma }}</strong>
+                {% if item.descuento > 0 %}
+                  <br>
+                  <small class="text-success">({{ item.descuento }}% descuento)</small>
+                {% endif %}
+              </td>
+              
+              <td>
+                {% if item.estado == "PENDIENTE" %}
+                  <span class="badge bg-warning text-dark">Pendiente</span>
+                {% elif item.estado == "CONFIRMADA" %}
+                  <span class="badge bg-primary">Confirmada</span>
+                {% elif item.estado == "CANCELADA" %}
+                  <span class="badge bg-danger">Cancelada</span>
+                {% elif item.estado == "COMPLETADA" %}
+                  <span class="badge bg-success">Completada</span>
+                {% else %}
+                  <span class="badge bg-secondary">{{ item.estado }}</span>
+                {% endif %}
+              </td>
+              
+              <td class="text-end">
+                <div class="btn-group btn-group-sm">
+                  {% if item.estado == "PENDIENTE" %}
+                    <a href="{% url 'restaurant:reserva_restaurante_update' item.id %}" 
+                       class="btn btn-outline-primary" title="Editar">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <a href="{% url 'restaurant:reserva_restaurante_confirm' item.id %}" 
+                       class="btn btn-outline-success" title="Confirmar">
+                      <i class="bi bi-check-lg"></i>
+                    </a>
+                    <a href="{% url 'restaurant:reserva_restaurante_cancel' item.id %}" 
+                       class="btn btn-outline-danger" title="Cancelar">
+                      <i class="bi bi-x-circle"></i>
+                    </a>
+                  {% elif item.estado == "CONFIRMADA" %}
+                    <a href="{% url 'restaurant:reserva_restaurante_complete' item.id %}" 
+                       class="btn btn-outline-success" title="Completar">
+                      <i class="bi bi-check2-circle"></i>
+                    </a>
+                    <a href="{% url 'restaurant:reserva_restaurante_cancel' item.id %}" 
+                       class="btn btn-outline-danger" title="Cancelar">
+                      <i class="bi bi-x-circle"></i>
+                    </a>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted text-center py-3">
+        <i class="bi bi-cup-straw"></i> No hay reservas de restaurante agregadas.
+      </p>
+    {% endif %}
+
+  </div>
+</div>
 
   </div>
 

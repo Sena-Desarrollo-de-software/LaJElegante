@@ -1,0 +1,181 @@
+{% extends "backoffice/layouts/base_form.html" %}
+{% load humanize l10n %}
+
+{% block title %}Usuarios{% endblock %}
+
+{% block form_title %}Usuarios{% endblock %}
+{% block form_subtitle %}
+Gestión de usuarios del sistema
+{% endblock %}
+
+{% block form_actions %}
+  {% if perms.users.add_usuario %}
+    <a href="{% url 'users:usuario_create' %}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-circle"></i> Nuevo Usuario
+    </a>
+  {% endif %}
+
+  {% if perms.users.delete_usuario %}
+    <a href="{% url 'users:usuario_trashcan' %}" class="btn btn-outline-warning btn-sm">
+      <i class="bi bi-trash"></i> Papelera
+    </a>
+  {% endif %}
+
+  {% if perms.users.add_usuario %}
+    <a href="{% url 'users:usuario_import' %}" class="btn btn-outline-success btn-sm">
+      <i class="bi bi-upload"></i> Importar
+    </a>
+  {% endif %}
+
+  {% if perms.users.view_usuario %}
+    <a href="?{{ request.GET.urlencode }}&export=pdf" target="_blank" class="btn btn-outline-danger btn-sm">
+      <i class="bi bi-file-pdf"></i> PDF
+    </a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<!-- Filtros horizontales -->
+<div class="card mb-4 border-0 bg-light">
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Usuario</label>
+        <input type="text" name="username" class="form-control form-control-sm" 
+               placeholder="Buscar por usuario..." value="{{ filtros.username|default:'' }}">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Email</label>
+        <input type="text" name="email" class="form-control form-control-sm" 
+               placeholder="Buscar por email..." value="{{ filtros.email|default:'' }}">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Grupo</label>
+        <select name="grupo" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          {% for grupo in grupos %}
+            <option value="{{ grupo.name }}" {% if filtros.grupo == grupo.name %}selected{% endif %}>
+              {{ grupo.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Estado</label>
+        <select name="estado" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          <option value="activo" {% if filtros.estado == "activo" %}selected{% endif %}>Activo</option>
+          <option value="archivado" {% if filtros.estado == "archivado" %}selected{% endif %}>Archivado</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="bi bi-funnel"></i> Filtrar
+          </button>
+          <a href="{% url 'users:usuario_index' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-eraser"></i> Limpiar
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Tabla de usuarios -->
+<div class="card shadow-sm border-0">
+  <div class="card-body p-0">
+
+    {% if usuarios %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>Nombre completo</th>
+              <th>Grupos</th>
+              <th>Staff</th>
+              <th>Estado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+              <td class="fw-semibold">{{ usuario.username }}</td>
+              <td>{{ usuario.email }}</td>
+              <td>{{ usuario.get_full_name|default:"-" }}</td>
+              <td>
+                {% for grupo in usuario.groups.all %}
+                  <span class="badge bg-secondary">{{ grupo.name }}</span>
+                {% empty %}
+                  <span class="text-muted small">—</span>
+                {% endfor %}
+              </td>
+              <td>
+                {% if usuario.is_staff %}
+                  <i class="bi bi-check-circle-fill text-success"></i>
+                {% else %}
+                  <i class="bi bi-x-circle-fill text-muted"></i>
+                {% endif %}
+              </td>
+              <td>
+                {% if usuario.is_active %}
+                  <span class="badge bg-success">Activo</span>
+                {% else %}
+                  <span class="badge bg-secondary">Archivado</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <div class="btn-group btn-group-sm" role="group">
+                  {% if perms.users.change_usuario and usuario.is_active %}
+                    <a href="{% url 'users:usuario_update' usuario.pk %}" 
+                       class="btn btn-outline-primary" title="Editar">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                  {% endif %}
+
+                  {% if usuario.is_active %}
+                    {% if perms.users.delete_usuario %}
+                      <a href="{% url 'users:usuario_delete' usuario.pk %}" 
+                         class="btn btn-outline-danger" title="Archivar">
+                        <i class="bi bi-archive"></i>
+                      </a>
+                    {% endif %}
+                  {% else %}
+                    {% if perms.users.change_usuario %}
+                      <a href="{% url 'users:usuario_restore' usuario.pk %}" 
+                         class="btn btn-outline-success" title="Restaurar">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                      </a>
+                    {% endif %}
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="p-4 text-center text-muted">
+        <i class="bi bi-people fs-1"></i>
+        <p class="mt-2">No hay usuarios registrados</p>
+        {% if perms.users.add_usuario %}
+          <a href="{% url 'users:usuario_create' %}" class="btn btn-sm btn-primary">
+            Crear el primer usuario
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}
