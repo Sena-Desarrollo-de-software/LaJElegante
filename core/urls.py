@@ -10,6 +10,7 @@ urlpatterns = [
     path("signup/", views.RegistroUsuario.as_view(), name="signup"),
     path("promociones/", views.promociones, name="promociones"),
     path("logout/", views.LogoutUsuario.as_view(), name="logout"),
+    path('tienda/', views.tienda_hotel, name='tienda'),
     #RECUPERACION DE USUARIO
     path("auth/recuperar/", views.CustomPasswordResetView.as_view(), name='password_reset'),
     path("auth/recuperar/enviado/", views.CustomPasswordResetDoneView.as_view(), name='password_reset_done'),
