@@ -1,0 +1,97 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Restaurar Usuario{% endblock %}
+
+{% block form_title %}Restaurar Usuario{% endblock %}
+{% block form_subtitle %}
+Reincorpora el usuario "{{ usuario.username }}" al sistema
+{% endblock %}
+
+{% block form_actions %}
+<a href="{% url 'users:usuario_trashcan' %}" class="btn btn-outline-secondary btn-sm">
+  <i class="bi bi-arrow-left"></i> Volver a la papelera
+</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+
+    <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
+      <i class="bi bi-arrow-counterclockwise fs-3"></i>
+      <div>
+        <strong>¿Restaurar usuario?</strong><br>
+        Esta acción reactivará al usuario y podrá acceder nuevamente al sistema.
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <small class="text-muted">Usuario</small><br>
+            <strong>{{ usuario.username }}</strong>
+          </div>
+          <div class="col-md-6">
+            <small class="text-muted">Email</small><br>
+            {{ usuario.email }}
+          </div>
+          <div class="col-md-6 mt-2">
+            <small class="text-muted">Nombre completo</small><br>
+            {{ usuario.get_full_name|default:"-" }}
+          </div>
+          <div class="col-md-6 mt-2">
+            <small class="text-muted">Archivado el</small><br>
+            {{ usuario.deleted_at|date:"d/m/Y H:i" }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <div class="form-check">
+          <input type="checkbox" name="confirm" id="id_confirm"
+                 class="form-check-input {% if form.confirm.errors %}is-invalid{% endif %}"
+                 required>
+          <label for="id_confirm" class="form-check-label fw-semibold">
+            {{ form.confirm.label }}
+          </label>
+          
+          {% for error in form.confirm.errors %}
+            <div class="invalid-feedback d-block">
+              {{ error }}
+            </div>
+          {% endfor %}
+
+          <small class="text-muted d-block mt-1">
+            Marca esta casilla para confirmar que deseas reincorporar este usuario.
+          </small>
+        </div>
+      </div>
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {% for error in form.non_field_errors %}
+            <div>{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <a href="{% url 'users:usuario_trashcan' %}" class="btn btn-outline-secondary">
+          Cancelar
+        </a>
+        <button type="submit" class="btn btn-success">
+          <i class="bi bi-arrow-counterclockwise"></i> Restaurar Usuario
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}
