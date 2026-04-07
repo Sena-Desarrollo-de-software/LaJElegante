@@ -1,0 +1,14 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Editar Temporada{% endblock %}
+{% block form_title %}Editar Temporada{% endblock %}
+{% block form_subtitle %}Actualización de temporada #{{ temporada.id }}{% endblock %}
+{% block form_actions %}<a href="{% url 'finance:temporada_index' %}" class="btn btn-outline-secondary btn-sm">Volver</a>{% endblock %}
+
+{% block content %}
+<form method="post">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<button type="submit" class="btn btn-primary">Guardar cambios</button>
+</form>
+{% endblock %}

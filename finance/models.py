@@ -259,14 +259,19 @@ class Tarifa(BaseAuditModel):
 
         config = SERVICIOS_TARIFABLES.get(key)
 
+        if self.servicio_tipo.app_label == 'rooms':
+            return 'HABITACION'
+        if self.servicio_tipo.app_label == 'restaurant':
+            return 'RESTAURANTE'
+
         if not config:
             return None
 
-        nombre = config.get('nombre', '').upper()
+        nombre = config.get('nombre', '').upper().replace('Á', 'A').replace('É', 'E').replace('Í', 'I').replace('Ó', 'O').replace('Ú', 'U')
 
         if 'HABITACION' in nombre:
             return 'HABITACION'
-        elif 'RESTAURANTE' in nombre:
+        if 'RESTAURANTE' in nombre:
             return 'RESTAURANTE'
         return None
 
@@ -277,6 +282,16 @@ class Tarifa(BaseAuditModel):
     def get_desglose_impuestos(self, es_extranjero=False):
         _, desglose = self._calcular_precios(es_extranjero)
         return desglose
+
+    def get_aplica_a_permitidos(self):
+        tipo_servicio = self.get_tipo_servicio_config()
+        permitidos = ['TODOS']
+        if tipo_servicio:
+            permitidos.append(tipo_servicio)
+        # En restaurante se aceptan impuestos de servicios adicionales.
+        if tipo_servicio == 'RESTAURANTE':
+            permitidos.append('SERVICIOS')
+        return permitidos
 
     def _calcular_precios(self, es_extranjero=False, impuestos_ids=None):
         from django.utils import timezone
@@ -309,13 +324,14 @@ class Tarifa(BaseAuditModel):
                 models.Q(fecha_vigencia_fin__gte=timezone.now().date())
             )
         
+        aplica_a_permitidos = self.get_aplica_a_permitidos()
+
         # Aplicar impuestos
         for impuesto in impuestos_qs:
             if es_extranjero and not impuesto.aplica_extranjeros:
                 continue
-            
-            tipo_servicio = self.get_tipo_servicio_config()
-            if impuesto.aplica_a not in ['TODOS', tipo_servicio]:
+
+            if impuesto.aplica_a not in aplica_a_permitidos:
                 continue
             
             valor_impuesto = precio * (impuesto.porcentaje / 100)

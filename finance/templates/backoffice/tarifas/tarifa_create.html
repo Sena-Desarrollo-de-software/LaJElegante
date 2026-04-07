@@ -1,0 +1,144 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Crear Tarifa{% endblock %}
+{% block form_title %}Crear Tarifa{% endblock %}
+{% block form_subtitle %}Registro de nueva tarifa{% endblock %}
+{% block form_actions %}<a href="{% url 'finance:tarifa_index' %}" class="btn btn-outline-secondary btn-sm">Volver</a>{% endblock %}
+
+{% block content %}
+<form method="post">
+	{% csrf_token %}
+
+	{% if form.non_field_errors %}
+		<div class="alert alert-danger">
+			{{ form.non_field_errors|join:", " }}
+		</div>
+	{% endif %}
+
+	{% for hidden in form.hidden_fields %}
+		{{ hidden }}
+	{% endfor %}
+
+	<div class="row g-4">
+		<div class="col-12 col-xl-8">
+			<div class="border rounded-3 p-3 p-md-4 bg-white">
+				<h6 class="text-uppercase text-muted mb-3">Configuracion de tarifa</h6>
+				<div class="row g-3">
+					{% if form.servicio_selector %}
+					<div class="col-12">
+						<label class="form-label fw-semibold" for="{{ form.servicio_selector.id_for_label }}">{{ form.servicio_selector.label }}</label>
+						{{ form.servicio_selector }}
+						{% if form.servicio_selector.help_text %}
+							<div class="form-text">{{ form.servicio_selector.help_text }}</div>
+						{% endif %}
+						{% if form.servicio_selector.errors %}
+							<div class="text-danger small mt-1">{{ form.servicio_selector.errors|join:", " }}</div>
+						{% endif %}
+					</div>
+					{% endif %}
+
+					{% if form.temporada %}
+					<div class="col-12 col-md-6">
+						<label class="form-label fw-semibold" for="{{ form.temporada.id_for_label }}">{{ form.temporada.label }}</label>
+						{{ form.temporada }}
+						{% if form.temporada.errors %}
+							<div class="text-danger small mt-1">{{ form.temporada.errors|join:", " }}</div>
+						{% endif %}
+					</div>
+					{% endif %}
+
+					{% if form.estado %}
+					<div class="col-12 col-md-6">
+						<label class="form-label fw-semibold" for="{{ form.estado.id_for_label }}">{{ form.estado.label }}</label>
+						{{ form.estado }}
+						{% if form.estado.errors %}
+							<div class="text-danger small mt-1">{{ form.estado.errors|join:", " }}</div>
+						{% endif %}
+					</div>
+					{% endif %}
+
+					{% if form.precio_base %}
+					<div class="col-12 col-md-6">
+						<label class="form-label fw-semibold" for="{{ form.precio_base.id_for_label }}">{{ form.precio_base.label }}</label>
+						{{ form.precio_base }}
+						{% if form.precio_base.help_text %}
+							<div class="form-text">{{ form.precio_base.help_text }}</div>
+						{% endif %}
+						{% if form.precio_base.errors %}
+							<div class="text-danger small mt-1">{{ form.precio_base.errors|join:", " }}</div>
+						{% endif %}
+					</div>
+					{% endif %}
+
+					{% if form.impuestos %}
+					<div class="col-12">
+						<label class="form-label fw-semibold">{{ form.impuestos.label }}</label>
+						<div class="border rounded-3 p-3 bg-light-subtle">
+							<div class="d-flex flex-column gap-2">
+								{% for impuesto in impuestos_disponibles %}
+								<div>
+									<div class="form-check border rounded-2 bg-white p-2">
+										<input
+											class="form-check-input"
+											type="checkbox"
+											name="impuestos"
+											id="impuesto_{{ impuesto.id }}"
+											value="{{ impuesto.id }}"
+											{% if impuesto.id in impuestos_seleccionados %}checked{% endif %}
+										>
+										<label class="form-check-label ms-1" for="impuesto_{{ impuesto.id }}">
+											{{ impuesto.nombre }} ({{ impuesto.porcentaje }}%)
+											<span class="text-muted">- {{ impuesto.get_aplica_a_display }}</span>
+										</label>
+									</div>
+								</div>
+								{% empty %}
+								<div class="col-12 text-muted small">No hay impuestos activos disponibles.</div>
+								{% endfor %}
+							</div>
+						</div>
+						<div class="form-text">Puedes seleccionar uno o varios impuestos para el calculo del precio final.</div>
+						{% if form.impuestos.errors %}
+							<div class="text-danger small mt-1">{{ form.impuestos.errors|join:", " }}</div>
+						{% endif %}
+					</div>
+					{% endif %}
+
+					{% for field in form.visible_fields %}
+						{% if field.name != 'servicio_selector' and field.name != 'temporada' and field.name != 'estado' and field.name != 'precio_base' and field.name != 'impuestos' %}
+						<div class="col-12 col-md-6">
+							<label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+							{{ field }}
+							{% if field.help_text %}
+								<div class="form-text">{{ field.help_text }}</div>
+							{% endif %}
+							{% if field.errors %}
+								<div class="text-danger small mt-1">{{ field.errors|join:", " }}</div>
+							{% endif %}
+						</div>
+						{% endif %}
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+
+		<div class="col-12 col-xl-4">
+			<div class="border rounded-3 p-3 p-md-4 bg-light h-100">
+				<h6 class="text-uppercase text-muted mb-3">Resumen</h6>
+				<p class="small text-secondary mb-2">Antes de guardar, valida que temporada y servicio correspondan al mismo contexto comercial.</p>
+				<ul class="small text-secondary ps-3 mb-0">
+					<li>El precio final se calcula con temporada e impuestos activos.</li>
+					<li>Solo impuestos vigentes aplican al momento del calculo.</li>
+					<li>Si cambias impuestos en edicion, el total se recalcula automaticamente.</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<hr class="my-4">
+	<div class="d-flex gap-2">
+		<button type="submit" class="btn btn-primary">Guardar tarifa</button>
+		<a href="{% url 'finance:tarifa_index' %}" class="btn btn-outline-secondary">Cancelar</a>
+	</div>
+</form>
+{% endblock %}

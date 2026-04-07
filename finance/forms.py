@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.apps import apps
-from .models import Tarifa, Impuesto
+from .models import Tarifa, Impuesto, Temporada
 from core.constants import SERVICIOS_TARIFABLES
 
 class TarifaAdminForm(forms.ModelForm):
@@ -20,6 +20,10 @@ class TarifaAdminForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        if self.instance and self.instance.pk and self.instance.servicio_tipo_id and self.instance.servicio_id:
+            valor_actual = f"{self.instance.servicio_tipo_id}|{self.instance.servicio_id}"
+            self.fields['servicio_selector'].initial = valor_actual
         
         opciones = []
         
@@ -38,12 +42,68 @@ class TarifaAdminForm(forms.ModelForm):
                 pass
         
         self.fields['servicio_selector'].choices = opciones
-        
-        # Si es edición, seleccionar la opción actual
-        if self.instance and self.instance.pk:
-            if self.instance.servicio_tipo_id and self.instance.servicio_id:
-                valor_actual = f"{self.instance.servicio_tipo_id}|{self.instance.servicio_id}"
-                self.fields['servicio_selector'].initial = valor_actual
+
+        # Usar todos los impuestos activos para evitar errores de "opcion invalida"
+        # cuando el usuario cambia el servicio durante el diligenciamiento.
+        self.fields['impuestos'].queryset = Impuesto.objects.filter(is_active=True).order_by('tipo', 'nombre')
+        self.fields['impuestos'].widget = forms.CheckboxSelectMultiple()
+        self.fields['impuestos'].widget.attrs['class'] = 'form-check-input'
+        self.fields['impuestos'].help_text = 'Selecciona uno o varios impuestos aplicables.'
+
+        # Aplicar estilos Bootstrap a todos los campos para UI consistente.
+        for field_name, field in self.fields.items():
+            if field_name == 'servicio_tipo' or field_name == 'servicio_id':
+                continue
+
+            widget = field.widget
+            css_class = ''
+
+            if isinstance(widget, forms.CheckboxSelectMultiple):
+                css_class = ''
+            elif isinstance(widget, forms.SelectMultiple):
+                css_class = 'form-select'
+                widget.attrs.setdefault('size', 5)
+            elif isinstance(widget, forms.Select):
+                css_class = 'form-select'
+            elif isinstance(widget, forms.CheckboxInput):
+                css_class = 'form-check-input'
+            else:
+                css_class = 'form-control'
+
+            if css_class:
+                widget.attrs['class'] = f"{widget.attrs.get('class', '').strip()} {css_class}".strip()
+
+    def _aplica_a_permitidos(self, tipo_servicio):
+        permitidos = ['TODOS']
+        if tipo_servicio:
+            permitidos.append(tipo_servicio)
+        # En restaurante se aceptan impuestos de servicios adicionales (p. ej. propina).
+        if tipo_servicio == 'RESTAURANTE':
+            permitidos.append('SERVICIOS')
+        return permitidos
+
+    def _resolver_tipo_servicio(self):
+        servicio_selector = None
+
+        if self.is_bound:
+            servicio_selector = self.data.get('servicio_selector')
+        elif self.instance and self.instance.pk and self.instance.servicio_tipo_id:
+            servicio_selector = f"{self.instance.servicio_tipo_id}|{self.instance.servicio_id}"
+
+        if not servicio_selector:
+            return None
+
+        try:
+            tipo_id, _ = servicio_selector.split('|')
+            content_type = ContentType.objects.get(id=int(tipo_id))
+        except (ValueError, TypeError, ContentType.DoesNotExist):
+            return None
+
+        if content_type.app_label == 'rooms':
+            return 'HABITACION'
+        if content_type.app_label == 'restaurant':
+            return 'RESTAURANTE'
+        return None
     
     def clean(self):
         cleaned_data = super().clean()
@@ -57,6 +117,22 @@ class TarifaAdminForm(forms.ModelForm):
                 # Asignar a cleaned_data
                 cleaned_data['servicio_tipo'] = content_type
                 cleaned_data['servicio_id'] = int(servicio_id)
+
+                if content_type.app_label == 'rooms':
+                    tipo_servicio = 'HABITACION'
+                elif content_type.app_label == 'restaurant':
+                    tipo_servicio = 'RESTAURANTE'
+                else:
+                    tipo_servicio = None
+
+                impuestos = cleaned_data.get('impuestos')
+                if tipo_servicio and impuestos is not None:
+                    invalidos = impuestos.exclude(aplica_a__in=self._aplica_a_permitidos(tipo_servicio))
+                    if invalidos.exists():
+                        nombres = ', '.join(invalidos.values_list('nombre', flat=True))
+                        raise forms.ValidationError(
+                            f"Los siguientes impuestos no aplican al servicio seleccionado: {nombres}."
+                        )
                 
             except (ValueError, TypeError, ContentType.DoesNotExist) as e:
                 raise forms.ValidationError(f"Error al seleccionar el servicio: {e}")
@@ -71,7 +147,6 @@ class TarifaAdminForm(forms.ModelForm):
             if 'servicio_tipo' in self.cleaned_data:
                 instance.servicio_tipo = self.cleaned_data['servicio_tipo']
                 instance.servicio_id = self.cleaned_data['servicio_id']
-                print(f"Asignado: servicio_tipo={instance.servicio_tipo}, servicio_id={instance.servicio_id}")
         
         if commit:
             instance.save()
@@ -175,3 +250,26 @@ class ImpuestoRestoreForm(forms.Form):
             )
 
         return cleaned_data
+
+
+class TemporadaForm(forms.ModelForm):
+    class Meta:
+        model = Temporada
+        fields = ['nombre', 'fecha_inicio', 'fecha_fin', 'porcentaje_modificador']
+        widgets = {
+            'fecha_inicio': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'fecha_fin': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'nombre': forms.Select(attrs={'class': 'form-select'}),
+            'porcentaje_modificador': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+
+class TarifaForm(TarifaAdminForm):
+    class Meta(TarifaAdminForm.Meta):
+        model = Tarifa
+        fields = '__all__'
+        exclude = ('is_active', 'deleted_at', 'created_by', 'updated_by')
+
+
+class SoftDeleteConfirmForm(forms.Form):
+    confirm = forms.BooleanField(required=True, label='Confirmo esta acción')

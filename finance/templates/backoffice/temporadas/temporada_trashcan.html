@@ -1,0 +1,28 @@
+{% extends "backoffice/layouts/base_form.html" %}
+
+{% block title %}Papelera de Temporadas{% endblock %}
+{% block form_title %}Papelera de Temporadas{% endblock %}
+{% block form_subtitle %}Temporadas archivadas{% endblock %}
+{% block form_actions %}<a href="{% url 'finance:temporada_index' %}" class="btn btn-outline-secondary btn-sm">Volver</a>{% endblock %}
+
+{% block content %}
+<div class="table-responsive">
+	<table class="table table-hover align-middle mb-0">
+		<thead class="table-light">
+			<tr><th>ID</th><th>Nombre</th><th>Rango</th><th>Ajuste</th></tr>
+		</thead>
+		<tbody>
+			{% for temporada in temporadas %}
+			<tr>
+				<td>#{{ temporada.id }}</td>
+				<td>{{ temporada.get_nombre_display }}</td>
+				<td>{{ temporada.fecha_inicio }} - {{ temporada.fecha_fin }}</td>
+				<td>{{ temporada.get_signo_porcentaje }}</td>
+			</tr>
+			{% empty %}
+			<tr><td colspan="4" class="text-center text-muted py-4">No hay temporadas archivadas.</td></tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}
