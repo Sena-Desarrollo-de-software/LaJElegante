@@ -2,9 +2,20 @@
 {% block title %}Mis Reservas de Restaurante{% endblock %}
 {% block content %}
 <main class="container my-4">
+  {% if messages %}
+  <div class="mb-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h4 text-white mb-0">Mis Reservas de Restaurante</h1>
-    <a href="{% url 'guests:reserva_restaurante_create' %}" class="btn btn-dark">Nueva reserva</a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'guests:dashboard' %}" class="btn btn-outline-secondary">Volver</a>
+      <a href="{% url 'guests:reserva_restaurante_create' %}" class="btn btn-dark">Nueva reserva</a>
+    </div>
   </div>
   <div class="card shadow-sm border-0 rounded-4">
     <div class="table-responsive">
@@ -19,8 +30,13 @@
             <td>${{ r.descuento|floatformat:0 }}</td>
             <td>{{ r.get_estado_display }}</td>
             <td class="text-end">
+              {% if r.estado != 'CANCELADA' %}
               <a href="{% url 'guests:reserva_restaurante_update' r.id %}" class="btn btn-sm btn-outline-secondary">Editar</a>
-              <a href="{% url 'guests:reserva_restaurante_cancel' r.id %}" class="btn btn-sm btn-outline-danger">Cancelar</a>
+              <form method="post" action="{% url 'guests:reserva_restaurante_cancel' r.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar</button>
+              </form>
+              {% endif %}
             </td>
           </tr>
           {% empty %}

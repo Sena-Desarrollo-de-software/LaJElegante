@@ -5,9 +5,51 @@
   <div class="card shadow-sm border-0 rounded-4 mx-auto" style="max-width: 760px;">
     <div class="card-body p-4">
       <h1 class="h4 mb-3">{% if modo == 'editar' %}Editar{% else %}Nueva{% endif %} Reserva de Restaurante</h1>
+      <div class="alert alert-info py-2" role="alert">
+        Cada turno tiene un cupo maximo. Tu reserva puede incluir varias personas y se descontaran del cupo disponible del turno.
+      </div>
       <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        <div class="mb-3">
+          {{ form.fecha.label_tag }}
+          {{ form.fecha }}
+          <div class="form-text">Selecciona primero la fecha para cargar los turnos disponibles.</div>
+          {% if form.fecha.errors %}
+            <div class="text-danger small mt-1">{{ form.fecha.errors|join:', ' }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.turno.label_tag }}
+          {{ form.turno }}
+          {% if form.turno.help_text %}
+            <div class="form-text">{{ form.turno.help_text }}</div>
+          {% endif %}
+          {% if form.turno.errors %}
+            <div class="text-danger small mt-1">{{ form.turno.errors|join:', ' }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.cantidad.label_tag }}
+          {{ form.cantidad }}
+          {% if form.cantidad.errors %}
+            <div class="text-danger small mt-1">{{ form.cantidad.errors|join:', ' }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.observaciones.label_tag }}
+          {{ form.observaciones }}
+          {% if form.observaciones.errors %}
+            <div class="text-danger small mt-1">{{ form.observaciones.errors|join:', ' }}</div>
+          {% endif %}
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger py-2">{{ form.non_field_errors|join:', ' }}</div>
+        {% endif %}
+
         <div class="d-flex gap-2">
           <button class="btn btn-dark" type="submit">Guardar</button>
           <a href="{% url 'guests:reserva_restaurante_list' %}" class="btn btn-outline-secondary">Volver</a>
@@ -16,4 +58,17 @@
     </div>
   </div>
 </main>
+<script>
+  (function () {
+    const fechaInput = document.getElementById('id_fecha');
+    if (!fechaInput) return;
+
+    fechaInput.addEventListener('change', function () {
+      if (!fechaInput.value) return;
+      const url = new URL(window.location.href);
+      url.searchParams.set('fecha', fechaInput.value);
+      window.location.href = url.toString();
+    });
+  })();
+</script>
 {% endblock %}

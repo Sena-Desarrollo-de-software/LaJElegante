@@ -113,6 +113,8 @@ class ReservaHabitacion(ReservaServicio):
     def clean(self):
         """Validaciones básicas antes de guardar"""
         errores = {}
+        habitacion = self.habitacion if self.habitacion_id else None
+
         try:
             validar_fechas(self.fecha_inicio, self.fecha_fin)
         except ValidationError as e:
@@ -123,17 +125,17 @@ class ReservaHabitacion(ReservaServicio):
         except ValidationError as e:
             errores["fecha_inicio"] = e.messages
 
-        if self.habitacion and self.cantidad_personas:
+        if habitacion and self.cantidad_personas:
             try:
                 validar_capacidad(
                     self.cantidad_personas,
-                    self.habitacion.tipo_habitacion.capacidad_maxima
+                    habitacion.tipo_habitacion.capacidad_maxima
                 )
             except ValidationError as e:
                 errores["cantidad_personas"] = e.messages
 
-        if self.habitacion and self.fecha_inicio and self.fecha_fin and self.hay_conflicto(habitacion=self.habitacion,fecha_inicio=self.fecha_inicio,fecha_fin=self.fecha_fin,exclude_id=self.pk):
-                errores["habitacion"] = ["Ya está reservada en ese rango de fechas"]
+        if habitacion and self.fecha_inicio and self.fecha_fin and self.hay_conflicto(habitacion=habitacion,fecha_inicio=self.fecha_inicio,fecha_fin=self.fecha_fin,exclude_id=self.pk):
+            errores["habitacion"] = ["Ya está reservada en ese rango de fechas"]
 
         if errores:
             raise ValidationError(errores)
@@ -141,6 +143,9 @@ class ReservaHabitacion(ReservaServicio):
 
     def _validar_reserva_nueva(self):
         """Validaciones exclusivas para nueva reserva"""
+        if not self.habitacion_id:
+            raise ValidationError({"habitacion": ["Debes seleccionar una habitación válida"]})
+
         validar_tiempo_reserva_nueva(self.fecha_inicio)
 
         if not self.habitacion.disponible_en_fechas(self.fecha_inicio, self.fecha_fin):
@@ -218,16 +223,15 @@ class ReservaHabitacion(ReservaServicio):
 
         penalizacion = self._calcular_penalizacion()
 
+        # Evita ejecutar save() del modelo para no recalcular precio ni revalidar fechas en cancelación.
+        type(self).objects.filter(pk=self.pk).update(
+            estado="CANCELADA",
+        )
         self.estado = "CANCELADA"
-        self.penalizacion = penalizacion
-        self.save()
 
-        for detalle in self.reservahabitacion_set.all():
-            detalle.estado = "CANCELADA"
-            detalle.save()
-            habitacion = detalle.habitacion
-            habitacion.estado = "DISPONIBLE"
-            habitacion.save()
+        habitacion = self.habitacion
+        habitacion.estado = "DISPONIBLE"
+        habitacion.save(update_fields=['estado', 'updated_at'])
         return penalizacion
 
 
@@ -259,7 +263,8 @@ class ReservaHabitacion(ReservaServicio):
             habitacion=habitacion,
             fecha_inicio__lt=fecha_fin,
             fecha_fin__gt=fecha_inicio,
-            is_active=True
+            is_active=True,
+            estado__in=['PENDIENTE', 'CONFIRMADA']
         )
 
         if exclude_id:
